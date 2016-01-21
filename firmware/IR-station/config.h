@@ -30,5 +30,10 @@
 // http://DEFAULT_MDNS_ADDRESS.local
 #define DEFAULT_MDNS_ADDRESS  "esp8266"
 
+
+/* for Debug */
+#define print_dbg             Serial.print
+#define println_dbg           Serial.println
+
 #endif
 

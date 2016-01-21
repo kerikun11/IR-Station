@@ -1,14 +1,16 @@
 /*
+   IR-station Ver.1.0.0
+   Infrared Remote Controller with ESP8266 WiFi Module
    Add ESP8266 Board URL:http://arduino.esp8266.com/stable/package_esp8266com_index.json
    Board Settings
-    * Board:           Generic ESP8266 Module
-    * Flash Mode:      QIO
-    * Flash Frequency: 40MHz
-    * Upload Using:    Serial
-    * CPU Frequency:   80MHz/160MHz
-    * Flash Size:      4M(3M SPIFFS)
-    * Reset Method:    ck
-    * Upload Speed:    115200
+      Board:           Generic ESP8266 Module
+      Flash Mode:      QIO
+      Flash Frequency: 40MHz
+      Upload Using:    Serial
+      CPU Frequency:   80MHz/160MHz
+      Flash Size:      4M(3M SPIFFS)
+      Reset Method:    ck
+      Upload Speed:    115200
 */
 
 #include <ESP8266WiFi.h>
@@ -24,9 +26,9 @@ void setup() {
   // Prepare Serial debug
   Serial.begin(115200);
   //Serial.setDebugOutput(true);
-  Serial.println("");
-  Serial.println("Hello, I'm ESP-WROOM-02");
-  Serial.println("");
+  println_dbg("");
+  println_dbg("Hello, I'm ESP-WROOM-02");
+  println_dbg("");
 
   // prepare GPIO
   pinMode(SW0, INPUT);
@@ -43,7 +45,7 @@ void setup() {
 
   // Prepare SPIFFS
   bool res = SPIFFS.begin();
-  if (!res) Serial.println("SPIFFS.begin fail");
+  if (!res) println_dbg("SPIFFS.begin fail");
 
   // Restore reserved data
   wifiRestoreFromFile();
@@ -52,15 +54,23 @@ void setup() {
   }
 
   // WiFi setup
-  wifiSetup();
+  if (configureWifi() != 0) {
+    wifiSetup();
+  }
 
   // Setup indicator OFF
   digitalWrite(LED1, LOW);
-  Serial.println("Setup Completed");
+  println_dbg("Setup Completed");
 }
 
 void loop() {
   ESP.wdtFeed();
   getClient();
+  if (WiFi.status() != WL_CONNECTED) {
+    digitalWrite(LED1, HIGH);
+    configureWifi();
+    digitalWrite(LED1, LOW);
+  }
+  delay(100);
 }
 

@@ -22,7 +22,7 @@ void setAccesspoint(void);
 
 void closeAccesspoint(void);
 
-int connectWifi(void);
+int configureWifi(void);
 
 void wifiRestoreFromFile(void);
 

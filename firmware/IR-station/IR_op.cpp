@@ -16,7 +16,7 @@ int remocon::sendSignal(void) {
       delayMicroseconds(16);
     } while (int32_t(us + time - micros()) > 0);
   }
-  Serial.println("Send OK");
+  println_dbg("Send OK");
   return 0;
 }
 
@@ -45,7 +45,7 @@ int remocon::recodeSignal(void) {
 
     if (wait_flag) {
       if ((micros() - pre_us) > TIMEOUT_RECODE) {
-        Serial.println("No signal received");
+        println_dbg("No signal received");
         return (-1);
       }
     } else {
@@ -85,28 +85,28 @@ void remocon::bin2raw(uint16_t *rawData) {
 }
 
 void remocon::dispData(void) {
-  Serial.print("Period: ");
-  Serial.println(period, DEC);
-  Serial.print("IR Data: ");
-  Serial.println(irData);
+  print_dbg("Period: ");
+  println_dbg(period, DEC);
+  print_dbg("IR Data: ");
+  println_dbg(irData);
 }
 
 void remocon::dispRawData(uint16_t* rawData) {
-  Serial.print("Raw Data: ");
+  print_dbg("Raw Data: ");
   for (uint16_t count = 0; rawData[count]; count++) {
-    Serial.print(rawData[count], DEC);
-    Serial.print(",");
+    print_dbg(rawData[count], DEC);
+    print_dbg(",");
   }
-  Serial.println("End");
+  println_dbg("End");
 }
 
 void remocon::dataBackupToFile(String path) {
-  Serial.println("IR data backup");
+  println_dbg("IR data backup");
   // irFormat,chName,period,binDataSize,binData
   SPIFFS.remove(path);
   File f = SPIFFS.open(path, "w");
   if (!f) {
-    Serial.println("file open error");
+    println_dbg("file open error");
     return;
   }
   f.print("?period=");
@@ -115,19 +115,19 @@ void remocon::dataBackupToFile(String path) {
   f.print("&chName=" + chName);
   f.println("&End");
   f.close();
-  Serial.println("Successful");
+  println_dbg("Successful");
 }
 
 void remocon::dataRestoreFromFile(String path) {
-  Serial.println("path: " + path);
+  println_dbg("path: " + path);
   File f = SPIFFS.open(path, "r");
   if (!f) {
-    Serial.println("file open error");
+    println_dbg("file open error");
     return;
   }
   String s = f.readStringUntil('\n');
   f.close();
-  Serial.println("data: " + s);
+  println_dbg("data: " + s);
   period = extract(s, "?period=").toInt();
   irData = extract(s, "&irData=");
   chName = extract(s, "&chName=");

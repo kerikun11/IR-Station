@@ -7,106 +7,104 @@ String target_pass = "NULL";
 
 void wifiSetup(void) {
   ESP.wdtFeed();
-  if (connectWifi() != 0) {
-    setAccesspoint();
-    while (1) {
-      ESP.wdtFeed();
-      if (getTargetWifi() != 0)continue;
-      if (connectWifi() != 0)continue;
-      break;
-    }
-    closeAccesspoint();
+  setAccesspoint();
+  while (1) {
     ESP.wdtFeed();
-    wifiBackupToFile();
+    if (getTargetWifi() != 0)continue;
+    if (configureWifi() != 0)continue;
+    break;
   }
+  closeAccesspoint();
+  ESP.wdtFeed();
+  wifiBackupToFile();
 }
 
 void setAccesspoint(void) {
   ESP.wdtFeed();
   WiFi.mode(WIFI_AP);
-  Serial.println("Configuring access point...");
+  println_dbg("Configuring access point...");
   WiFi.softAP(softap_ssid, softap_pass);
 
   // display information
-  Serial.print("AP SSID : ");
-  Serial.println(softap_ssid);
-  Serial.print("AP IP address: ");
-  Serial.println(WiFi.softAPIP());
+  print_dbg("AP SSID : ");
+  println_dbg(softap_ssid);
+  print_dbg("AP IP address: ");
+  println_dbg(WiFi.softAPIP());
 
   // Set up mDNS responder:
   MDNS.addService("http", "tcp", 80);
-  Serial.print("mDNS address: ");
-  Serial.println(DEFAULT_MDNS_ADDRESS);
+  print_dbg("mDNS address: ");
+  println_dbg(DEFAULT_MDNS_ADDRESS);
   if (!MDNS.begin(DEFAULT_MDNS_ADDRESS, WiFi.softAPIP())) {
-    Serial.println("Error setting up MDNS responder!");
+    println_dbg("Error setting up MDNS responder!");
   } else {
-    Serial.println("mDNS responder started");
+    println_dbg("mDNS responder started");
   }
 
   server.begin();
-  Serial.println("HTTP AP server started");
-  Serial.println("Listening");
+  println_dbg("HTTP AP server started");
+  println_dbg("Listening");
 }
 
 void closeAccesspoint(void) {
   ESP.wdtFeed();
-  Serial.println("softAP closed and configuring Station");
+  println_dbg("softAP closed and configuring Station");
   WiFi.softAPdisconnect(true);
   WiFi.mode(WIFI_STA);
   delay(100);
 }
 
-int connectWifi() {
+int configureWifi() {
   // Connect to WiFi network
-  Serial.println("");
-  Serial.print("Connecting to SSID: ");
-  Serial.println(target_ssid);
-  Serial.print("Password: ");
-  Serial.println(target_pass);
+  println_dbg("");
+  print_dbg("Connecting to SSID: ");
+  println_dbg(target_ssid);
+  print_dbg("Password: ");
+  println_dbg(target_pass);
   WiFi.begin(target_ssid.c_str(), target_pass.c_str());
-  Serial.println("");
+  println_dbg("");
 
   // Wait for connection
   int timeout = 0;
   while (WiFi.status() != WL_CONNECTED) {
     ESP.wdtFeed();
     delay(500);
-    Serial.print(".");
+    print_dbg(".");
     timeout++;
     if (timeout >= 2 * WIFI_CONNECT_TIMEOUT) {
-      Serial.println("");
-      Serial.println("Invalid SSID or Password");
-      Serial.println("WiFi Connection Failed");
+      println_dbg("");
+      println_dbg("Invalid SSID or Password");
+      println_dbg("WiFi Connection Failed");
       return (-1);
     }
   }
-  Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(target_ssid);
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
+  println_dbg("");
+  print_dbg("Connected to ");
+  println_dbg(target_ssid);
+  print_dbg("IP address: ");
+  println_dbg(WiFi.localIP());
 
   // Set up mDNS responder:
   MDNS.addService("http", "tcp", 80);
-  Serial.print("mDNS address: ");
-  Serial.println(mdns_address);
+  print_dbg("mDNS address: ");
+  println_dbg(mdns_address);
   if (!MDNS.begin(mdns_address.c_str(), WiFi.localIP())) {
-    Serial.println("Error setting up MDNS responder!");
+    println_dbg("Error setting up MDNS responder!");
   } else {
-    Serial.println("mDNS responder started");
+    println_dbg("mDNS responder started");
   }
 
   // Start TCP (HTTP) server
   server.begin();
-  Serial.println("TCP server started");
-  Serial.println("Listening");
+  println_dbg("TCP server started");
+  println_dbg("Listening");
   return 0;
 }
 
 void wifiRestoreFromFile(void) {
   File f = SPIFFS.open(WIFI_DATA_PATH, "r");
   if (!f) {
-    Serial.println("file open error");
+    println_dbg("file open error");
   } else {
     String s = f.readStringUntil('\n');
     target_ssid = extract(s, "?ssid=");
@@ -116,7 +114,7 @@ void wifiRestoreFromFile(void) {
       mdns_address = mdns;
     }
     f.close();
-    Serial.println("got WiFi SSID and Password");
+    println_dbg("got WiFi SSID and Password");
   }
 }
 
@@ -124,7 +122,7 @@ void wifiBackupToFile(void) {
   SPIFFS.remove(WIFI_DATA_PATH);
   File f = SPIFFS.open(WIFI_DATA_PATH, "w");
   if (!f) {
-    Serial.println("file open error");
+    println_dbg("file open error");
     return;
   }
   f.print("?ssid=" + target_ssid);
@@ -132,7 +130,7 @@ void wifiBackupToFile(void) {
   f.print("&mdns=" + mdns_address);
   f.println("&End");
   f.close();
-  Serial.println("WiFi data backup successful");
+  println_dbg("WiFi data backup successful");
 }
 
 

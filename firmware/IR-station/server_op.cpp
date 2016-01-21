@@ -26,11 +26,10 @@ int getTargetWifi() {
   WiFiClient client = server.available();
   if (!client) {
     ESP.wdtFeed();
-    delay(10);
     return (-1);
   }
-  Serial.println("");
-  Serial.println("New client");
+  println_dbg("");
+  println_dbg("New client");
 
   // Wait for data from client to become available
   while (client.connected() && !client.available()) {
@@ -40,8 +39,8 @@ int getTargetWifi() {
 
   // Read the first line of HTTP request
   String req = client.readStringUntil('\n');
-  Serial.print("Request: ");
-  Serial.println(req);
+  print_dbg("Request: ");
+  println_dbg(req);
 
   // GET / HTTP/1.1
   // GET /?ssid=ABCDEFG&pass=PASSWORD HTTP/1.1
@@ -71,12 +70,12 @@ int getTargetWifi() {
     } else {
       mdns_address = DEFAULT_MDNS_ADDRESS;
     }
-    Serial.print("Target SSID: ");
-    Serial.println(target_ssid);
-    Serial.print("Target Password: ");
-    Serial.println(target_pass);
-    Serial.print("mDNS Address: ");
-    Serial.println(mdns_address);
+    print_dbg("Target SSID: ");
+    println_dbg(target_ssid);
+    print_dbg("Target Password: ");
+    println_dbg(target_pass);
+    print_dbg("mDNS Address: ");
+    println_dbg(mdns_address);
 
     s = html_head;
     s += "<p>Connecting to SSID:" + target_ssid + "</p>";
@@ -84,7 +83,7 @@ int getTargetWifi() {
     s += html_tail;
     client.print(s);
     delay(1);
-    Serial.println("Client disonnected");
+    println_dbg("Client disonnected");
     client.stop();
     return 0;
   } else {
@@ -94,7 +93,7 @@ int getTargetWifi() {
     client.print(s);
     delay(1);
     client.stop();
-    Serial.println("Client disonnected");
+    println_dbg("Client disonnected");
     return (-1);
   }
 }
@@ -104,11 +103,10 @@ void getClient(void) {
   WiFiClient client = server.available();
   if (!client) {
     ESP.wdtFeed();
-    delay(10);
     return;
   }
-  Serial.println("");
-  Serial.println("New client");
+  println_dbg("");
+  println_dbg("New client");
 
   // Wait for data from client to become available
   while (client.connected() && !client.available()) {
@@ -118,8 +116,8 @@ void getClient(void) {
 
   // Read the first line of HTTP request
   String req = client.readStringUntil('\r');
-  Serial.print("Request: ");
-  Serial.println(req);
+  print_dbg("Request: ");
+  println_dbg(req);
   if (req == "") {
     client.stop();
     return;
@@ -141,12 +139,12 @@ void getClient(void) {
       ir[ch].chName = extract(req, "&chName=", " HTTP/");
       charEncode(ir[ch].chName);
       digitalWrite(LED1, HIGH);
-      if (ir[ch].recodeSignal()==0) {
+      if (ir[ch].recodeSignal() == 0) {
         ir[ch].dataBackupToFile(IR_DATA_PATH(ch));
       }
       digitalWrite(LED1, LOW);
     } else {
-      Serial.println("No ch selected");
+      println_dbg("No ch selected");
     }
   } else if (req.startsWith("GET /?clear=", 0)) {
     for (uint8_t i = 0; i < IR_CH_SIZE; i++) {
@@ -154,17 +152,13 @@ void getClient(void) {
       ir[i].irData = "";
       ir[i].dataBackupToFile(IR_DATA_PATH(i));
     }
-    Serial.println("Cleared All Ch Signals");
+    println_dbg("Cleared All Ch Signals");
   } else if (req.startsWith("GET /?chwifi=", 0)) {
-    Serial.println("Change WiFi SSID");
+    println_dbg("Change WiFi SSID");
     target_ssid = "NULL";
     target_pass = "NULL";
     wifiBackupToFile();
-    // Setup indicator ON
-    digitalWrite(LED1, HIGH);
     wifiSetup();
-    // Setup indicator OFF
-    digitalWrite(LED1, LOW);
   }
 
   ESP.wdtFeed();
@@ -173,7 +167,7 @@ void getClient(void) {
   html_send_buttons = "<form method=\"get\">";
   for (uint8_t i = 0; i < IR_CH_SIZE; i++) {
     if (i % 3 == 0) html_send_buttons += "<p>";
-    html_send_buttons += "<button class=\"send\" type = \"submit\" name=\"send" + String(i, DEC) + "ch\" >";
+    html_send_buttons += "<button class=\"send\" type = \"submit\" name=\"send" + String(i+1, DEC) + "ch\" >";
     if (ir[i].chName == "") html_send_buttons += "ch " + String(i + 1, DEC) ;
     else html_send_buttons += String(ir[i].chName);
     html_send_buttons += "</button>";
@@ -212,6 +206,6 @@ void getClient(void) {
   client.println(html_tail);
   delay(1);
   client.stop();
-  Serial.println("Client disonnected");
+  println_dbg("Client disonnected");
 }
 
