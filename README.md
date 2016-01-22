@@ -11,8 +11,10 @@ You can control your home appliances with your smartphone or laptop.
   * IR Receiver
   * IR LED
   * Indicator LED
+  * 3.3V Power supplyer
 
-# Usage
+
+# How to Use
 
 ## Setup the Device
 
@@ -40,3 +42,38 @@ You can control your home appliances with your smartphone or laptop.
 
   1. Click a button which assigned a signal you want to send.
 
+
+# How to Make
+
+## Steps
+
+  1. Gather the components.
+  1. Assemble the components according to the circuit diagram.
+  1. Connect the device and the PC with a serial-to-USB conversion module.
+  1. Prepare Arduino IDE and serial-USB converter's driver.
+  1. Open the preferences of Arduino IDE and fill in this URL: http://arduino.esp8266.com/stable/package_esp8266com_index.json to "Additional Boards Manager URLs".
+  1. Add "Generic ESP8266 Module" in the Arduino IDE Board Manager.
+  1. Open IR-station firmware in the Arduino IDE.
+  1. Select "Generic ESP8266 Module" and configure each item of board settings properly. See Arduino Board Settings below.
+  1. Select correct serial COM port and upload program to the device. When upload program, GPIO0 and GPIO2 must be pulled-up, and GPIO15 must be pulled-down. It's necessary to reset the devie immediately before upload. It's a little difficult.
+  1. The uploading takes about 30 seconds.
+  1. Process termination.
+
+## Components
+
+### Required Parts
+
+  an ESP8266 WiFi Module
+  an IR receiver 
+
+
+## Arduino Board Settings
+
+  * Board:           Generic ESP8266 Module
+  * Flash Mode:      QIO
+  * Flash Frequency: 40MHz
+  * Upload Using:    Serial
+  * CPU Frequency:   80MHz/160MHz
+  * Flash Size:      4M(3M SPIFFS)
+  * Reset Method:    ck
+  * Upload Speed:    115200
