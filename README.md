@@ -1,4 +1,3 @@
-C:\Users\kerikun11\OneDrive\Github\IR-station\README.md
 # IR station 
 
 Infrared Remote Controller with ESP8266 WiFi-module  
@@ -71,7 +70,7 @@ You can control your home appliances with your smartphone or laptop.
 | IR receiver | PL-IRM0101-3 or equivalents | 1 |
 | IR LED | anything good | 2~4 |
 | Nch FET | BS170 or equivalents | 1 |
-| IR LED Current Reguration Resistor | 10 ohm, 1W | 1 |
+| IR LED Current Regulation Resistor | 10 ohm, 1W | 1 |
 | Pull-up/down Resistor | 10k ohm | 5 |
 | Indicator LED | anything good | 2 |
 | Voltage Regulator | output: 3.3V 150mA or more | 1 |
@@ -85,20 +84,26 @@ You can control your home appliances with your smartphone or laptop.
 | Reset Switch | tact switch | 1 |
 | Program Upload Switch | tact switch | 1 |
 
-### Reqires
+### Requires
 
 | Requires |Details|Quantity|
 |:------|:-------|:--------|
 | Serial-to-USB conversion Module | such as FT232  | 1 |
 | Power Supplyer | over 3.3V | 1 |
 
+## Circuit Diagram
+
+![sketch](sketch.png)
+
 ## Arduino Board Settings
 
-  * Board:           Generic ESP8266 Module
-  * Flash Mode:      QIO
-  * Flash Frequency: 40MHz
-  * Upload Using:    Serial
-  * CPU Frequency:   80MHz/160MHz
-  * Flash Size:      4M(3M SPIFFS)
-  * Reset Method:    ck
-  * Upload Speed:    115200
+| item | select |
+| :---- | :---------------------- |
+| Board | Generic ESP8266 Module |
+| Flash Mode | QIO |
+| Flash Frequency | 40MHz |
+| Upload Using | Serial |
+| CPU Frequency | 80MHz |
+| Flash Size | 4M\(3M SPIFFS\) |
+| Reset Method | ck |
+| Upload Speed | 115200 |
