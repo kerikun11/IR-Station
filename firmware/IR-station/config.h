@@ -32,8 +32,15 @@
 
 
 /* for Debug */
+#define SERIAL_DEBUG          true
+
+#if SERIAL_DEBUG == true
 #define print_dbg             Serial.print
 #define println_dbg           Serial.println
+#else
+#define print_dbg             
+#define println_dbg           
+#endif
 
 #endif
 

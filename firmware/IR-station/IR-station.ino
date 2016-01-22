@@ -3,14 +3,14 @@
    Infrared Remote Controller with ESP8266 WiFi Module
    Add ESP8266 Board URL:http://arduino.esp8266.com/stable/package_esp8266com_index.json
    Board Settings
-      Board:           Generic ESP8266 Module
-      Flash Mode:      QIO
-      Flash Frequency: 40MHz
-      Upload Using:    Serial
-      CPU Frequency:   80MHz/160MHz
-      Flash Size:      4M(3M SPIFFS)
-      Reset Method:    ck
-      Upload Speed:    115200
+     * Board:           Generic ESP8266 Module
+     * Flash Mode:      QIO
+     * Flash Frequency: 40MHz
+     * Upload Using:    Serial
+     * CPU Frequency:   80MHz/160MHz
+     * Flash Size:      4M(3M SPIFFS)
+     * Reset Method:    ck
+     * Upload Speed:    115200
 */
 
 #include <ESP8266WiFi.h>
