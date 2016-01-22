@@ -6,11 +6,10 @@
 
 
 /* Hardware Mapping */
-#define IR_IN                 (12)
-#define IR_OUT                (15)
-#define SW0                   (0)
-#define LED0                  (4)
-#define LED1                  (16)
+#define IR_IN                 (5)
+#define IR_OUT                (14)
+#define Indicate_LED          (15)
+#define ERROR_LED             (16)
 
 
 /* Software */

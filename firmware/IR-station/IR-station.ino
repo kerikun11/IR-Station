@@ -31,17 +31,16 @@ void setup() {
   println_dbg("");
 
   // prepare GPIO
-  pinMode(SW0, INPUT);
-  pinMode(LED0, OUTPUT);
-  pinMode(LED1, OUTPUT);
+  pinMode(Indicate_LED, OUTPUT);
+  pinMode(ERROR_LED, OUTPUT);
   pinMode(IR_IN, INPUT);
   pinMode(IR_OUT, OUTPUT);
 
-  digitalWrite(LED0, LOW);
-  digitalWrite(LED1, LOW);
+  digitalWrite(Indicate_LED, LOW);
+  digitalWrite(ERROR_LED, LOW);
 
   // Setup indicator ON
-  digitalWrite(LED1, HIGH);
+  digitalWrite(ERROR_LED, HIGH);
 
   // Prepare SPIFFS
   bool res = SPIFFS.begin();
@@ -59,7 +58,7 @@ void setup() {
   }
 
   // Setup indicator OFF
-  digitalWrite(LED1, LOW);
+  digitalWrite(Indicate_LED, LOW);
   println_dbg("Setup Completed");
 }
 
@@ -67,9 +66,9 @@ void loop() {
   ESP.wdtFeed();
   getClient();
   if (WiFi.status() != WL_CONNECTED) {
-    digitalWrite(LED1, HIGH);
+    digitalWrite(Indicate_LED, HIGH);
     configureWifi();
-    digitalWrite(LED1, LOW);
+    digitalWrite(Indicate_LED, LOW);
   }
   delay(100);
 }

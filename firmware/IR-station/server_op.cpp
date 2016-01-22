@@ -128,9 +128,9 @@ void getClient(void) {
     uint8_t ch = extract(req, "?send", "ch=").toInt();
     ch -= 1;
     if (0 <= ch  && ch < IR_CH_SIZE) {
-      digitalWrite(LED1, HIGH);
+      digitalWrite(Indicate_LED, HIGH);
       ir[ch].sendSignal();
-      digitalWrite(LED1, LOW);
+      digitalWrite(Indicate_LED, LOW);
     }
   } else if (req.startsWith("GET /?recode=", 0)) {
     uint8_t ch = extract(req, "?recode=").toInt();
@@ -138,11 +138,11 @@ void getClient(void) {
     if (0 <= ch  && ch < IR_CH_SIZE) {
       ir[ch].chName = extract(req, "&chName=", " HTTP/");
       charEncode(ir[ch].chName);
-      digitalWrite(LED1, HIGH);
+      digitalWrite(Indicate_LED, HIGH);
       if (ir[ch].recodeSignal() == 0) {
         ir[ch].dataBackupToFile(IR_DATA_PATH(ch));
       }
-      digitalWrite(LED1, LOW);
+      digitalWrite(Indicate_LED, LOW);
     } else {
       println_dbg("No ch selected");
     }
