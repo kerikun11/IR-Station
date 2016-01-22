@@ -1,3 +1,4 @@
+C:\Users\kerikun11\OneDrive\Github\IR-station\README.md
 # IR station 
 
 Infrared Remote Controller with ESP8266 WiFi-module  
@@ -7,11 +8,10 @@ You can control your home appliances with your smartphone or laptop.
 
 ## Main parts
 
-  * ESP-WROOM-02
+  * ESP-WROOM-02 (ESP8266 WiFi Module)
   * IR Receiver
   * IR LED
   * Indicator LED
-  * 3.3V Power supplyer
 
 
 # How to Use
@@ -27,11 +27,12 @@ You can control your home appliances with your smartphone or laptop.
   1. If connection succeeded, Wi-Fi "ESP8266-Remocon" will automatically disappear.
   1. Reconnect the power to reboot the device.
   1. Connect your cellphone or laptop to your router's Wi-Fi.
-  1. Access http://devie-name-you-entered.local in a browser.
+  1. Access http://DEVICE_NAME.local in a browser.
   1. If something appears, setup is complete.
 
 ## Store Signals
 
+  1. Access http://DEVICE_NAME.local in a browser. DEVICE_NAME is the device name you entered previous form.
   1. Look at the form of the bottom of the screen.
   1. Select a channel you want to assign a signal.
   1. Enter a name of the signal. Don't use Japanese character.
@@ -40,6 +41,7 @@ You can control your home appliances with your smartphone or laptop.
 
 ## Remote Control
 
+  1. Access http://DEVICE_NAME.local in a browser.
   1. Click a button which assigned a signal you want to send.
 
 
@@ -61,11 +63,34 @@ You can control your home appliances with your smartphone or laptop.
 
 ## Components
 
-### Required Parts
+### Device Components
 
-  an ESP8266 WiFi Module
-  an IR receiver 
+|Components|Details|Quantity|
+|:-------------|:-------|:--------|
+| ESP8266 WiFi Module | ESP8266 | 1 |
+| IR receiver | PL-IRM0101-3 or equivalents | 1 |
+| IR LED | anything good | 2~4 |
+| Nch FET | BS170 or equivalents | 1 |
+| IR LED Current Reguration Resistor | 10 ohm, 1W | 1 |
+| Pull-up/down Resistor | 10k ohm | 5 |
+| Indicator LED | anything good | 2 |
+| Voltage Regulator | output: 3.3V 150mA or more | 1 |
+| Bypass Capacitor | 0.1uF | 2~3 |
+| Power Stabilization Capacitor | 470uF~1000uF | 1 |
 
+### Optional Device Components
+
+|Components|Details|Quantity|
+|:-------------|:-------|:--------|
+| Reset Switch | tact switch | 1 |
+| Program Upload Switch | tact switch | 1 |
+
+### Reqires
+
+| Requires |Details|Quantity|
+|:------|:-------|:--------|
+| Serial-to-USB conversion Module | such as FT232  | 1 |
+| Power Supplyer | over 3.3V | 1 |
 
 ## Arduino Board Settings
 
