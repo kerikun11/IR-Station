@@ -58,7 +58,7 @@ void setup() {
   }
 
   // Setup indicator OFF
-  digitalWrite(Indicate_LED, LOW);
+  digitalWrite(ERROR_LED, LOW);
   println_dbg("Setup Completed");
 }
 
@@ -66,9 +66,9 @@ void loop() {
   ESP.wdtFeed();
   getClient();
   if (WiFi.status() != WL_CONNECTED) {
-    digitalWrite(Indicate_LED, HIGH);
+    digitalWrite(ERROR_LED, HIGH);
     configureWifi();
-    digitalWrite(Indicate_LED, LOW);
+    digitalWrite(ERROR_LED, LOW);
   }
   delay(100);
 }
