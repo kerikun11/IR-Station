@@ -95,6 +95,10 @@ You can control your home appliances with your smartphone or laptop.
 
 ![sketch](sketch.png)
 
+## Sample
+
+![sample](brb.jpg)
+
 ## Arduino Board Settings
 
 | item | select |
