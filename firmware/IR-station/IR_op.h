@@ -1,4 +1,3 @@
-#include <arduino.h>
 #include <ESP8266WiFi.h>
 #include <FS.h>
 #include "config.h"
@@ -6,10 +5,6 @@
 
 #ifndef IR_OPERATION_H
 #define IR_OPERATION_H
-
-// IR recode timeouts
-#define TIMEOUT_RECODE_NOSIGNAL (40000)
-#define TIMEOUT_RECODE          (3000000)
 
 // IR recode state
 #define STATE_NONE              (-1)
@@ -19,7 +14,7 @@
 #define STATE_FORMAT_ERROR      (3)
 
 // for rawDataSize
-#define RAW_DATA_SIZE           (400)
+#define RAW_DATA_SIZE           (800)
 
 // for state
 #define REMOCON_IDLE            (0)

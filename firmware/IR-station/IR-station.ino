@@ -1,6 +1,10 @@
 /*
    IR-station Ver.1.0.0
    Infrared Remote Controller with ESP8266 WiFi Module
+
+   Author:  kerikun11
+   Date:    2016.01.22
+   
    Add ESP8266 Board URL:http://arduino.esp8266.com/stable/package_esp8266com_index.json
    Board Settings
      * Board:           Generic ESP8266 Module
@@ -25,9 +29,9 @@ void setup() {
   ESP.wdtFeed();
   // Prepare Serial debug
   Serial.begin(115200);
-  //Serial.setDebugOutput(true);
-  println_dbg("");
   println_dbg("Hello, I'm ESP-WROOM-02");
+  println_dbg("");
+  //Serial.setDebugOutput(true);
   println_dbg("");
 
   // prepare GPIO
@@ -54,6 +58,7 @@ void setup() {
 
   // WiFi setup
   if (configureWifi() != 0) {
+    // if couldn't connect the cached WiFi
     wifiSetup();
   }
 

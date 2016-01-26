@@ -1,7 +1,6 @@
 #ifndef WIFI_OPERATION
 #define WIFI_OPERATION
 
-#include <arduino.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266WebServer.h>

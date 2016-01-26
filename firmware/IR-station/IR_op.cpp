@@ -106,7 +106,7 @@ void remocon::dataBackupToFile(String path) {
   SPIFFS.remove(path);
   File f = SPIFFS.open(path, "w");
   if (!f) {
-    println_dbg("file open error");
+    println_dbg("File open error");
     return;
   }
   f.print("?period=");
@@ -119,10 +119,10 @@ void remocon::dataBackupToFile(String path) {
 }
 
 void remocon::dataRestoreFromFile(String path) {
-  println_dbg("path: " + path);
+  print_dbg("path: " + path + " ");
   File f = SPIFFS.open(path, "r");
   if (!f) {
-    println_dbg("file open error");
+    println_dbg("File open error");
     return;
   }
   String s = f.readStringUntil('\n');
