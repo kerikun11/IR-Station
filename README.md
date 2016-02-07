@@ -66,12 +66,12 @@ You can control your home appliances with your smartphone or laptop.
 
 |Components|Details|Quantity|
 |:-------------|:-------|:--------|
-| ESP8266 WiFi Module | ESP8266 | 1 |
+| ESP8266 WiFi Module | ESP-WROOM-02 | 1 |
 | IR receiver | PL-IRM0101-3 or equivalents | 1 |
 | IR LED | anything good | 2~4 |
 | Nch FET | BS170 or equivalents | 1 |
-| IR LED Current Regulation Resistor | 10 ohm, 1W | 1 |
-| Pull-up/down Resistor | 10k ohm | 5 |
+| IR LED Current Regulation Resistor | 10 ohms, 1W | 1 |
+| Pull-up/down Resistor | 10k ohms | 5 |
 | Indicator LED | anything good | 2 |
 | Voltage Regulator | output: 3.3V 150mA or more | 1 |
 | Bypass Capacitor | 0.1uF | 2~3 |
