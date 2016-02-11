@@ -16,10 +16,6 @@
 // for Remocon
 #define IR_CH_SIZE              (24)
 
-// IR recode timeouts
-#define TIMEOUT_RECODE_NOSIGNAL (40000)
-#define TIMEOUT_RECODE          (5000000)
-
 // SPIFFS saving path
 #define IR_DATA_PATH(i)         ("/data/" + String(i,DEC) + ".txt")
 #define WIFI_DATA_PATH          ("/wifi.txt")

@@ -12,6 +12,7 @@ int remocon::sendSignal(void) {
       delayMicroseconds(16);
     } while (int32_t(us + time - micros()) > 0);
   }
+  dispData();
   println_dbg("Send OK");
   return 0;
 }
@@ -26,7 +27,7 @@ int remocon::recodeSignal(void) {
   uint32_t now_us = 0;
 
   while (1) {
-    //ESP.wdtFeed();
+    ESP.wdtFeed();
     now_value = digitalRead(IR_IN);
     if (pre_value != now_value) {
       now_us = micros();

@@ -5,6 +5,10 @@
 #ifndef IR_OPERATION_H
 #define IR_OPERATION_H
 
+// IR recode timeouts
+#define TIMEOUT_RECODE_NOSIGNAL (40000)
+#define TIMEOUT_RECODE          (5000000)
+
 // for period
 #define MIN_PERIOD              (200)
 #define MAX_PERIOD              (580)

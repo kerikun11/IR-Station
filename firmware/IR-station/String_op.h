@@ -1,7 +1,7 @@
 #ifndef STRING_OPERATION
 #define STRING_OPERATION
 
-#include <ESP8266WiFi.h>
+#include <arduino.h>
 
 // extracts a string between "head" and "tail"
 String extract(String target, String head, String tail = "&");
