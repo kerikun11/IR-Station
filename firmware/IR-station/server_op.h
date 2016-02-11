@@ -11,6 +11,7 @@
 // TCP server at port 80 will respond to HTTP requests
 extern WiFiServer server;
 extern String mdns_address;
+extern remocon ir[IR_CH_SIZE];
 
 int getTargetWifi(void);
 

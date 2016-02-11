@@ -21,7 +21,7 @@
 #define TIMEOUT_RECODE          (5000000)
 
 // SPIFFS saving path
-#define IR_DATA_PATH(i)         ("/data/"+String(i,DEC)+".txt")
+#define IR_DATA_PATH(i)         ("/data/" + String(i,DEC) + ".txt")
 #define WIFI_DATA_PATH          ("/wifi.txt")
 
 // SSID & Password of ESP8266 Access Point Mode

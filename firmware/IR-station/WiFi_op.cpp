@@ -20,6 +20,7 @@ void wifiSetup(void) {
 }
 
 void setAccesspoint(void) {
+  server.available().stop();
   ESP.wdtFeed();
   WiFi.mode(WIFI_AP);
   println_dbg("Configuring access point...");
@@ -32,9 +33,8 @@ void setAccesspoint(void) {
   println_dbg(WiFi.softAPIP());
 
   // Set up mDNS responder:
-  MDNS.addService("http", "tcp", 80);
   print_dbg("mDNS address: ");
-  println_dbg(DEFAULT_MDNS_ADDRESS);
+  println_dbg("http://"DEFAULT_MDNS_ADDRESS".local");
   if (!MDNS.begin(DEFAULT_MDNS_ADDRESS, WiFi.softAPIP())) {
     println_dbg("Error setting up MDNS responder!");
   } else {
@@ -55,6 +55,7 @@ void closeAccesspoint(void) {
 }
 
 int configureWifi() {
+  server.available().stop();
   // Connect to WiFi network
   println_dbg("");
   print_dbg("Connecting to SSID: ");
@@ -85,7 +86,6 @@ int configureWifi() {
   println_dbg(WiFi.localIP());
 
   // Set up mDNS responder:
-  MDNS.addService("http", "tcp", 80);
   print_dbg("mDNS address: ");
   println_dbg(mdns_address);
   if (!MDNS.begin(mdns_address.c_str(), WiFi.localIP())) {

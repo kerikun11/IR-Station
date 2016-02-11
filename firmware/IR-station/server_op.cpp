@@ -140,7 +140,16 @@ void getClient(void) {
       charEncode(ir[ch].chName);
       digitalWrite(Indicate_LED, HIGH);
       if (ir[ch].recodeSignal() == 0) {
-        ir[ch].dataBackupToFile(IR_DATA_PATH(ch));
+        String dataString = ir[ch].getBackupString();
+        SPIFFS.remove(IR_DATA_PATH(ch));
+        File f = SPIFFS.open(IR_DATA_PATH(ch), "w");
+        if (!f) {
+          println_dbg("File open error");
+        } else {
+          f.println(dataString);
+          f.close();
+          println_dbg("Backup Successful");
+        }
       }
       digitalWrite(Indicate_LED, LOW);
     } else {
@@ -150,7 +159,16 @@ void getClient(void) {
     for (uint8_t i = 0; i < IR_CH_SIZE; i++) {
       ir[i].chName = "";
       ir[i].irData = "";
-      ir[i].dataBackupToFile(IR_DATA_PATH(i));
+      String dataString = ir[i].getBackupString();
+      SPIFFS.remove(IR_DATA_PATH(i));
+      File f = SPIFFS.open(IR_DATA_PATH(i), "w");
+      if (!f) {
+        println_dbg("File open error");
+      } else {
+        f.println(dataString);
+        f.close();
+        println_dbg("Backup Successful");
+      }
     }
     println_dbg("Cleared All Ch Signals");
   } else if (req.startsWith("GET /?chwifi=", 0)) {
@@ -167,7 +185,7 @@ void getClient(void) {
   html_send_buttons = "<form method=\"get\">";
   for (uint8_t i = 0; i < IR_CH_SIZE; i++) {
     if (i % 3 == 0) html_send_buttons += "<p>";
-    html_send_buttons += "<button class=\"send\" type = \"submit\" name=\"send" + String(i+1, DEC) + "ch\" >";
+    html_send_buttons += "<button class=\"send\" type = \"submit\" name=\"send" + String(i + 1, DEC) + "ch\" >";
     if (ir[i].chName == "") html_send_buttons += "ch " + String(i + 1, DEC) ;
     else html_send_buttons += String(ir[i].chName);
     html_send_buttons += "</button>";

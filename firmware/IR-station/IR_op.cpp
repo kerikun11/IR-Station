@@ -1,7 +1,5 @@
 #include "IR_op.h"
 
-remocon ir[IR_CH_SIZE];
-
 int remocon::sendSignal(void) {
   for (uint16_t count = 0; irData[count]; count++) {
     uint32_t us = micros();
@@ -73,36 +71,16 @@ void remocon::dispData(void) {
   println_dbg(irData);
 }
 
-void remocon::dataBackupToFile(String path) {
+String remocon::getBackupString(void) {
   println_dbg("IR data backup");
-  // irFormat,chName,period,binDataSize,binData
-  SPIFFS.remove(path);
-  File f = SPIFFS.open(path, "w");
-  if (!f) {
-    println_dbg("File open error");
-    return;
-  }
-  f.print("?period=");
-  f.print(period, DEC);
-  f.print("&irData=" + irData);
-  f.print("&chName=" + chName);
-  f.println("&End");
-  f.close();
-  println_dbg("Successful");
+  String s = "?period=" + String(period, DEC) + "&irData=" + irData + "&chName=" + chName + "&End";
+  return s;
 }
 
-void remocon::dataRestoreFromFile(String path) {
-  print_dbg("path: " + path + " ");
-  File f = SPIFFS.open(path, "r");
-  if (!f) {
-    println_dbg("File open error");
-    return;
-  }
-  String s = f.readStringUntil('\n');
-  f.close();
-  println_dbg("data: " + s);
-  period = extract(s, "?period=").toInt();
-  irData = extract(s, "&irData=");
-  chName = extract(s, "&chName=");
+void remocon::restoreFromString(String dataString) {
+  println_dbg("data: " + dataString);
+  period = extract(dataString, "?period=").toInt();
+  irData = extract(dataString, "&irData=");
+  chName = extract(dataString, "&chName=");
 }
 
