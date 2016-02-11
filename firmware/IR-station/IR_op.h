@@ -6,21 +6,12 @@
 #ifndef IR_OPERATION_H
 #define IR_OPERATION_H
 
-// IR recode state
-#define STATE_NONE              (-1)
-#define STATE_OK                (0)
-#define STATE_TIMEOUT           (1)
-#define STATE_OVERFLOW          (2)
-#define STATE_FORMAT_ERROR      (3)
-
-// for rawDataSize
-#define RAW_DATA_SIZE           (800)
-
 // for state
 #define REMOCON_IDLE            (0)
 #define REMOCON_RECODE          (1)
 #define REMOCON_SEND            (2)
 
+#define MIN_PERIOD              (200)
 #define MAX_PERIOD              (580)
 #define EXTRA_PERIOD            (100)
 

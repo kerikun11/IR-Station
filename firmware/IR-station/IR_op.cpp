@@ -3,11 +3,9 @@
 remocon ir[IR_CH_SIZE];
 
 int remocon::sendSignal(void) {
-  uint16_t rawData[RAW_DATA_SIZE];
-  bin2raw(rawData);
-  for (uint16_t count = 0; rawData[count]; count++) {
+  for (uint16_t count = 0; irData[count]; count++) {
     uint32_t us = micros();
-    uint16_t time = rawData[count];
+    uint16_t time = period * (irData[count] - '0');
     ESP.wdtFeed();
     do {
       digitalWrite(IR_OUT, !(count & 1));
@@ -21,22 +19,33 @@ int remocon::sendSignal(void) {
 }
 
 int remocon::recodeSignal(void) {
-  uint16_t rawData[RAW_DATA_SIZE];
-  uint16_t rawDataSize;
+  uint16_t time;
+  bool firstBit = true;
   uint8_t pre_value = HIGH;
   uint8_t now_value = HIGH;
   uint8_t wait_flag = HIGH;
   uint32_t pre_us = micros();
   uint32_t now_us = 0;
 
-  rawDataSize = 0;
   while (1) {
-    ESP.wdtFeed();
+    //ESP.wdtFeed();
     now_value = digitalRead(IR_IN);
     if (pre_value != now_value) {
       now_us = micros();
       if (!wait_flag) {
-        rawData[rawDataSize++] = now_us - pre_us;
+        time = now_us - pre_us;
+        if (firstBit) {
+          firstBit = false;
+          irData = "";
+          period = time;
+          if (period < MIN_PERIOD) {
+            break;
+          }
+          while (period > MAX_PERIOD) {
+            period /= 2;
+          }
+        }
+        irData += (char)('0' + (time + EXTRA_PERIOD) / period);
       }
       wait_flag = LOW;
       pre_value = now_value;
@@ -45,43 +54,16 @@ int remocon::recodeSignal(void) {
 
     if (wait_flag) {
       if ((micros() - pre_us) > TIMEOUT_RECODE) {
-        println_dbg("No signal received");
-        return (-1);
       }
     } else {
       if ((micros() - pre_us) > TIMEOUT_RECODE_NOSIGNAL) {
-        rawData[rawDataSize++] = 0;
-        raw2bin(rawData);
+        dispData();
         return 0;
       }
     }
   }
-}
-
-void remocon::raw2bin(uint16_t *rawData) {
-  dispRawData(rawData);
-
-  irData = "";
-  period = rawData[0];
-  while (period > MAX_PERIOD) {
-    period /= 2;
-  }
-  for (int i = 0; rawData[i]; i++) {
-    irData += (char)('0' + (rawData[i] + EXTRA_PERIOD) / period);
-  }
-
-  dispData();
-}
-
-void remocon::bin2raw(uint16_t *rawData) {
-  dispData();
-
-  uint16_t rawDataSize = 0;
-  for (int i = 0; irData[i]; i++) {
-    rawData[i] = period * (irData[i] - '0');
-  }
-
-  dispRawData(rawData);
+  println_dbg("No signal received");
+  return (-1);
 }
 
 void remocon::dispData(void) {
@@ -89,15 +71,6 @@ void remocon::dispData(void) {
   println_dbg(period, DEC);
   print_dbg("IR Data: ");
   println_dbg(irData);
-}
-
-void remocon::dispRawData(uint16_t* rawData) {
-  print_dbg("Raw Data: ");
-  for (uint16_t count = 0; rawData[count]; count++) {
-    print_dbg(rawData[count], DEC);
-    print_dbg(",");
-  }
-  println_dbg("End");
 }
 
 void remocon::dataBackupToFile(String path) {
