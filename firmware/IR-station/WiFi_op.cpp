@@ -14,11 +14,8 @@ void wifiSetup(void) {
   setupAPServer();
   while (1) {
     ESP.wdtFeed();
-    if (getTargetWifi() == 0) break;
+    server.handleClient();
   }
-  wifiBackupToFile();
-  closeAP();
-  RESET();
 }
 
 void setupAP(void) {
@@ -110,4 +107,7 @@ void wifiBackupToFile(void) {
   println_dbg("WiFi data backup successful");
 }
 
+String extract(String target, String head, String tail) {
+  return target.substring(target.indexOf(head) + head.length(), target.indexOf(tail, target.indexOf(head) + head.length()));
+}
 

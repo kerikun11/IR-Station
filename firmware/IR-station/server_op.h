@@ -5,21 +5,24 @@
 #include "config.h"
 #include "IR_op.h"
 #include "WiFi_op.h"
-#include "String_op.h"
 #include "server_op.h"
 
 // TCP server at port 80 will respond to HTTP requests
-extern WiFiServer server;
+extern ESP8266WebServer server;
 extern String mdns_address;
 
 void setupAPServer(void);
+String generateAPHtml(String status);
+String handleAPRequest(void);
+void handleAPRoot(void);
 
 void setupServer(void);
+String generateHtml(String status);
+String handleRequest(void);
+void handleRoot(void);
 
-int getTargetWifi(void);
-
-void getClient(void) ;
-
+// replace a number to the symbol
+void charEncode(String &s);
 
 #endif
 

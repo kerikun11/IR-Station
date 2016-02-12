@@ -32,6 +32,7 @@
 // Software Reset
 #define RESET()                 while(true);
 
+
 /* for Debug */
 #define SERIAL_DEBUG            true
 

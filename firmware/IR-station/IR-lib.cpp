@@ -52,16 +52,17 @@ int remocon::recodeSignal(void) {
 
     if (wait_flag) {
       if ((micros() - pre_us) > TIMEOUT_RECODE) {
+        println_dbg("No signal received");
+        return (-1);
       }
     } else {
       if ((micros() - pre_us) > TIMEOUT_RECODE_NOSIGNAL) {
         dispData();
-        return 0;
+        break;
       }
     }
   }
-  println_dbg("No signal received");
-  return (-1);
+  return 0;
 }
 
 void remocon::dispData(void) {
@@ -82,5 +83,9 @@ void remocon::restoreFromString(String dataString) {
   period = extract(dataString, "?period=").toInt();
   irData = extract(dataString, "&irData=");
   chName = extract(dataString, "&chName=");
+}
+
+String remocon::extract(String target, String head, String tail) {
+  return target.substring(target.indexOf(head) + head.length(), target.indexOf(tail, target.indexOf(head) + head.length()));
 }
 

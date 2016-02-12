@@ -9,6 +9,7 @@ void irSendSignal(int ch) {
 }
 
 int irRecodeSignal(int ch) {
+  int ret = (-1);
   digitalWrite(Indicate_LED, HIGH);
   if (ir[ch].recodeSignal() == 0) {
     String dataString = ir[ch].getBackupString();
@@ -21,8 +22,10 @@ int irRecodeSignal(int ch) {
       f.close();
       println_dbg("Backup Successful");
     }
+    ret = 0;
   }
   digitalWrite(Indicate_LED, LOW);
+  return ret;
 }
 
 void irDataBackupToFile(int ch) {

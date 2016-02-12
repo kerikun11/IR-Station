@@ -8,7 +8,6 @@
 #include <FS.h>
 #include "config.h"
 #include "IR_op.h"
-#include "String_op.h"
 #include "server_op.h"
 
 extern const char softap_ssid[];
@@ -27,6 +26,9 @@ int connectWifi(void);
 void wifiRestoreFromFile(void);
 
 void wifiBackupToFile(void);
+
+// extracts a string between "head" and "tail"
+String extract(String target, String head, String tail = "&");
 
 #endif
 

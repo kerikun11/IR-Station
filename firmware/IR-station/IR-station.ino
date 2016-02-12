@@ -2,7 +2,7 @@
    IR-station Ver.1.0.0
    Infrared Remote Controller with ESP8266 WiFi Module
 
-   Author:  kerikun11
+   Author:  kerikun11 (Github: kerikun11)
    Date:    2016.01.22
 
    Add ESP8266 Board URL:http://arduino.esp8266.com/stable/package_esp8266com_index.json
@@ -18,12 +18,12 @@
 */
 
 #include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
 #include <FS.h>
 #include "config.h"
 #include "IR-lib.h"
 #include "IR_op.h"
 #include "WiFi_op.h"
-#include "String_op.h"
 #include "server_op.h"
 
 void setup() {
@@ -67,12 +67,12 @@ void setup() {
 
 void loop() {
   ESP.wdtFeed();
-  getClient();
+  server.handleClient();
   if (WiFi.status() != WL_CONNECTED) {
     digitalWrite(ERROR_LED, HIGH);
     connectWifi();
     digitalWrite(ERROR_LED, LOW);
   }
-  delay(100);
+  delay(10);
 }
 
