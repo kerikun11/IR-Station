@@ -7,23 +7,24 @@ String target_pass = "NULL";
 
 void wifiSetup(void) {
   ESP.wdtFeed();
-  setAccesspoint();
+  if (connectWifi() == 0) return;
+
+  // if couldn't connect the cached WiFi
+  setupAP();
+  setupAPServer();
   while (1) {
     ESP.wdtFeed();
-    if (getTargetWifi() != 0)continue;
-    if (configureWifi() != 0)continue;
-    break;
+    if (getTargetWifi() == 0) break;
   }
-  closeAccesspoint();
-  ESP.wdtFeed();
   wifiBackupToFile();
+  closeAP();
+  RESET();
 }
 
-void setAccesspoint(void) {
-  server.available().stop();
+void setupAP(void) {
   ESP.wdtFeed();
   WiFi.mode(WIFI_AP);
-  println_dbg("Configuring access point...");
+  println_dbg("Configuring Access Point...");
   WiFi.softAP(softap_ssid, softap_pass);
 
   // display information
@@ -31,22 +32,9 @@ void setAccesspoint(void) {
   println_dbg(softap_ssid);
   print_dbg("AP IP address: ");
   println_dbg(WiFi.softAPIP());
-
-  // Set up mDNS responder:
-  print_dbg("mDNS address: ");
-  println_dbg("http://"DEFAULT_MDNS_ADDRESS".local");
-  if (!MDNS.begin(DEFAULT_MDNS_ADDRESS, WiFi.softAPIP())) {
-    println_dbg("Error setting up MDNS responder!");
-  } else {
-    println_dbg("mDNS responder started");
-  }
-
-  server.begin();
-  println_dbg("HTTP AP server started");
-  println_dbg("Listening");
 }
 
-void closeAccesspoint(void) {
+void closeAP(void) {
   ESP.wdtFeed();
   println_dbg("softAP closed and configuring Station");
   WiFi.softAPdisconnect(true);
@@ -54,14 +42,16 @@ void closeAccesspoint(void) {
   delay(100);
 }
 
-int configureWifi() {
-  server.available().stop();
+int connectWifi() {
+  // set WiFi Mode
+  WiFi.mode(WIFI_STA);
   // Connect to WiFi network
   println_dbg("");
   print_dbg("Connecting to SSID: ");
   println_dbg(target_ssid);
   print_dbg("Password: ");
   println_dbg(target_pass);
+  if (target_ssid == "NULL")return (-1);
   WiFi.begin(target_ssid.c_str(), target_pass.c_str());
   println_dbg("");
 
@@ -85,19 +75,6 @@ int configureWifi() {
   print_dbg("IP address: ");
   println_dbg(WiFi.localIP());
 
-  // Set up mDNS responder:
-  print_dbg("mDNS address: ");
-  println_dbg(mdns_address);
-  if (!MDNS.begin(mdns_address.c_str(), WiFi.localIP())) {
-    println_dbg("Error setting up MDNS responder!");
-  } else {
-    println_dbg("mDNS responder started");
-  }
-
-  // Start TCP (HTTP) server
-  server.begin();
-  println_dbg("TCP server started");
-  println_dbg("Listening");
   return 0;
 }
 

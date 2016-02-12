@@ -1,34 +1,18 @@
-#include <arduino.h>
+#ifndef IR_OPERATION
+#define IR_OPERATION
+
+#include <ESP8266WiFi.h>
+#include <FS.h>
 #include "config.h"
-#include "String_op.h"
+#include "IR-lib.h"
 
-#ifndef IR_OPERATION_H
-#define IR_OPERATION_H
+// define variables
+extern remocon ir[IR_CH_SIZE];
 
-// IR recode timeouts
-#define TIMEOUT_RECODE_NOSIGNAL (40000)
-#define TIMEOUT_RECODE          (5000000)
-
-// for period
-#define MIN_PERIOD              (200)
-#define MAX_PERIOD              (580)
-#define EXTRA_PERIOD            (100)
-
-class remocon {
-  public:
-    uint16_t period;
-    String irData;
-    String chName;
-
-    int sendSignal(void);
-    int recodeSignal(void);
-
-    String getBackupString(void);
-    void restoreFromString(String dataString);
-
-    void dispData(void);
-  private:
-};
+void irSendSignal(int ch);
+int irRecodeSignal(int ch);
+void irDataBackupToFile(int ch);
+void irDataRestoreFromFile(void);
 
 #endif
 

@@ -15,15 +15,14 @@ extern const char softap_ssid[];
 extern const char softap_pass[];
 extern String target_ssid;
 extern String target_pass;
-extern remocon ir[IR_CH_SIZE];
 
 void wifiSetup(void);
 
-void setAccesspoint(void);
+void setupAP(void);
 
-void closeAccesspoint(void);
+void closeAP(void);
 
-int configureWifi(void);
+int connectWifi(void);
 
 void wifiRestoreFromFile(void);
 

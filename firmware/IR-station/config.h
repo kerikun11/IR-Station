@@ -29,6 +29,8 @@
 // http://DEFAULT_MDNS_ADDRESS.local
 #define DEFAULT_MDNS_ADDRESS    "esp8266"
 
+// Software Reset
+#define RESET()                 while(true);
 
 /* for Debug */
 #define SERIAL_DEBUG            true

@@ -1,87 +1,54 @@
 #include "IR_op.h"
 
-int remocon::sendSignal(void) {
-  for (uint16_t count = 0; irData[count]; count++) {
-    uint32_t us = micros();
-    uint16_t time = period * (irData[count] - '0');
-    ESP.wdtFeed();
-    do {
-      digitalWrite(IR_OUT, !(count & 1));
-      delayMicroseconds(8);
-      digitalWrite(IR_OUT, 0);
-      delayMicroseconds(16);
-    } while (int32_t(us + time - micros()) > 0);
-  }
-  dispData();
-  println_dbg("Send OK");
-  return 0;
+remocon ir[IR_CH_SIZE];
+
+void irSendSignal(int ch) {
+  digitalWrite(Indicate_LED, HIGH);
+  ir[ch].sendSignal();
+  digitalWrite(Indicate_LED, LOW);
 }
 
-int remocon::recodeSignal(void) {
-  uint16_t time;
-  bool firstBit = true;
-  uint8_t pre_value = HIGH;
-  uint8_t now_value = HIGH;
-  uint8_t wait_flag = HIGH;
-  uint32_t pre_us = micros();
-  uint32_t now_us = 0;
-
-  while (1) {
-    ESP.wdtFeed();
-    now_value = digitalRead(IR_IN);
-    if (pre_value != now_value) {
-      now_us = micros();
-      if (!wait_flag) {
-        time = now_us - pre_us;
-        if (firstBit) {
-          firstBit = false;
-          irData = "";
-          period = time;
-          if (period < MIN_PERIOD) {
-            break;
-          }
-          while (period > MAX_PERIOD) {
-            period /= 2;
-          }
-        }
-        irData += (char)('0' + (time + EXTRA_PERIOD) / period);
-      }
-      wait_flag = LOW;
-      pre_value = now_value;
-      pre_us = now_us;
-    }
-
-    if (wait_flag) {
-      if ((micros() - pre_us) > TIMEOUT_RECODE) {
-      }
+int irRecodeSignal(int ch) {
+  digitalWrite(Indicate_LED, HIGH);
+  if (ir[ch].recodeSignal() == 0) {
+    String dataString = ir[ch].getBackupString();
+    SPIFFS.remove(IR_DATA_PATH(ch));
+    File f = SPIFFS.open(IR_DATA_PATH(ch), "w");
+    if (!f) {
+      println_dbg("File open error");
     } else {
-      if ((micros() - pre_us) > TIMEOUT_RECODE_NOSIGNAL) {
-        dispData();
-        return 0;
-      }
+      f.println(dataString);
+      f.close();
+      println_dbg("Backup Successful");
     }
   }
-  println_dbg("No signal received");
-  return (-1);
+  digitalWrite(Indicate_LED, LOW);
 }
 
-void remocon::dispData(void) {
-  print_dbg("Period: ");
-  println_dbg(period, DEC);
-  print_dbg("IR Data: ");
-  println_dbg(irData);
+void irDataBackupToFile(int ch) {
+  String dataString = ir[ch].getBackupString();
+  SPIFFS.remove(IR_DATA_PATH(ch));
+  File f = SPIFFS.open(IR_DATA_PATH(ch), "w");
+  if (!f) {
+    println_dbg("File open error: ch" + String(ch + 1));
+  } else {
+    f.println(dataString);
+    f.close();
+    println_dbg("Backup Successful: ch" + String(ch + 1));
+  }
 }
 
-String remocon::getBackupString(void) {
-  println_dbg("IR data backup");
-  String s = "?period=" + String(period, DEC) + "&irData=" + irData + "&chName=" + chName + "&End";
-  return s;
-}
-
-void remocon::restoreFromString(String dataString) {
-  println_dbg("data: " + dataString);
-  period = extract(dataString, "?period=").toInt();
-  irData = extract(dataString, "&irData=");
-  chName = extract(dataString, "&chName=");
+void irDataRestoreFromFile(void) {
+  for (uint8_t ch = 0; ch < IR_CH_SIZE; ch++) {
+    File f = SPIFFS.open(IR_DATA_PATH(ch), "r");
+    if (!f) {
+      println_dbg("File open error: " + String(ch + 1));
+    } else {
+      String s = f.readStringUntil('\n');
+      f.close();
+      ir[ch].restoreFromString(s);
+      println_dbg("Restore Successful: ch" + String(ch + 1));
+    }
+  }
 }
 

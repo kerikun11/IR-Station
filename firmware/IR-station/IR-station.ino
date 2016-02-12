@@ -20,21 +20,19 @@
 #include <ESP8266WiFi.h>
 #include <FS.h>
 #include "config.h"
+#include "IR-lib.h"
 #include "IR_op.h"
 #include "WiFi_op.h"
 #include "String_op.h"
 #include "server_op.h"
 
-remocon ir[IR_CH_SIZE];
-
 void setup() {
   ESP.wdtFeed();
   // Prepare Serial debug
   Serial.begin(115200);
-  println_dbg("Hello, I'm ESP-WROOM-02");
-  println_dbg("");
   //Serial.setDebugOutput(true);
   println_dbg("");
+  println_dbg("Hello, I'm ESP-WROOM-02");
 
   // prepare GPIO
   pinMode(Indicate_LED, OUTPUT);
@@ -45,7 +43,7 @@ void setup() {
   digitalWrite(Indicate_LED, LOW);
   digitalWrite(ERROR_LED, LOW);
 
-  // Setup indicator ON
+  // Setup Start
   digitalWrite(ERROR_LED, HIGH);
 
   // Prepare SPIFFS
@@ -54,24 +52,15 @@ void setup() {
 
   // Restore reserved data
   wifiRestoreFromFile();
-  for (uint8_t i = 0; i < IR_CH_SIZE; i++) {
-    File f = SPIFFS.open(IR_DATA_PATH(i), "r");
-    if (!f) {
-      println_dbg("File open error");
-    } else {
-      String s = f.readStringUntil('\n');
-      f.close();
-      ir[i].restoreFromString(s);
-    }
-  }
+  irDataRestoreFromFile();
 
   // WiFi setup
-  if (configureWifi() != 0) {
-    // if couldn't connect the cached WiFi
-    wifiSetup();
-  }
+  wifiSetup();
 
-  // Setup indicator OFF
+  // WebServer Setup
+  setupServer();
+
+  // Setup Completed
   digitalWrite(ERROR_LED, LOW);
   println_dbg("Setup Completed");
 }
@@ -81,7 +70,7 @@ void loop() {
   getClient();
   if (WiFi.status() != WL_CONNECTED) {
     digitalWrite(ERROR_LED, HIGH);
-    configureWifi();
+    connectWifi();
     digitalWrite(ERROR_LED, LOW);
   }
   delay(100);

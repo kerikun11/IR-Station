@@ -19,7 +19,39 @@ const String html_menu_buttons =
 
 // TCP server at port 80 will respond to HTTP requests
 WiFiServer server(80);
-String mdns_address;
+String mdns_address = DEFAULT_MDNS_ADDRESS;
+
+void setupAPServer(void) {
+  // Set up mDNS responder:
+  print_dbg("mDNS address: ");
+  println_dbg("http://" + mdns_address + ".local");
+  if (!MDNS.begin(DEFAULT_MDNS_ADDRESS, WiFi.softAPIP())) {
+    println_dbg("Error setting up MDNS responder!");
+  } else {
+    println_dbg("mDNS responder started");
+  }
+
+  // Start TCP (HTTP) server
+  server.begin();
+  println_dbg("TCP server started");
+  println_dbg("Listening");
+}
+
+void setupServer(void) {
+  // Set up mDNS responder:
+  print_dbg("mDNS address: ");
+  println_dbg("http://" + mdns_address + ".local");
+  if (!MDNS.begin(mdns_address.c_str(), WiFi.localIP())) {
+    println_dbg("Error setting up MDNS responder!");
+  } else {
+    println_dbg("mDNS responder started");
+  }
+
+  // Start TCP (HTTP) server
+  server.begin();
+  println_dbg("TCP server started");
+  println_dbg("Listening");
+}
 
 int getTargetWifi() {
   // Check if a client has connected
@@ -128,9 +160,7 @@ void getClient(void) {
     uint8_t ch = extract(req, "?send", "ch=").toInt();
     ch -= 1;
     if (0 <= ch  && ch < IR_CH_SIZE) {
-      digitalWrite(Indicate_LED, HIGH);
-      ir[ch].sendSignal();
-      digitalWrite(Indicate_LED, LOW);
+      irSendSignal(ch);
     }
   } else if (req.startsWith("GET /?recode=", 0)) {
     uint8_t ch = extract(req, "?recode=").toInt();
@@ -138,37 +168,16 @@ void getClient(void) {
     if (0 <= ch  && ch < IR_CH_SIZE) {
       ir[ch].chName = extract(req, "&chName=", " HTTP/");
       charEncode(ir[ch].chName);
-      digitalWrite(Indicate_LED, HIGH);
-      if (ir[ch].recodeSignal() == 0) {
-        String dataString = ir[ch].getBackupString();
-        SPIFFS.remove(IR_DATA_PATH(ch));
-        File f = SPIFFS.open(IR_DATA_PATH(ch), "w");
-        if (!f) {
-          println_dbg("File open error");
-        } else {
-          f.println(dataString);
-          f.close();
-          println_dbg("Backup Successful");
-        }
-      }
-      digitalWrite(Indicate_LED, LOW);
+      irRecodeSignal(ch);
     } else {
       println_dbg("No ch selected");
     }
   } else if (req.startsWith("GET /?clear=", 0)) {
     for (uint8_t i = 0; i < IR_CH_SIZE; i++) {
+      ir[i].period = 0;
       ir[i].chName = "";
       ir[i].irData = "";
-      String dataString = ir[i].getBackupString();
-      SPIFFS.remove(IR_DATA_PATH(i));
-      File f = SPIFFS.open(IR_DATA_PATH(i), "w");
-      if (!f) {
-        println_dbg("File open error");
-      } else {
-        f.println(dataString);
-        f.close();
-        println_dbg("Backup Successful");
-      }
+      irDataBackupToFile(i);
     }
     println_dbg("Cleared All Ch Signals");
   } else if (req.startsWith("GET /?chwifi=", 0)) {
@@ -176,7 +185,7 @@ void getClient(void) {
     target_ssid = "NULL";
     target_pass = "NULL";
     wifiBackupToFile();
-    wifiSetup();
+    RESET();
   }
 
   ESP.wdtFeed();
