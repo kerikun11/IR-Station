@@ -10,11 +10,6 @@ const String html_head =
   "<title>ESP8266-Remocon</title></head>\r\n"
   "<body><h1>Welcome to ESP8266!</h1>";
 const String html_tail = "</body></html>\r\n";
-const String html_menu_buttons =
-  "<form method=\"get\"><p>"
-  "<button type=\"submit\" name=\"clear\">Clear All Signals</button>"
-  "<button type=\"submit\" name=\"chwifi\">Change WiFi-SSID</button>"
-  "</p></form>";
 
 // TCP server at port 80 will respond to HTTP requests
 ESP8266WebServer server(80);
@@ -161,6 +156,12 @@ String generateHtml(String status) {
   html_status += String((WiFi.localIP() >> 24) & 0xFF, DEC);
   html_status += "</p>";
   html_status += "<p>URL : http://" + mdns_address + ".local</p>";
+
+  String html_menu_buttons =
+    "<form method=\"get\"><p>"
+    "<button type=\"submit\" name=\"clear\">Clear All Signals</button>"
+    "<button type=\"submit\" name=\"chwifi\">Change WiFi-SSID</button>"
+    "</p></form>";
 
   return html_head + html_send_buttons + html_recode_buttons + html_status + html_menu_buttons + html_tail;
 }
