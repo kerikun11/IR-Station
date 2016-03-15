@@ -5,16 +5,16 @@
    Author:  kerikun11 (Github: kerikun11)
    Date:    2016.01.22
 
-   Add ESP8266 Board URL:http://arduino.esp8266.com/stable/package_esp8266com_index.json
-   Board Settings
-       Board:           Generic ESP8266 Module
-       Flash Mode:      QIO
-       Flash Frequency: 40MHz
-       Upload Using:    Serial
-       CPU Frequency:   80MHz/160MHz
-       Flash Size:      4M(3M SPIFFS)
-       Reset Method:    ck
-       Upload Speed:    115200
+   1. Add ESP8266 Board to Arduino IDE in Preferences. 
+      Put URL: http://arduino.esp8266.com/stable/package_esp8266com_index.json
+   2. Tool -> Board Settings:
+        * Board:           NodeMCU 1.0 (ESP-12E Module)
+        * Upload Using:    Serial
+        * CPU Frequency:   80MHz
+        * Flash Size:      4M (3M SPIFFS)
+        * Upload Speed:    115200
+   3. Define your WiFi-SSID and Password below.
+   4. Upload the program to the ESP8266 WiFi Module.
 */
 
 #include <ESP8266WiFi.h>

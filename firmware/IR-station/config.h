@@ -21,7 +21,7 @@
 #define WIFI_DATA_PATH          ("/wifi.txt")
 
 // SSID & Password of ESP8266 Access Point Mode
-#define SOFTAP_SSID             "ESP8266-Remocon"
+#define SOFTAP_SSID             "IR-Station"
 #define SOFTAP_PASS             ""
 
 #define WIFI_CONNECT_TIMEOUT    (10) // seconds
