@@ -17,9 +17,11 @@ String handleAPRequest(void);
 void handleAPRoot(void);
 
 void setupServer(void);
-String generateHtml(String status);
-String handleRequest(void);
+String generateHtml(String status = "");
 void handleRoot(void);
+void handleSend(void);
+void handleRecode(void);
+void handleSettings(void);
 
 // replace a number to the symbol
 void charEncode(String &s);

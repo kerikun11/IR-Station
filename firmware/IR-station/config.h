@@ -14,7 +14,7 @@
 
 /* Software */
 // for Remocon
-#define IR_CH_SIZE              (24)
+#define IR_CH_SIZE              (25)
 
 // SPIFFS saving path
 #define IR_DATA_PATH(i)         ("/data/" + String(i,DEC) + ".txt")

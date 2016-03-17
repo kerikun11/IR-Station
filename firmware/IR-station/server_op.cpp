@@ -1,15 +1,25 @@
 #include "server_op.h"
 
 const String html_head =
-  "<!DOCTYPE HTML><html><head>"
+  "<!DOCTYPE HTML><html><head>\r\n"
+  "<meta charset=\"utf-8\">\r\n"
   "<style type=\"text/css\">"
   "body{background-color:#BBDDFF;margin:5%;text-align:center;}"
-  "button.send{font-size:2em;font-weight:bold;width:30%;}"
+  "#send button{font-size:1.5em;height:3em;font-weight:bold;width:19%;}"
   "</style>"
-  "<link rel=\"shortcut icon\" href=\"http://kerikeri.top/esp8266.png\"/>"
-  "<title>ESP8266-Remocon</title></head>\r\n"
-  "<body><h1>Welcome to ESP8266!</h1>";
-const String html_tail = "</body></html>\r\n";
+  "<link rel=\"shortcut icon\" href=\"http://kerikeri.top/esp8266.png\"/>\r\n"
+  "<title>IR Station</title></head>\r\n"
+  "<body><h1>IR Station</h1>\r\n";
+const String html_tail =
+  "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js\"></script>\r\n"
+  "<script>\r\n"
+  "$('#send button').click(function(){var el = $(this);$.post('/send',{id: el.data('id')}).done(function(){$('#log').prepend('<p>'+Date().match(/.+(\\d\\d:\\d\\d:\\d\\d).+/)[1]+' => Sent '+el.text()+' Signal</p>');})});\r\n"
+  "$('#recode button').click(function(){$.post('/recode',{ch: $('[name=ch]').val(), chName: $('[name=chName]').val()}).done(function(){location.reload();});});\r\n"
+  "$('#reload').click(function(){location.reload();});"
+  "$('#clearAllSignals').click(function(){if(confirm('Are you sure to delete all signals?')){$.post('/settings',{settings: $(this).attr('id')}).done(function(){location.reload();});}});\r\n"
+  "$('#disconnectWifi').click(function(){if(confirm('Are you sure to disconnect this WiFi?')){$.post('/settings',{settings: $(this).attr('id')});}});\r\n"
+  "</script>\r\n"
+  "</body></html>";
 
 // TCP server at port 80 will respond to HTTP requests
 ESP8266WebServer server(80);
@@ -78,8 +88,8 @@ void handleAPRoot(void) {
   // Request detail
   println_dbg("");
   println_dbg("New Request");
-  //println_dbg("URI: " + server.uri());
-  //println_dbg("Method: " + (server.method() == HTTP_GET) ? "GET" : "POST");
+  println_dbg("URI: " + server.uri());
+  println_dbg("Method: " + (server.method() == HTTP_GET) ? "GET" : "POST");
   println_dbg("Arguments: " + String(server.args()));
   for (uint8_t i = 0; i < server.args(); i++) {
     println_dbg("  " + server.argName(i) + " = " + server.arg(i));
@@ -114,6 +124,9 @@ void setupServer(void) {
   }
 
   server.on("/", handleRoot);
+  server.on("/send", handleSend);
+  server.on("/recode", handleRecode);
+  server.on("/settings", handleSettings);
 
   // Start TCP (HTTP) server
   server.begin();
@@ -122,78 +135,140 @@ void setupServer(void) {
 }
 
 String generateHtml(String status) {
-  String html_send_buttons;
-  html_send_buttons = "<form method=\"get\">";
+  String html_send_buttons = "";
+  html_send_buttons += "<div id=\"send\">";
   for (uint8_t i = 0; i < IR_CH_SIZE; i++) {
-    if (i % 3 == 0) html_send_buttons += "<p>";
-    html_send_buttons += "<button class=\"send\" name=\"send\" value=\"" + String(i + 1, DEC) + "\">";
+    if (i % 5 == 0) html_send_buttons += "<p>";
+    html_send_buttons += "<button data-id=\"" + String(i + 1, DEC) + "\">";
     if (ir[i].chName == "") html_send_buttons += "ch " + String(i + 1, DEC) ;
     else html_send_buttons += String(ir[i].chName);
     html_send_buttons += "</button>";
-    if (i % 3 == 3 - 1) html_send_buttons += "</p>";
+    if (i % 5 == 5 - 1) html_send_buttons += "</p>\r\n";
   }
-  html_send_buttons += "</form>";
+  html_send_buttons += "</div>\r\n";
 
-  String html_recode_buttons;
-  html_recode_buttons += "<form method=\"get\"><p><select name=\"recode\">";
+  String html_recode_buttons = "";
+  html_recode_buttons += "<div id=\"recode\">";
+  html_recode_buttons += "<p><select name=\"ch\">\r\n";
   html_recode_buttons += "<option value=\"" + String(-1, DEC) + "\">-- channel select --</option>";
   for (uint8_t i = 0; i < IR_CH_SIZE; i++) {
     html_recode_buttons += "<option value=\"" + String(i + 1, DEC) + "\">";
     if (ir[i].chName == "") html_recode_buttons += "Ch." + String(i + 1, DEC);
-    else html_recode_buttons += ir[i].chName;
-    html_recode_buttons += "</option>";
+    else html_recode_buttons += "Ch." + String(i + 1, DEC) + " : " + ir[i].chName;
+    html_recode_buttons += "</option>\r\n";
   }
-  html_recode_buttons += "</select>:<input type=\"text\" name=\"chName\"/><button type=\"submit\">Recode</button>";
-  html_recode_buttons += "</p></form>";
+  html_recode_buttons += "</select><input type=\"text\" name=\"chName\"/><button>Recode</button>";
+  html_recode_buttons += "</p></div>\r\n";
 
-  String html_status;
-  html_status = status;
-  html_status += "<p>Connecting SSID : " + target_ssid + "</p>";
+  String html_status = "";
+  html_status += status;
+  html_status += "<p>Connecting SSID : " + target_ssid + "</p>\r\n";
   html_status += "<p>IP address : ";
   html_status += String((WiFi.localIP() >> 0) & 0xFF, DEC) + ".";
   html_status += String((WiFi.localIP() >> 8) & 0xFF, DEC) + ".";
   html_status += String((WiFi.localIP() >> 16) & 0xFF, DEC) + ".";
   html_status += String((WiFi.localIP() >> 24) & 0xFF, DEC);
-  html_status += "</p>";
-  html_status += "<p>URL : http://" + mdns_address + ".local</p>";
+  html_status += "</p>\r\n";
+  html_status += "<p>URL : http://" + mdns_address + ".local</p>\r\n";
+
+  String html_log = "";
+  html_log += "<div id=\"log\"></div>";
 
   String html_menu_buttons =
-    "<form method=\"get\"><p>"
-    "<button type=\"submit\" name=\"clear\">Clear All Signals</button>"
-    "<button type=\"submit\" name=\"chwifi\">Change WiFi-SSID</button>"
-    "</p></form>";
+    "<div id=\"settings\">"
+    "<button id=\"reload\">Reload</button>"
+    "<button id=\"clearAllSignals\">Clear All Signals</button>"
+    "<button id=\"disconnectWifi\">Disconnect WiFi</button>"
+    "</div>\r\n";
 
-  return html_head + html_send_buttons + html_recode_buttons + html_status + html_menu_buttons + html_tail;
+  return html_head + html_send_buttons + html_recode_buttons + html_status + html_menu_buttons + html_log + html_tail;
 }
 
-String handleRequest(void) {
+void handleRoot(void) {
+  // Request detail
+  println_dbg("");
+  println_dbg("New Request");
+  println_dbg("URI: " + server.uri());
+  println_dbg("Method: " + (server.method() == HTTP_GET) ? "GET" : "POST");
+  println_dbg("Arguments: " + String(server.args()));
+  for (uint8_t i = 0; i < server.args(); i++) {
+    println_dbg("  " + server.argName(i) + " = " + server.arg(i));
+  }
+
+  // Prepare the response
+  String response = generateHtml("<p>Status: Listening</p>");
+
+  // Send the response
+  server.send(200, "text/html", response);
+}
+
+void handleSend(void) {
+  // Request detail
+  println_dbg("");
+  println_dbg("New Request");
+  println_dbg("URI: " + server.uri());
+  println_dbg("Method: " + (server.method() == HTTP_GET) ? "GET" : "POST");
+  println_dbg("Arguments: " + String(server.args()));
+  for (uint8_t i = 0; i < server.args(); i++) {
+    println_dbg("  " + server.argName(i) + " = " + server.arg(i));
+  }
+
+  uint8_t ch = server.arg(0).toInt();
+  ch -= 1; // display: 1 ch ~ IR_CH_SIZE ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
+  if (0 <= ch  && ch < IR_CH_SIZE) {
+    irSendSignal(ch);
+  } else {
+    println_dbg("Invalid channel selected. Sending failed.");
+  }
+
+  // Send the response
+  server.send(200);
+}
+
+void handleRecode(void) {
+  // Request detail
+  println_dbg("");
+  println_dbg("New Request");
+  println_dbg("URI: " + server.uri());
+  println_dbg("Method: " + (server.method() == HTTP_GET) ? "GET" : "POST");
+  println_dbg("Arguments: " + String(server.args()));
+  for (uint8_t i = 0; i < server.args(); i++) {
+    println_dbg("  " + server.argName(i) + " = " + server.arg(i));
+  }
+
   String status = "<p>Status: ";
   // Match the request
-  if (server.argName(0) == "send") {
-    uint8_t ch = server.arg(0).toInt();
-    ch -= 1; // display: 1 ch ~ IR_CH_SIZE ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
-    if (0 <= ch  && ch < IR_CH_SIZE) {
-      irSendSignal(ch);
-      status += "Sending Successful: ch " + String(ch + 1);
+  uint8_t ch = server.arg(0).toInt();
+  ch -= 1; // display: 1 ch ~ IR_CH_SIZE ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
+  if (0 <= ch  && ch < IR_CH_SIZE) {
+    ir[ch].chName = server.arg(1);
+    charEncode(ir[ch].chName);
+    if (irRecodeSignal(ch) == 0) {
+      status += "Recoding Successful: ch " + String(ch + 1);
     } else {
-      status += "Error: ch select";
+      status += "Nosignal Recieved";
     }
-  } else if (server.argName(0) == "recode") {
-    uint8_t ch = server.arg(0).toInt();
-    ch -= 1; // display: 1 ch ~ IR_CH_SIZE ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
-    if (0 <= ch  && ch < IR_CH_SIZE) {
-      ir[ch].chName = server.arg(1);
-      charEncode(ir[ch].chName);
-      if (irRecodeSignal(ch) == 0) {
-        status += "Recoding Successful: ch " + String(ch + 1);
-      } else {
-        status += "Nosignal Recieved";
-      }
-    } else {
-      println_dbg("No ch selected");
-      status += "Please select a channel.";
-    }
-  } else if (server.argName(0) == "clear") {
+  } else {
+    println_dbg("No ch selected");
+    status += "Please select a channel.";
+  }
+
+  // Send the response
+  server.send(200);
+}
+
+void handleSettings(void) {
+  // Request detail
+  println_dbg("");
+  println_dbg("New Request");
+  println_dbg("URI: " + server.uri());
+  println_dbg("Method: " + (server.method() == HTTP_GET) ? "GET" : "POST");
+  println_dbg("Arguments: " + String(server.args()));
+  for (uint8_t i = 0; i < server.args(); i++) {
+    println_dbg("  " + server.argName(i) + " = " + server.arg(i));
+  }
+
+  if (server.arg(0) == "clearAllSignals") {
     for (uint8_t i = 0; i < IR_CH_SIZE; i++) {
       ir[i].period = 0;
       ir[i].chName = "";
@@ -201,40 +276,16 @@ String handleRequest(void) {
       irDataBackupToFile(i);
     }
     println_dbg("Cleared All Ch Signals");
-    status += "Cleared All Signals.";
-  } else if (server.argName(0) == "chwifi") {
+  } else if (server.arg(0) == "disconnectWifi") {
     println_dbg("Change WiFi SSID");
     target_ssid = "NULL";
     target_pass = "NULL";
     wifiBackupToFile();
     RESET();
-  } else {
-    status += "Listening";
   }
-  status += "</p>";
-  return status;
-}
-
-void handleRoot(void) {
-  // Request detail
-  println_dbg("");
-  println_dbg("New Request");
-  //println_dbg("URI: " + server.uri());
-  //println_dbg("Method: " + (server.method() == HTTP_GET) ? "GET" : "POST");
-  println_dbg("Arguments: " + String(server.args()));
-  for (uint8_t i = 0; i < server.args(); i++) {
-    println_dbg("  " + server.argName(i) + " = " + server.arg(i));
-  }
-
-  // Prepare the response
-  String status = handleRequest();
-
-  // Prepare the response
-  String response = generateHtml(status);
 
   // Send the response
-  server.send(200, "text/html", response);
-  delay(100);
+  server.send(200);
 }
 
 void charEncode(String & s) {
