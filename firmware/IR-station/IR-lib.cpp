@@ -4,8 +4,8 @@ void remocon::sendSignal(void) {
   for (uint16_t count = 0; irData[count]; count++) {
     uint32_t us = micros();
     uint16_t time = period * (irData[count] - '0');
-    ESP.wdtFeed();
     do {
+      wdt_reset();
       digitalWrite(IR_OUT, !(count & 1));
       delayMicroseconds(8);
       digitalWrite(IR_OUT, 0);
@@ -26,7 +26,7 @@ int remocon::recodeSignal(void) {
   uint32_t now_us = 0;
 
   while (1) {
-    ESP.wdtFeed();
+    wdt_reset();
     now_value = digitalRead(IR_IN);
     if (pre_value != now_value) {
       now_us = micros();

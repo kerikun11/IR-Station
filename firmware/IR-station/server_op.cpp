@@ -1,5 +1,11 @@
 #include "server_op.h"
 
+#include <ESP8266mDNS.h>
+#include "config.h"
+#include "IR_op.h"
+#include "WiFi_op.h"
+#include "server_op.h"
+
 const String html_head =
   "<!DOCTYPE HTML><html><head>\r\n"
   "<meta charset=\"utf-8\">\r\n"
@@ -110,7 +116,7 @@ void handleAPRoot(void) {
   if (server.argName(0) == "ssid") {
     wifiBackupToFile();
     closeAP();
-    RESET();
+    ESP.reset();
   }
 }
 
@@ -282,7 +288,7 @@ void handleSettings(void) {
     target_ssid = "NULL";
     target_pass = "NULL";
     wifiBackupToFile();
-    RESET();
+    ESP.reset();
   }
 
   // Send the response

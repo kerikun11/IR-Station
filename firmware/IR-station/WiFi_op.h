@@ -2,12 +2,6 @@
 #define WIFI_OPERATION
 
 #include <ESP8266WiFi.h>
-#include <ESP8266mDNS.h>
-#include <ESP8266WebServer.h>
-#include <FS.h>
-#include "config.h"
-#include "IR_op.h"
-#include "server_op.h"
 
 extern const char softap_ssid[];
 extern const char softap_pass[];

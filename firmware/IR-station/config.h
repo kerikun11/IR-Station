@@ -24,13 +24,11 @@
 #define SOFTAP_SSID             "IR-Station"
 #define SOFTAP_PASS             ""
 
+// WiFi connection Timeout
 #define WIFI_CONNECT_TIMEOUT    (10) // seconds
 
 // http://DEFAULT_MDNS_ADDRESS.local
 #define DEFAULT_MDNS_ADDRESS    "esp8266"
-
-// Software Reset
-#define RESET()                 while(true);
 
 
 /* for Debug */

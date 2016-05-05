@@ -1,5 +1,12 @@
 #include "WiFi_op.h"
 
+#include <ESP8266mDNS.h>
+#include <ESP8266WebServer.h>
+#include <FS.h>
+#include "config.h"
+#include "IR_op.h"
+#include "server_op.h"
+
 const char softap_ssid[] = SOFTAP_SSID;
 const char softap_pass[] = SOFTAP_PASS;
 String target_ssid = "NULL";

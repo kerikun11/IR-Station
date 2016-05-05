@@ -1,5 +1,8 @@
 #include "IR_op.h"
 
+#include <FS.h>
+#include "config.h"
+
 remocon ir[IR_CH_SIZE];
 
 void irSendSignal(int ch) {

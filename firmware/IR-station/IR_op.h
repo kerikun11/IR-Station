@@ -2,8 +2,6 @@
 #define IR_OPERATION
 
 #include <ESP8266WiFi.h>
-#include <FS.h>
-#include "config.h"
 #include "IR-lib.h"
 
 // define variables
