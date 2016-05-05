@@ -6,6 +6,7 @@ const String html_head =
   "<style type=\"text/css\">"
   "body{background-color:#BBDDFF;margin:5%;text-align:center;}"
   "#send button{font-size:1.5em;height:3em;font-weight:bold;width:19%;}"
+  ".sending{background-color:magenta;}"
   "</style>"
   "<link rel=\"shortcut icon\" href=\"http://kerikeri.top/esp8266.png\"/>\r\n"
   "<title>IR Station</title></head>\r\n"
@@ -13,7 +14,7 @@ const String html_head =
 const String html_tail =
   "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js\"></script>\r\n"
   "<script>\r\n"
-  "$('#send button').click(function(){var el = $(this);$.post('/send',{id: el.data('id')}).done(function(){$('#log').prepend('<p>'+Date().match(/.+(\\d\\d:\\d\\d:\\d\\d).+/)[1]+' => Sent '+el.text()+' Signal</p>');})});\r\n"
+  "$('#send button').click(function(){var el = $(this);el.addClass(\"sending\");$.post('/send',{id: el.data('id')}).done(function(){el.removeClass(\"sending\");$('#log').prepend('<p>'+Date().match(/.+(\\d\\d:\\d\\d:\\d\\d).+/)[1]+' => Sent '+el.text()+' Signal</p>');})});\r\n"
   "$('#recode button').click(function(){$.post('/recode',{ch: $('[name=ch]').val(), chName: $('[name=chName]').val()}).done(function(){location.reload();});});\r\n"
   "$('#reload').click(function(){location.reload();});"
   "$('#clearAllSignals').click(function(){if(confirm('Are you sure to delete all signals?')){$.post('/settings',{settings: $(this).attr('id')}).done(function(){location.reload();});}});\r\n"
