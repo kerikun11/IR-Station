@@ -4,24 +4,13 @@
 
    Author:  kerikun11 (Github: kerikun11)
    Date:    2016.01.22
-
-   1. Add ESP8266 Board to Arduino IDE in Preferences.
-      Put URL: http://arduino.esp8266.com/stable/package_esp8266com_index.json
-   2. Tool -> Board Settings:
-          Board:           ESPDuino (ESP-13 Module)
-          Upload Using:    Serial
-          CPU Frequency:   80MHz
-          Flash Size:      4M (3M SPIFFS)
-          Upload Speed:    115200
-   3. Upload the program to the ESP8266 WiFi Module.
 */
 
 #include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
 #include <FS.h>
 #include "config.h"
-#include "IR-lib.h"
 #include "IR_op.h"
+#include "OTA_op.h"
 #include "WiFi_op.h"
 #include "server_op.h"
 
@@ -49,22 +38,27 @@ void setup() {
   SPIFFS.begin();
 
   // Restore reserved data
-  wifiRestoreFromFile();
   irDataRestoreFromFile();
+  settingsRestoreFromFile();
 
   // WiFi setup
-  wifiSetup();
+  modeSetup();
+
+  // OTA setup
+  setupOTA();
 
   // WebServer Setup
   setupServer();
 
   // Setup Completed
   digitalWrite(ERROR_LED, LOW);
+  settingsBackupToFile();
   println_dbg("Setup Completed");
 }
 
 void loop() {
-  server.handleClient();
+  OTATask();
+  serverTask();
   if (WiFi.status() != WL_CONNECTED) {
     digitalWrite(ERROR_LED, HIGH);
   } else {

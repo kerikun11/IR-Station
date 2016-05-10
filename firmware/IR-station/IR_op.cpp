@@ -2,8 +2,35 @@
 
 #include <FS.h>
 #include "config.h"
+#include "server_op.h"
+#include "WiFi_op.h"
 
 remocon ir[IR_CH_SIZE];
+uint8_t mode;
+
+void modeSetup(void) {
+  wdt_reset();
+  switch (mode) {
+    case IR_STATION_MODE_NULL:
+      println_dbg("Boot Mode: NULL");
+      mdns_address = MDNS_ADDRESS_DEFAULT;
+      break;
+    case IR_STATION_MODE_AP:
+      println_dbg("Boot Mode: AP");
+      return;
+      break;
+    case IR_STATION_MODE_STA:
+      println_dbg("Boot Mode: Station");
+      if (connectCachedWifi() == true) return;
+      break;
+  }
+  setupAP();
+  setupFormServer();
+  while (1) {
+    wdt_reset();
+    serverTask();
+  }
+}
 
 void irSendSignal(int ch) {
   digitalWrite(Indicate_LED, HIGH);
@@ -56,5 +83,42 @@ void irDataRestoreFromFile(void) {
       println_dbg("Restore Successful: ch" + String(ch + 1));
     }
   }
+}
+
+void settingsRestoreFromFile(void) {
+  File f = SPIFFS.open(SETTINGS_DATA_PATH, "r");
+  if (!f) {
+    println_dbg("Settings: file open error");
+  } else {
+    String s = f.readStringUntil('\n');
+    println_dbg("Settings data: " + s);
+    mode = extract(s, "?mode=").toInt();
+    String mdns = extract(s, "&mdns=");
+    if (mdns != "") {
+      mdns_address = mdns;
+    } else {
+      mdns_address = MDNS_ADDRESS_DEFAULT;
+    }
+    f.close();
+    println_dbg("Restored Settings from File");
+  }
+}
+
+void settingsBackupToFile(void) {
+  SPIFFS.remove(SETTINGS_DATA_PATH);
+  File f = SPIFFS.open(SETTINGS_DATA_PATH, "w");
+  if (!f) {
+    println_dbg("file open error");
+    return;
+  }
+  f.print("?mode=" + String(mode, DEC));
+  f.print("&mdns=" + mdns_address);
+  f.println("&End");
+  f.close();
+  println_dbg("Settings data backup successful");
+}
+
+String extract(String target, String head, String tail) {
+  return target.substring(target.indexOf(head) + head.length(), target.indexOf(tail, target.indexOf(head) + head.length()));
 }
 

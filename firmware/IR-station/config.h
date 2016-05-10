@@ -18,7 +18,7 @@
 
 // SPIFFS saving path
 #define IR_DATA_PATH(i)         ("/data/" + String(i,DEC) + ".txt")
-#define WIFI_DATA_PATH          ("/wifi.txt")
+#define SETTINGS_DATA_PATH      ("/settings.txt")
 
 // SSID & Password of ESP8266 Access Point Mode
 #define SOFTAP_SSID             "IR-Station"
@@ -27,18 +27,28 @@
 // WiFi connection Timeout
 #define WIFI_CONNECT_TIMEOUT    (10) // seconds
 
-// http://DEFAULT_MDNS_ADDRESS.local
-#define DEFAULT_MDNS_ADDRESS    "esp8266"
+// http://MDNS_ADDRESS_DEFAULT.local
+#define MDNS_ADDRESS_SETUP      "setup"
+#define MDNS_ADDRESS_DEFAULT    "ir"
 
+// OTA update
+#define USE_OTA_UPDATE          true
+
+#if USE_OTA_UPDATE == true
+#define OTA_HOSTNAME            "ir-station"
+#define OTA_PASSWORD            "1234"
+#endif
 
 /* for Debug */
 #define SERIAL_DEBUG            true
 
 #if SERIAL_DEBUG == true
 #define print_dbg               Serial.print
+#define printf_dbg             Serial.printf
 #define println_dbg             Serial.println
 #else
 #define print_dbg               // No Operation
+#define printf_dbg             // No Operation
 #define println_dbg             // No Operation
 #endif
 
