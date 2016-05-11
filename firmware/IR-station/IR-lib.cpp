@@ -6,9 +6,9 @@ void remocon::sendSignal(void) {
     uint16_t time = period * (irData[count] - '0');
     do {
       wdt_reset();
-      digitalWrite(IR_OUT, !(count & 1));
+      digitalWrite(PIN_IR_OUT, !(count & 1));
       delayMicroseconds(8);
-      digitalWrite(IR_OUT, 0);
+      digitalWrite(PIN_IR_OUT, 0);
       delayMicroseconds(16);
     } while (int32_t(us + time - micros()) > 0);
   }
@@ -27,7 +27,7 @@ int remocon::recodeSignal(void) {
 
   while (1) {
     wdt_reset();
-    now_value = digitalRead(IR_IN);
+    now_value = digitalRead(PIN_IR_IN);
     if (pre_value != now_value) {
       now_us = micros();
       if (!wait_flag) {

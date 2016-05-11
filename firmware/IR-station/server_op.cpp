@@ -44,15 +44,6 @@ String getContentType(String filename) {
 }
 
 void setupFormServer(void) {
-  // Set up mDNS responder:
-  print_dbg("mDNS address: ");
-  println_dbg("http://" + String(MDNS_ADDRESS_SETUP) + ".local");
-  if (!MDNS.begin(MDNS_ADDRESS_SETUP, WiFi.softAPIP())) {
-    println_dbg("Error setting up MDNS responder!");
-  } else {
-    println_dbg("mDNS responder started");
-  }
-
   server.on("/wifiList", []() {
     dispRequest();
     int n = WiFi.scanNetworks();
@@ -121,7 +112,7 @@ void setupServer(void) {
   print_dbg("mDNS address: ");
   println_dbg("http://" + mdns_address + ".local");
   if (!MDNS.begin(mdns_address.c_str())) {
-    println_dbg("Error setting up MDNS responder!");
+    println_dbg("Indicate setting up MDNS responder!");
   } else {
     println_dbg("mDNS responder started");
   }
@@ -182,6 +173,7 @@ void setupServer(void) {
       ir[i].irData = "";
       irDataBackupToFile(i);
     }
+    println_dbg("Cleared All Signals");
     server.send(200, "text/plain", "Cleared All Signals");
   });
   server.on("/disconnectWifi", []() {

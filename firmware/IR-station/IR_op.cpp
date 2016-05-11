@@ -33,20 +33,20 @@ void modeSetup(void) {
 }
 
 void irSendSignal(int ch) {
-  digitalWrite(Indicate_LED, HIGH);
+  digitalWrite(PIN_LED1, HIGH);
   ir[ch].sendSignal();
-  digitalWrite(Indicate_LED, LOW);
+  digitalWrite(PIN_LED1, LOW);
 }
 
 int irRecodeSignal(int ch) {
   int ret = (-1);
-  digitalWrite(Indicate_LED, HIGH);
+  digitalWrite(PIN_LED1, HIGH);
   if (ir[ch].recodeSignal() == 0) {
     String dataString = ir[ch].getBackupString();
     SPIFFS.remove(IR_DATA_PATH(ch));
     File f = SPIFFS.open(IR_DATA_PATH(ch), "w");
     if (!f) {
-      println_dbg("File open error");
+      println_dbg("File open Indicate");
     } else {
       f.println(dataString);
       f.close();
@@ -54,7 +54,7 @@ int irRecodeSignal(int ch) {
     }
     ret = 0;
   }
-  digitalWrite(Indicate_LED, LOW);
+  digitalWrite(PIN_LED1, LOW);
   return ret;
 }
 
@@ -63,7 +63,7 @@ void irDataBackupToFile(int ch) {
   SPIFFS.remove(IR_DATA_PATH(ch));
   File f = SPIFFS.open(IR_DATA_PATH(ch), "w");
   if (!f) {
-    println_dbg("File open error: ch" + String(ch + 1));
+    println_dbg("File open Indicate: ch" + String(ch + 1));
   } else {
     f.println(dataString);
     f.close();
@@ -75,7 +75,7 @@ void irDataRestoreFromFile(void) {
   for (uint8_t ch = 0; ch < IR_CH_SIZE; ch++) {
     File f = SPIFFS.open(IR_DATA_PATH(ch), "r");
     if (!f) {
-      println_dbg("File open error: " + String(ch + 1));
+      println_dbg("File open Indicate: " + String(ch + 1));
     } else {
       String s = f.readStringUntil('\n');
       f.close();
@@ -88,7 +88,7 @@ void irDataRestoreFromFile(void) {
 void settingsRestoreFromFile(void) {
   File f = SPIFFS.open(SETTINGS_DATA_PATH, "r");
   if (!f) {
-    println_dbg("Settings: file open error");
+    println_dbg("Settings: file open Indicate");
   } else {
     String s = f.readStringUntil('\n');
     println_dbg("Settings data: " + s);
@@ -108,7 +108,7 @@ void settingsBackupToFile(void) {
   SPIFFS.remove(SETTINGS_DATA_PATH);
   File f = SPIFFS.open(SETTINGS_DATA_PATH, "w");
   if (!f) {
-    println_dbg("file open error");
+    println_dbg("file open Indicate");
     return;
   }
   f.print("?mode=" + String(mode, DEC));

@@ -4,13 +4,12 @@
 #ifndef CONFIG
 #define CONFIG
 
-
 /* Hardware Mapping */
-#define IR_IN                   (5)
-#define IR_OUT                  (14)
-#define Indicate_LED            (15)
-#define ERROR_LED               (16)
-
+#define PIN_IR_IN               (5)
+#define PIN_IR_OUT              (14)
+#define PIN_SDA                 (2)
+#define PIN_SCL                 (12)
+#define PIN_LED1                (16)
 
 /* Software */
 // for Remocon
