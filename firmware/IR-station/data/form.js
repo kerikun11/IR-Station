@@ -8,39 +8,43 @@ function getWifiList(){
 		$('#ap').toggle();
 	});
 }
-function confirm(){
-	$('#form').toggle();
-	$('#ap').toggle();
-	$('#info-status').text("Connecting... Please wait.");
-	$.get('/confirm',{
-		ssid: $('#form [name="ssid"]').val(),
-		password: $('#form input[name="password"]').val(),
-		url: $('#form input[name="url"]').val()
-	}).done(function(res){
-		if(res=="false"){
-			$('#form').toggle();
-			$('#ap').toggle();
-			$('#info-status').text("Connection failed. Please try again.");
-		}else{
-			$('#info-status').text("Connection Successful.");
-		}
-	});
+function form(){
+	if(confirm("OK?")){
+		$('#form').toggle();
+		$('#ap').toggle();
+		$('#info-status').text("Connecting... Please wait.");
+		$.get('/confirm',{
+			ssid: $('#form [name="ssid"]').val(),
+			password: $('#form input[name="password"]').val(),
+			url: $('#form input[name="url"]').val()
+		}).done(function(res){
+			if(res=="false"){
+				$('#form').toggle();
+				$('#ap').toggle();
+				$('#info-status').text("Connection failed. Please try again.");
+			}else{
+				$('#info-status').text("Connection Successful.");
+			}
+		});
+	}
 }
 function setAP(){
-	$('#form').toggle();
-	$('#ap').toggle();
-	$('#info-status').text("Connecting... Please wait.");
-	$.get('/accessPointMode',{
-		url: $('#ap input[name="url"]').val()
-	}).done(function(res){
-		$('#info-status').text(res);
-	});
+	if(confirm("Can I setup as Access Point Mode?")){
+		$('#form').toggle();
+		$('#ap').toggle();
+		$('#info-status').text("Connecting... Please wait.");
+		$.get('/accessPointMode',{
+			url: $('#ap input[name="url"]').val()
+		}).done(function(res){
+			$('#info-status').text(res);
+		});
+	}
 }
 
-$('#form button').click(confirm);
+$('#form button').click(form);
 $('#form input').keypress(function(e){
 	if(e.which == 13){
-		confirm();
+		form();
 	}
 });
 $('#ap button').click(setAP);

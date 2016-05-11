@@ -44,11 +44,11 @@
 
 #if SERIAL_DEBUG == true
 #define print_dbg               Serial.print
-#define printf_dbg             Serial.printf
+#define printf_dbg              Serial.printf
 #define println_dbg             Serial.println
 #else
 #define print_dbg               // No Operation
-#define printf_dbg             // No Operation
+#define printf_dbg              // No Operation
 #define println_dbg             // No Operation
 #endif
 

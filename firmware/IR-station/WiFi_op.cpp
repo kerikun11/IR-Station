@@ -7,20 +7,18 @@
 #include "IR_op.h"
 #include "server_op.h"
 
-const char softap_ssid[] = SOFTAP_SSID;
-const char softap_pass[] = SOFTAP_PASS;
 String target_ssid = "NULL";
 String target_pass = "NULL";
 
 void setupAP(void) {
   wdt_reset();
-  WiFi.mode(WIFI_AP);
+  WiFi.mode(WIFI_STA);
   println_dbg("Configuring Access Point...");
-  WiFi.softAP(softap_ssid, softap_pass);
+  WiFi.softAP(SOFTAP_SSID, SOFTAP_PASS);
 
   // display information
   print_dbg("AP SSID : ");
-  println_dbg(softap_ssid);
+  println_dbg(SOFTAP_SSID);
   print_dbg("AP IP address: ");
   println_dbg(WiFi.softAPIP());
 }
@@ -30,18 +28,18 @@ bool connectCachedWifi() {
   WiFi.mode(WIFI_STA);
   // Connect to WiFi network
   target_ssid = WiFi.SSID();
-  //  int n = WiFi.scanNetworks();
-  //  for (int i = 0; i < n; ++i) {
-  //    if (target_ssid == String(WiFi.SSID(i))) {
-  //      break;
-  //    }
-  //    if (i == n - 1) {
-  //      println_dbg("");
-  //      print_dbg("Couldn't find cached SSID: ");
-  //      println_dbg(target_ssid);
-  //      return false;
-  //    }
-  //  }
+  int n = WiFi.scanNetworks();
+  for (int i = 0; i < n; ++i) {
+    if (target_ssid == String(WiFi.SSID(i))) {
+      break;
+    }
+    if (i == n - 1) {
+      println_dbg("");
+      print_dbg("Couldn't find cached SSID: ");
+      println_dbg(target_ssid);
+      return false;
+    }
+  }
   println_dbg("");
   print_dbg("Connecting to cached SSID: ");
   println_dbg(target_ssid);
@@ -79,7 +77,6 @@ bool connectWifi() {
   println_dbg(target_ssid);
   print_dbg("Password: ");
   println_dbg(target_pass);
-  if (target_ssid == "NULL")return false;
   WiFi.begin(target_ssid.c_str(), target_pass.c_str());
 
   // Wait for connection

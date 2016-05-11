@@ -15,7 +15,6 @@
 #include "server_op.h"
 
 void setup() {
-  ESP.wdtFeed();
   // Prepare Serial debug
   Serial.begin(115200);
   println_dbg("");
