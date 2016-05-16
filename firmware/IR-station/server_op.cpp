@@ -54,6 +54,7 @@ void setupFormServer(void) {
     }
     res += "]";
     server.send(200, "text/json", res);
+    println_dbg("End");
   });
   server.on("/confirm", []() {
     dispRequest();
@@ -73,6 +74,7 @@ void setupFormServer(void) {
       ESP.reset();
     } else {
       server.send(200, "text/plain", "false");
+      println_dbg("End");
     }
   });
   server.on("/accessPointMode", []() {
@@ -96,10 +98,12 @@ void setupFormServer(void) {
       File file = SPIFFS.open(path, "r");
       size_t sent = server.streamFile(file, getContentType(path));
       file.close();
+      println_dbg("End");
       return;
     }
     println_dbg("file not found");
     server.send(404, "text/plain", "FileNotFound");
+    println_dbg("End");
   });
 
   // Start TCP (HTTP) server
@@ -132,6 +136,7 @@ void setupServer(void) {
     }
     // Send the response
     server.send(200, "text/plain", res);
+    println_dbg("End");
   });
   server.on("/recode", []() {
     // Request detail
@@ -155,8 +160,10 @@ void setupServer(void) {
     }
     // Send the response
     server.send(200, "text/plain", status);
+    println_dbg("End");
   });
   server.on("/chName", []() {
+    dispRequest();
     String res = "";
     res += "[";
     for (uint8_t i = 0; i < IR_CH_SIZE; i++) {
@@ -165,8 +172,10 @@ void setupServer(void) {
     }
     res += "]";
     server.send(200, "text/json", res);
+    println_dbg("End");
   });
   server.on("/clearAllSignals", []() {
+    dispRequest();
     for (uint8_t i = 0; i < IR_CH_SIZE; i++) {
       ir[i].period = 0;
       ir[i].chName = "ch " + String(i + 1, DEC);
@@ -175,8 +184,10 @@ void setupServer(void) {
     }
     println_dbg("Cleared All Signals");
     server.send(200, "text/plain", "Cleared All Signals");
+    println_dbg("End");
   });
   server.on("/disconnectWifi", []() {
+    dispRequest();
     server.send(200, "text/json", "Disconnected this WiFi, Please connect again");
     println_dbg("Change WiFi SSID");
     mode = IR_STATION_MODE_NULL;
@@ -184,6 +195,7 @@ void setupServer(void) {
     ESP.reset();
   });
   server.on("/info", []() {
+    dispRequest();
     String res = "";
     res += "[\"";
     res += "Listening...";
@@ -197,6 +209,7 @@ void setupServer(void) {
     res += "http://" + mdns_address + ".local";
     res += "\"]";
     server.send(200, "text/json", res);
+    println_dbg("End");
   });
   server.onNotFound([]() {
     // Request detail
@@ -208,10 +221,12 @@ void setupServer(void) {
       File file = SPIFFS.open(path, "r");
       size_t sent = server.streamFile(file, getContentType(path));
       file.close();
+      println_dbg("End");
       return;
     }
     println_dbg("file not found");
     server.send(404, "text/plain", "FileNotFound");
+    println_dbg("End");
   });
   // Start TCP (HTTP) server
   server.begin();

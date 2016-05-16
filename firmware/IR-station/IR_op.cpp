@@ -6,7 +6,7 @@
 #include "WiFi_op.h"
 
 remocon ir[IR_CH_SIZE];
-uint8_t mode;
+uint8_t mode = IR_STATION_MODE_STA;
 
 void modeSetup(void) {
   wdt_reset();
@@ -63,7 +63,7 @@ void irDataBackupToFile(int ch) {
   SPIFFS.remove(IR_DATA_PATH(ch));
   File f = SPIFFS.open(IR_DATA_PATH(ch), "w");
   if (!f) {
-    println_dbg("File open Indicate: ch" + String(ch + 1));
+    println_dbg("File open Error: ch" + String(ch + 1));
   } else {
     f.println(dataString);
     f.close();
@@ -75,7 +75,7 @@ void irDataRestoreFromFile(void) {
   for (uint8_t ch = 0; ch < IR_CH_SIZE; ch++) {
     File f = SPIFFS.open(IR_DATA_PATH(ch), "r");
     if (!f) {
-      println_dbg("File open Indicate: " + String(ch + 1));
+      println_dbg("File open Error: " + String(ch + 1));
     } else {
       String s = f.readStringUntil('\n');
       f.close();
@@ -88,7 +88,7 @@ void irDataRestoreFromFile(void) {
 void settingsRestoreFromFile(void) {
   File f = SPIFFS.open(SETTINGS_DATA_PATH, "r");
   if (!f) {
-    println_dbg("Settings: file open Indicate");
+    println_dbg("Settings: file open Error");
   } else {
     String s = f.readStringUntil('\n');
     println_dbg("Settings data: " + s);
@@ -108,7 +108,7 @@ void settingsBackupToFile(void) {
   SPIFFS.remove(SETTINGS_DATA_PATH);
   File f = SPIFFS.open(SETTINGS_DATA_PATH, "w");
   if (!f) {
-    println_dbg("file open Indicate");
+    println_dbg("Settings: file open Error");
     return;
   }
   f.print("?mode=" + String(mode, DEC));

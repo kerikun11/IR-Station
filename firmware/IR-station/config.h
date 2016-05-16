@@ -5,6 +5,7 @@
 #define CONFIG
 
 /* Hardware Mapping */
+#define PIN_SW                  (0)
 #define PIN_IR_IN               (5)
 #define PIN_IR_OUT              (14)
 #define PIN_SDA                 (2)
@@ -27,7 +28,6 @@
 #define WIFI_CONNECT_TIMEOUT    (10) // seconds
 
 // http://MDNS_ADDRESS_DEFAULT.local
-#define MDNS_ADDRESS_SETUP      "setup"
 #define MDNS_ADDRESS_DEFAULT    "ir"
 
 // OTA update

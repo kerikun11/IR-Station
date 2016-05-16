@@ -26,7 +26,7 @@ void setup() {
   pinMode(PIN_IR_IN, INPUT);
   pinMode(PIN_IR_OUT, OUTPUT);
 
-  digitalWrite(PIN_IR_OUT, LOW);
+  //digitalWrite(PIN_IR_OUT, LOW);
   digitalWrite(PIN_LED1, LOW);
 
   // Setup Start
