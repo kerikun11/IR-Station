@@ -5,7 +5,7 @@
 #define CONFIG
 
 /* Hardware Mapping */
-#define PIN_SW                  (0)
+#define PIN_BUTTON              (0)
 #define PIN_IR_IN               (5)
 #define PIN_IR_OUT              (14)
 #define PIN_SDA                 (2)
@@ -17,8 +17,8 @@
 #define IR_CH_SIZE              (25)
 
 // SPIFFS saving path
-#define IR_DATA_PATH(i)         ("/data/" + String(i,DEC) + ".txt")
-#define SETTINGS_DATA_PATH      ("/settings.txt")
+#define IR_DATA_PATH(i)         ("/IR_data/" + String(i,DEC) + ".json")
+#define SETTINGS_DATA_PATH      ("/settings.json")
 
 // SSID & Password of ESP8266 Access Point Mode
 #define SOFTAP_SSID             "IR-Station"

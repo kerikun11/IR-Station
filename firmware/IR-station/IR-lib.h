@@ -26,10 +26,6 @@ class remocon {
     void restoreFromString(String dataString);
 
     void dispData(void);
-
-  private:
-    // extracts a string between "head" and "tail"
-    String extract(String target, String head, String tail = "&");
 };
 
 #endif

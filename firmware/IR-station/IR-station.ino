@@ -53,7 +53,6 @@ void setup() {
 
   // Setup Completed
   digitalWrite(PIN_LED1, LOW);
-  settingsBackupToFile();
   println_dbg("Setup Completed");
 }
 
@@ -66,5 +65,6 @@ void loop() {
   } else {
     digitalWrite(PIN_LED1, LOW);
   }
+  if (digitalRead(PIN_BUTTON)) mode = IR_STATION_MODE_NULL;
 }
 

@@ -23,8 +23,8 @@ void irDataRestoreFromFile(void);
 void settingsRestoreFromFile(void);
 void settingsBackupToFile(void);
 
-// extracts a string between "head" and "tail"
-String extract(String target, String head, String tail = "&");
+bool writeStringToFile(String path, String dataString);
+bool getStringFromFile(String path, String& dataString);
 
 #endif
 
