@@ -1,12 +1,13 @@
 #include "IR_op.h"
 
+#include <ArduinoJson.h>
 #include <FS.h>
 #include "config.h"
 #include "server_op.h"
 #include "WiFi_op.h"
 
 remocon ir[IR_CH_SIZE];
-uint8_t mode;
+uint8_t mode = IR_STATION_MODE_STA;
 
 void modeSetup(void) {
   wdt_reset();
@@ -32,93 +33,87 @@ void modeSetup(void) {
   }
 }
 
+void setMode(int newMode) {
+  mode = newMode;
+  settingsBackupToFile();
+}
+
 void irSendSignal(int ch) {
-  digitalWrite(Indicate_LED, HIGH);
+  digitalWrite(PIN_LED1, HIGH);
   ir[ch].sendSignal();
-  digitalWrite(Indicate_LED, LOW);
+  digitalWrite(PIN_LED1, LOW);
 }
 
 int irRecodeSignal(int ch) {
   int ret = (-1);
-  digitalWrite(Indicate_LED, HIGH);
+  digitalWrite(PIN_LED1, HIGH);
   if (ir[ch].recodeSignal() == 0) {
-    String dataString = ir[ch].getBackupString();
-    SPIFFS.remove(IR_DATA_PATH(ch));
-    File f = SPIFFS.open(IR_DATA_PATH(ch), "w");
-    if (!f) {
-      println_dbg("File open error");
-    } else {
-      f.println(dataString);
-      f.close();
-      println_dbg("Backup Successful");
-    }
-    ret = 0;
+    irDataBackupToFile(ch);
   }
-  digitalWrite(Indicate_LED, LOW);
+  digitalWrite(PIN_LED1, LOW);
   return ret;
 }
 
 void irDataBackupToFile(int ch) {
   String dataString = ir[ch].getBackupString();
-  SPIFFS.remove(IR_DATA_PATH(ch));
-  File f = SPIFFS.open(IR_DATA_PATH(ch), "w");
-  if (!f) {
-    println_dbg("File open error: ch" + String(ch + 1));
-  } else {
-    f.println(dataString);
-    f.close();
-    println_dbg("Backup Successful: ch" + String(ch + 1));
-  }
+  writeStringToFile(IR_DATA_PATH(ch + 1), dataString);
 }
 
 void irDataRestoreFromFile(void) {
   for (uint8_t ch = 0; ch < IR_CH_SIZE; ch++) {
-    File f = SPIFFS.open(IR_DATA_PATH(ch), "r");
-    if (!f) {
-      println_dbg("File open error: " + String(ch + 1));
-    } else {
-      String s = f.readStringUntil('\n');
-      f.close();
-      ir[ch].restoreFromString(s);
-      println_dbg("Restore Successful: ch" + String(ch + 1));
-    }
+    String str;
+    getStringFromFile(IR_DATA_PATH(ch + 1), str);
+    ir[ch].restoreFromString(str);
   }
 }
 
 void settingsRestoreFromFile(void) {
-  File f = SPIFFS.open(SETTINGS_DATA_PATH, "r");
-  if (!f) {
-    println_dbg("Settings: file open error");
-  } else {
-    String s = f.readStringUntil('\n');
-    println_dbg("Settings data: " + s);
-    mode = extract(s, "?mode=").toInt();
-    String mdns = extract(s, "&mdns=");
-    if (mdns != "") {
-      mdns_address = mdns;
-    } else {
-      mdns_address = MDNS_ADDRESS_DEFAULT;
-    }
-    f.close();
-    println_dbg("Restored Settings from File");
+  String s;
+  if (getStringFromFile(SETTINGS_DATA_PATH, s) == false) return;
+  DynamicJsonBuffer jsonBuffer;
+  JsonObject& data = jsonBuffer.parseObject(s);
+  mode = (int)data["mode"];
+  mdns_address = (const char*)data["mdns_address"];
+  if (mdns_address == "") {
+    mdns_address = MDNS_ADDRESS_DEFAULT;
   }
 }
 
 void settingsBackupToFile(void) {
-  SPIFFS.remove(SETTINGS_DATA_PATH);
-  File f = SPIFFS.open(SETTINGS_DATA_PATH, "w");
-  if (!f) {
-    println_dbg("file open error");
-    return;
-  }
-  f.print("?mode=" + String(mode, DEC));
-  f.print("&mdns=" + mdns_address);
-  f.println("&End");
-  f.close();
-  println_dbg("Settings data backup successful");
+  DynamicJsonBuffer jsonBuffer;
+  JsonObject& data = jsonBuffer.createObject();
+  data["mode"] = mode;
+  data["mdns_address"] = mdns_address;
+  String str;
+  data.printTo(str);
+  writeStringToFile(SETTINGS_DATA_PATH, str);
 }
 
-String extract(String target, String head, String tail) {
-  return target.substring(target.indexOf(head) + head.length(), target.indexOf(tail, target.indexOf(head) + head.length()));
+bool writeStringToFile(String path, String dataString) {
+  SPIFFS.remove(path);
+  File file = SPIFFS.open(path, "w");
+  if (!file) {
+    println_dbg("File open Error: " + path);
+    return false;
+  }
+  file.print(dataString);
+  file.close();
+  println_dbg("Backup successful: " + path);
+  println_dbg("data: " + dataString);
+  return true;
+}
+
+bool getStringFromFile(String path, String& dataString) {
+  File file = SPIFFS.open(path, "r");
+  if (!file) {
+    println_dbg("File open Error: " + path);
+    return false;
+  }
+  file.setTimeout(10);
+  dataString = file.readString();
+  file.close();
+  println_dbg("Restore successful: " + path);
+  println_dbg("data: " + dataString);
+  return true;
 }
 

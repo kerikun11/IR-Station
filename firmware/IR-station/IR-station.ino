@@ -10,6 +10,7 @@
 #include <FS.h>
 #include "config.h"
 #include "IR_op.h"
+#include "LCD_op.h"
 #include "OTA_op.h"
 #include "WiFi_op.h"
 #include "server_op.h"
@@ -21,17 +22,15 @@ void setup() {
   println_dbg("Hello, I'm ESP-WROOM-02");
 
   // prepare GPIO
-  pinMode(Indicate_LED, OUTPUT);
-  pinMode(ERROR_LED, OUTPUT);
-  pinMode(IR_IN, INPUT);
-  pinMode(IR_OUT, OUTPUT);
+  pinMode(PIN_LED1, OUTPUT);
+  pinMode(PIN_IR_IN, INPUT);
+  pinMode(PIN_IR_OUT, OUTPUT);
 
-  digitalWrite(IR_IN, LOW);
-  digitalWrite(Indicate_LED, LOW);
-  digitalWrite(ERROR_LED, LOW);
+  //digitalWrite(PIN_IR_OUT, LOW);
+  digitalWrite(PIN_LED1, LOW);
 
   // Setup Start
-  digitalWrite(ERROR_LED, HIGH);
+  digitalWrite(PIN_LED1, HIGH);
 
   // Prepare SPIFFS
   SPIFFS.begin();
@@ -39,6 +38,9 @@ void setup() {
   // Restore reserved data
   irDataRestoreFromFile();
   settingsRestoreFromFile();
+
+  // LCD setup
+  setupLcd();
 
   // WiFi setup
   modeSetup();
@@ -50,18 +52,28 @@ void setup() {
   setupServer();
 
   // Setup Completed
-  digitalWrite(ERROR_LED, LOW);
-  settingsBackupToFile();
+  digitalWrite(PIN_LED1, LOW);
   println_dbg("Setup Completed");
 }
 
 void loop() {
   OTATask();
   serverTask();
+  lcdTask();
   if (WiFi.status() != WL_CONNECTED) {
-    digitalWrite(ERROR_LED, HIGH);
+    digitalWrite(PIN_LED1, HIGH);
   } else {
-    digitalWrite(ERROR_LED, LOW);
+    digitalWrite(PIN_LED1, LOW);
+  }
+  /* disconnect wifi by SW */
+  static uint32_t timeStamp;
+  if (digitalRead(PIN_BUTTON) == LOW) {
+    if (millis() - timeStamp > 5000) {
+      setMode(IR_STATION_MODE_NULL);
+      ESP.reset();
+    }
+  } else {
+    timeStamp = millis();
   }
 }
 

@@ -19,7 +19,7 @@ void dispRequest() {
   println_dbg("");
   println_dbg("New Request");
   println_dbg("URI: " + server.uri());
-  println_dbg("Method: " + (server.method() == HTTP_GET) ? "GET" : "POST");
+  println_dbg(String("Method: ") + ((server.method() == HTTP_GET) ? "GET" : "POST"));
   println_dbg("Arguments: " + String(server.args()));
   for (uint8_t i = 0; i < server.args(); i++) {
     println_dbg("  " + server.argName(i) + " = " + server.arg(i));
@@ -44,15 +44,6 @@ String getContentType(String filename) {
 }
 
 void setupFormServer(void) {
-  // Set up mDNS responder:
-  print_dbg("mDNS address: ");
-  println_dbg("http://" + String(MDNS_ADDRESS_SETUP) + ".local");
-  if (!MDNS.begin(MDNS_ADDRESS_SETUP, WiFi.softAPIP())) {
-    println_dbg("Error setting up MDNS responder!");
-  } else {
-    println_dbg("mDNS responder started");
-  }
-
   server.on("/wifiList", []() {
     dispRequest();
     int n = WiFi.scanNetworks();
@@ -63,6 +54,7 @@ void setupFormServer(void) {
     }
     res += "]";
     server.send(200, "text/json", res);
+    println_dbg("End");
   });
   server.on("/confirm", []() {
     dispRequest();
@@ -77,11 +69,11 @@ void setupFormServer(void) {
     println_dbg("mDNS Address: " + mdns_address);
     if (connectWifi()) {
       server.send(200, "text/palin", "true");
-      mode = IR_STATION_MODE_STA;
-      settingsBackupToFile();
+      setMode(IR_STATION_MODE_STA);
       ESP.reset();
     } else {
       server.send(200, "text/plain", "false");
+      println_dbg("End");
     }
   });
   server.on("/accessPointMode", []() {
@@ -90,9 +82,8 @@ void setupFormServer(void) {
     if (mdns_address == "") {
       mdns_address = MDNS_ADDRESS_DEFAULT;
     }
-    mode = IR_STATION_MODE_AP;
-    settingsBackupToFile();
     server.send(200, "text/plain", "Setting up Access Point Successful");
+    setMode(IR_STATION_MODE_AP);
     ESP.reset();
   });
   server.onNotFound([]() {
@@ -105,10 +96,12 @@ void setupFormServer(void) {
       File file = SPIFFS.open(path, "r");
       size_t sent = server.streamFile(file, getContentType(path));
       file.close();
+      println_dbg("End");
       return;
     }
     println_dbg("file not found");
     server.send(404, "text/plain", "FileNotFound");
+    println_dbg("End");
   });
 
   // Start TCP (HTTP) server
@@ -121,7 +114,7 @@ void setupServer(void) {
   print_dbg("mDNS address: ");
   println_dbg("http://" + mdns_address + ".local");
   if (!MDNS.begin(mdns_address.c_str())) {
-    println_dbg("Error setting up MDNS responder!");
+    println_dbg("Indicate setting up MDNS responder!");
   } else {
     println_dbg("mDNS responder started");
   }
@@ -141,6 +134,7 @@ void setupServer(void) {
     }
     // Send the response
     server.send(200, "text/plain", res);
+    println_dbg("End");
   });
   server.on("/recode", []() {
     // Request detail
@@ -153,7 +147,6 @@ void setupServer(void) {
       String chName = server.arg("chName");
       if (chName == "") chName = "ch " + String(ch + 1, DEC);
       ir[ch].chName = chName;
-      charEncode(ir[ch].chName);
       if (irRecodeSignal(ch) == 0) {
         status = "Recoding Successful: ch " + String(ch + 1);
       } else {
@@ -164,8 +157,10 @@ void setupServer(void) {
     }
     // Send the response
     server.send(200, "text/plain", status);
+    println_dbg("End");
   });
   server.on("/chName", []() {
+    dispRequest();
     String res = "";
     res += "[";
     for (uint8_t i = 0; i < IR_CH_SIZE; i++) {
@@ -174,24 +169,29 @@ void setupServer(void) {
     }
     res += "]";
     server.send(200, "text/json", res);
+    println_dbg("End");
   });
   server.on("/clearAllSignals", []() {
+    dispRequest();
     for (uint8_t i = 0; i < IR_CH_SIZE; i++) {
       ir[i].period = 0;
       ir[i].chName = "ch " + String(i + 1, DEC);
       ir[i].irData = "";
       irDataBackupToFile(i);
     }
+    println_dbg("Cleared All Signals");
     server.send(200, "text/plain", "Cleared All Signals");
+    println_dbg("End");
   });
   server.on("/disconnectWifi", []() {
+    dispRequest();
     server.send(200, "text/json", "Disconnected this WiFi, Please connect again");
     println_dbg("Change WiFi SSID");
-    mode = IR_STATION_MODE_NULL;
-    settingsBackupToFile();
+    setMode(IR_STATION_MODE_NULL);
     ESP.reset();
   });
   server.on("/info", []() {
+    dispRequest();
     String res = "";
     res += "[\"";
     res += "Listening...";
@@ -205,6 +205,7 @@ void setupServer(void) {
     res += "http://" + mdns_address + ".local";
     res += "\"]";
     server.send(200, "text/json", res);
+    println_dbg("End");
   });
   server.onNotFound([]() {
     // Request detail
@@ -216,26 +217,15 @@ void setupServer(void) {
       File file = SPIFFS.open(path, "r");
       size_t sent = server.streamFile(file, getContentType(path));
       file.close();
+      println_dbg("End");
       return;
     }
     println_dbg("file not found");
     server.send(404, "text/plain", "FileNotFound");
+    println_dbg("End");
   });
   // Start TCP (HTTP) server
   server.begin();
   println_dbg("IR Station Server Listening");
-}
-
-void charEncode(String & s) {
-  s.replace("+", " ");
-  s.replace("%20", " ");  s.replace("%21", "!");  s.replace("%22", "\""); s.replace("%23", "#");
-  s.replace("%24", "$");  s.replace("%25", "%");  s.replace("%26", "&");  s.replace("%27", "\'");
-  s.replace("%28", "(");  s.replace("%29", ")");  s.replace("%2A", "*");  s.replace("%2B", "+");
-  s.replace("%2C", ",");  s.replace("%2D", "-");  s.replace("%2E", ".");  s.replace("%2F", "/");
-  s.replace("%3A", ":");  s.replace("%3B", ";");  s.replace("%3C", "<");  s.replace("%3D", "=");
-  s.replace("%3E", ">");  s.replace("%3F", "?");  s.replace("%40", "@");  s.replace("%5B", "[");
-  s.replace("%5C", "\\"); s.replace("%5D", "]");  s.replace("%5E", "^");  s.replace("%5F", "-");
-  s.replace("%60", "`");  s.replace("%7B", "{");  s.replace("%7C", "|");  s.replace("%7D", "}");
-  s.replace("%7E", "~");
 }
 

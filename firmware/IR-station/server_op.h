@@ -12,8 +12,5 @@ void serverTask();
 void setupFormServer(void);
 void setupServer(void);
 
-// replace a number to the symbol
-void charEncode(String &s);
-
 #endif
 

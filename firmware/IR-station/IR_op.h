@@ -13,6 +13,7 @@ extern remocon ir[IR_CH_SIZE];
 extern uint8_t mode;
 
 void modeSetup(void);
+void setMode(int newMode);
 
 void irSendSignal(int ch);
 int irRecodeSignal(int ch);
@@ -23,8 +24,8 @@ void irDataRestoreFromFile(void);
 void settingsRestoreFromFile(void);
 void settingsBackupToFile(void);
 
-// extracts a string between "head" and "tail"
-String extract(String target, String head, String tail = "&");
+bool writeStringToFile(String path, String dataString);
+bool getStringFromFile(String path, String& dataString);
 
 #endif
 

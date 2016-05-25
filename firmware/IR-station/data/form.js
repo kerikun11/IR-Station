@@ -1,15 +1,20 @@
 function getWifiList(){
-	$.get("/wifiList").done(function(res){
-		$.each(res,function(index,wifi){
-			$('#wifiList').append($('<option>').val(wifi).text(wifi));
-		});
-		$('#info-status').text("Loading successful.")
-		$('#form').toggle();
-		$('#ap').toggle();
-	});
+	console.log("Getting wifi list")
+	$.getJSON(
+		'/wifiList',
+		{},
+		function(data) {
+			$.each(data,function(index,wifi){
+				$('#wifiList').append($('<option>').val(wifi).text(wifi));
+			});
+			$('#info-status').text("Loading successful.")
+			$('#form').toggle();
+			$('#ap').toggle();
+		}
+	);
 }
 function form(){
-	if(confirm("OK?")){
+	if(confirm("Are you sure to confirm?")){
 		$('#form').toggle();
 		$('#ap').toggle();
 		$('#info-status').text("Connecting... Please wait.");
@@ -47,6 +52,7 @@ $('#form input').keypress(function(e){
 		form();
 	}
 });
+
 $('#ap button').click(setAP);
 $('#ap input').keypress(function(e){
 	if(e.which == 13){

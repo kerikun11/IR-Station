@@ -4,21 +4,21 @@
 #ifndef CONFIG
 #define CONFIG
 
-
 /* Hardware Mapping */
-#define IR_IN                   (5)
-#define IR_OUT                  (14)
-#define Indicate_LED            (15)
-#define ERROR_LED               (16)
-
+#define PIN_BUTTON              (0)
+#define PIN_IR_IN               (5)
+#define PIN_IR_OUT              (14)
+#define PIN_SDA                 (2)
+#define PIN_SCL                 (12)
+#define PIN_LED1                (16)
 
 /* Software */
 // for Remocon
 #define IR_CH_SIZE              (25)
 
 // SPIFFS saving path
-#define IR_DATA_PATH(i)         ("/data/" + String(i,DEC) + ".txt")
-#define SETTINGS_DATA_PATH      ("/settings.txt")
+#define IR_DATA_PATH(i)         ("/IR_data/" + String(i,DEC) + ".json")
+#define SETTINGS_DATA_PATH      ("/settings.json")
 
 // SSID & Password of ESP8266 Access Point Mode
 #define SOFTAP_SSID             "IR-Station"
@@ -28,7 +28,6 @@
 #define WIFI_CONNECT_TIMEOUT    (10) // seconds
 
 // http://MDNS_ADDRESS_DEFAULT.local
-#define MDNS_ADDRESS_SETUP      "setup"
 #define MDNS_ADDRESS_DEFAULT    "ir"
 
 // OTA update

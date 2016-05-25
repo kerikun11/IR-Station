@@ -12,7 +12,7 @@ String target_pass = "NULL";
 
 void setupAP(void) {
   wdt_reset();
-  WiFi.mode(WIFI_STA);
+  WiFi.mode(WIFI_AP_STA);
   println_dbg("Configuring Access Point...");
   WiFi.softAP(SOFTAP_SSID, SOFTAP_PASS);
 
@@ -24,12 +24,15 @@ void setupAP(void) {
 }
 
 bool connectCachedWifi() {
+  wdt_reset();
   // set WiFi Mode
   WiFi.mode(WIFI_STA);
   // Connect to WiFi network
   target_ssid = WiFi.SSID();
+  target_pass = WiFi.psk();
   int n = WiFi.scanNetworks();
   for (int i = 0; i < n; ++i) {
+    println_dbg("SSID: " + String(WiFi.SSID(i)));
     if (target_ssid == String(WiFi.SSID(i))) {
       break;
     }
@@ -43,7 +46,7 @@ bool connectCachedWifi() {
   println_dbg("");
   print_dbg("Connecting to cached SSID: ");
   println_dbg(target_ssid);
-  WiFi.begin();
+  WiFi.begin(target_ssid.c_str(), target_pass.c_str());
 
   // Wait for connection
   int timeout = 0;
@@ -69,6 +72,7 @@ bool connectCachedWifi() {
 }
 
 bool connectWifi() {
+  wdt_reset();
   // set WiFi Mode
   WiFi.mode(WIFI_AP_STA);
   // Connect to WiFi network

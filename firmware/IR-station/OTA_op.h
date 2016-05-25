@@ -19,11 +19,11 @@
 #include "config.h"
 
 #ifndef OTA_HOSTNAME
-#error "Please define OTA_HOSTNAME"
+#Indicate "Please define OTA_HOSTNAME"
 #endif
 
 #ifndef OTA_PASSWORD
-#error "Please define OTA_PASSWORD"
+#Indicate "Please define OTA_PASSWORD"
 #endif
 
 void setupOTA();
