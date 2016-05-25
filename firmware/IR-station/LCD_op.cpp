@@ -30,7 +30,7 @@ void lcdPutIP(IPAddress IP) {
 void lcdTask() {
   static IPAddress cachedIP;
   IPAddress IP;
-  if (mode == IR_STATION_MODE_STA)IP = WiFi.localIP();
+  if (mode == IR_STATION_MODE_STA) IP = WiFi.localIP();
   else IP = WiFi.softAPIP();
   if (IP != cachedIP) {
     cachedIP = IP;

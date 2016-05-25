@@ -65,6 +65,15 @@ void loop() {
   } else {
     digitalWrite(PIN_LED1, LOW);
   }
-  if (digitalRead(PIN_BUTTON)) mode = IR_STATION_MODE_NULL;
+  /* disconnect wifi by SW */
+  static uint32_t timeStamp;
+  if (digitalRead(PIN_BUTTON) == LOW) {
+    if (millis() - timeStamp > 5000) {
+      setMode(IR_STATION_MODE_NULL);
+      ESP.reset();
+    }
+  } else {
+    timeStamp = millis();
+  }
 }
 

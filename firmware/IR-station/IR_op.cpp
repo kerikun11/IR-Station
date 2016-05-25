@@ -33,6 +33,11 @@ void modeSetup(void) {
   }
 }
 
+void setMode(int newMode) {
+  mode = newMode;
+  settingsBackupToFile();
+}
+
 void irSendSignal(int ch) {
   digitalWrite(PIN_LED1, HIGH);
   ir[ch].sendSignal();
@@ -64,11 +69,10 @@ void irDataRestoreFromFile(void) {
 
 void settingsRestoreFromFile(void) {
   String s;
-  getStringFromFile(SETTINGS_DATA_PATH, s);
-  println_dbg("data: " + s);
+  if (getStringFromFile(SETTINGS_DATA_PATH, s) == false) return;
   DynamicJsonBuffer jsonBuffer;
   JsonObject& data = jsonBuffer.parseObject(s);
-  mode = data["mode"];
+  mode = (int)data["mode"];
   mdns_address = (const char*)data["mdns_address"];
   if (mdns_address == "") {
     mdns_address = MDNS_ADDRESS_DEFAULT;
@@ -94,8 +98,9 @@ bool writeStringToFile(String path, String dataString) {
   }
   file.print(dataString);
   file.close();
-  return true;
   println_dbg("Backup successful: " + path);
+  println_dbg("data: " + dataString);
+  return true;
 }
 
 bool getStringFromFile(String path, String& dataString) {
@@ -104,11 +109,11 @@ bool getStringFromFile(String path, String& dataString) {
     println_dbg("File open Error: " + path);
     return false;
   }
-  dataString = "";
-  while (file.available()) {
-    dataString += file.readStringUntil('\n');
-  }
+  file.setTimeout(10);
+  dataString = file.readString();
   file.close();
-  println_dbg("Restored successful: " + path);
+  println_dbg("Restore successful: " + path);
+  println_dbg("data: " + dataString);
+  return true;
 }
 

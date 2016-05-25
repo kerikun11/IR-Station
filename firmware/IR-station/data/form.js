@@ -3,7 +3,7 @@ function getWifiList(){
 	$.getJSON(
 		'/wifiList',
 		{},
-		function(data, textStatus) {
+		function(data) {
 			$.each(data,function(index,wifi){
 				$('#wifiList').append($('<option>').val(wifi).text(wifi));
 			});
@@ -14,7 +14,7 @@ function getWifiList(){
 	);
 }
 function form(){
-	if(confirm("OK?")){
+	if(confirm("Are you sure to confirm?")){
 		$('#form').toggle();
 		$('#ap').toggle();
 		$('#info-status').text("Connecting... Please wait.");

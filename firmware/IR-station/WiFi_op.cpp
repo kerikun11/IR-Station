@@ -29,23 +29,24 @@ bool connectCachedWifi() {
   WiFi.mode(WIFI_STA);
   // Connect to WiFi network
   target_ssid = WiFi.SSID();
-  //  int n = WiFi.scanNetworks();
-  //  for (int i = 0; i < n; ++i) {
-  //    println_dbg("SSID: " + String(WiFi.SSID(i)));
-  //    if (target_ssid == String(WiFi.SSID(i))) {
-  //      break;
-  //    }
-  //    if (i == n - 1) {
-  //      println_dbg("");
-  //      print_dbg("Couldn't find cached SSID: ");
-  //      println_dbg(target_ssid);
-  //      return false;
-  //    }
-  //  }
+  target_pass = WiFi.psk();
+  int n = WiFi.scanNetworks();
+  for (int i = 0; i < n; ++i) {
+    println_dbg("SSID: " + String(WiFi.SSID(i)));
+    if (target_ssid == String(WiFi.SSID(i))) {
+      break;
+    }
+    if (i == n - 1) {
+      println_dbg("");
+      print_dbg("Couldn't find cached SSID: ");
+      println_dbg(target_ssid);
+      return false;
+    }
+  }
   println_dbg("");
   print_dbg("Connecting to cached SSID: ");
   println_dbg(target_ssid);
-  WiFi.begin();
+  WiFi.begin(target_ssid.c_str(), target_pass.c_str());
 
   // Wait for connection
   int timeout = 0;

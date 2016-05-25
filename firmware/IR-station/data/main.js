@@ -1,51 +1,21 @@
-function loadInfo(){
-	console.log("loadInfo");
-	$.getJSON(
-		'/info',
-		{},
-		function(data, textStatus) {
-			console.log(textStatus);
-			console.log(data);
-			$('span#info-status').text(data[0]);
-			$('span#info-ssid').text(data[1]);
-			$('span#info-ipaddress').text(data[2]);
-			$('span#info-url').text(data[3]);
-		}
-	);
-}
-function loadStatus(){
-	console.log("loadStatus");
-	$.getJSON(
-		'/status',
-		{},
-		function(data, textStatus) {
-			console.log(textStatus);
-			console.log(data);
-			$('span#info-status').text(data[0]);
-		}
-	);
-}
 function loadChName(){
-	$.getJSON(
-		'/chName',
-		{},
-		function(data, textStatus) {
-			console.log(textStatus);
-			console.log(data);
-			for(var i=0;i<25;i++){
-				$('#send button').eq(i).text(data[i]);
-				$('#recode option').eq(i+1).text("ch "+(i+1).toString()+": "+data[i]);
-			}
+	$.getJSON('/chName',{},function(data) {
+		console.log(data);
+		for(var i=0;i<25;i++){
+			$('#send button').eq(i).text(data[i]);
+			$('#recode option').eq(i+1).text("ch "+(i+1).toString()+": "+data[i]);
 		}
-	);
+	});
 }
 function init(){
-	loadInfo();
 	loadChName();
-	$.get('/info').done(function(){
-		$('#send').toggle();
-		$('#menu').toggle();
-		$('#info').toggle();
+	$.getJSON('/info',{},function(data) {
+		console.log(data);
+		$('span#info-status').text(data[0]);
+		$('span#info-ssid').text(data[1]);
+		$('span#info-ipaddress').text(data[2]);
+		$('span#info-url').text(data[3]);
+		$('#main').toggle();
 	});
 }
 function updateStatus(status){
@@ -66,7 +36,6 @@ function recode(){
 		});
 	}
 }
-$('#menu-load').click(loadChName);
 $('#menu-recode').click(
 	function(){
 		$('#advanced').hide();

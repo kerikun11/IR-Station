@@ -13,6 +13,7 @@ extern remocon ir[IR_CH_SIZE];
 extern uint8_t mode;
 
 void modeSetup(void);
+void setMode(int newMode);
 
 void irSendSignal(int ch);
 int irRecodeSignal(int ch);
