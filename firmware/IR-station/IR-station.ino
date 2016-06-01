@@ -10,10 +10,10 @@
 #include <FS.h>
 #include "config.h"
 #include "IR_op.h"
-#include "LCD_op.h"
 #include "OTA_op.h"
 #include "WiFi_op.h"
 #include "server_op.h"
+#include "time_op.h"
 
 void setup() {
   // Prepare Serial debug
@@ -24,10 +24,6 @@ void setup() {
   // prepare GPIO
   pinMode(PIN_LED1, OUTPUT);
   pinMode(PIN_IR_IN, INPUT);
-  pinMode(PIN_IR_OUT, OUTPUT);
-
-  //digitalWrite(PIN_IR_OUT, LOW);
-  digitalWrite(PIN_LED1, LOW);
 
   // Setup Start
   digitalWrite(PIN_LED1, HIGH);
@@ -39,14 +35,14 @@ void setup() {
   irDataRestoreFromFile();
   settingsRestoreFromFile();
 
-  // LCD setup
-  setupLcd();
-
   // WiFi setup
   modeSetup();
 
   // OTA setup
   setupOTA();
+
+  // Time setup
+  setupTime();
 
   // WebServer Setup
   setupServer();
@@ -59,7 +55,7 @@ void setup() {
 void loop() {
   OTATask();
   serverTask();
-  lcdTask();
+  /* display status */
   if (WiFi.status() != WL_CONNECTED) {
     digitalWrite(PIN_LED1, HIGH);
   } else {

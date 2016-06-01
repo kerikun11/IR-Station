@@ -8,8 +8,6 @@
 #define PIN_BUTTON              (0)
 #define PIN_IR_IN               (5)
 #define PIN_IR_OUT              (14)
-#define PIN_SDA                 (2)
-#define PIN_SCL                 (12)
 #define PIN_LED1                (16)
 
 /* Software */
