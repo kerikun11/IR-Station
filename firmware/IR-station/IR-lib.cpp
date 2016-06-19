@@ -3,15 +3,16 @@
 #include <ArduinoJson.h>
 
 void remocon::sendSignal(void) {
-  analogWriteFreq(38000);
   for (uint16_t count = 0; irData[count]; count++) {
     uint32_t us = micros();
     uint16_t time = period * (irData[count] - '0');
-    if (!(count & 1))analogWrite(PIN_IR_OUT, 300);
-    else analogWrite(PIN_IR_OUT, 0);
-    while (int32_t(us + time - micros()) > 0)wdt_reset();
+    do {
+      digitalWrite(PIN_IR_OUT, !(count & 1));
+      delayMicroseconds(8);
+      digitalWrite(PIN_IR_OUT, 0);
+      delayMicroseconds(16);
+    } while (int32_t(us + time - micros()) > 0);
   }
-  analogWrite(PIN_IR_OUT, 0);
   dispData();
   println_dbg("Send OK");
 }

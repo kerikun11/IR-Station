@@ -3,13 +3,10 @@
 
 #include <ESP8266WiFi.h>
 
-extern String target_ssid;
-extern String target_pass;
-
 void setupAP(void);
 
 bool connectCachedWifi();
-bool connectWifi();
+bool connectWifi(String ssid,String password);
 
 #endif
 

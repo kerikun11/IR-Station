@@ -7,9 +7,6 @@
 #include "IR_op.h"
 #include "server_op.h"
 
-String target_ssid = "NULL";
-String target_pass = "NULL";
-
 void setupAP(void) {
   wdt_reset();
   WiFi.mode(WIFI_AP_STA);
@@ -28,8 +25,8 @@ bool connectCachedWifi() {
   // set WiFi Mode
   WiFi.mode(WIFI_STA);
   // Connect to WiFi network
-  target_ssid = WiFi.SSID();
-  target_pass = WiFi.psk();
+  String target_ssid = WiFi.SSID();
+  String target_pass = WiFi.psk();
   int n = WiFi.scanNetworks();
   for (int i = 0; i < n; ++i) {
     println_dbg("SSID: " + String(WiFi.SSID(i)));
@@ -71,17 +68,17 @@ bool connectCachedWifi() {
   return true;
 }
 
-bool connectWifi() {
+bool connectWifi(String ssid, String password) {
   wdt_reset();
   // set WiFi Mode
   WiFi.mode(WIFI_AP_STA);
   // Connect to WiFi network
   println_dbg("");
   print_dbg("Connecting to SSID: ");
-  println_dbg(target_ssid);
+  println_dbg(ssid);
   print_dbg("Password: ");
-  println_dbg(target_pass);
-  WiFi.begin(target_ssid.c_str(), target_pass.c_str());
+  println_dbg(password);
+  WiFi.begin(ssid.c_str(), password.c_str());
 
   // Wait for connection
   int timeout = 0;
@@ -99,7 +96,7 @@ bool connectWifi() {
   }
   println_dbg("");
   print_dbg("Connected to ");
-  println_dbg(target_ssid);
+  println_dbg(ssid);
   print_dbg("IP address: ");
   println_dbg(WiFi.localIP());
 

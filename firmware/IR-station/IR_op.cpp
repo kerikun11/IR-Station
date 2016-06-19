@@ -33,7 +33,7 @@ void modeSetup(void) {
   }
 }
 
-void setMode(int newMode) {
+void setMode(uint8_t newMode) {
   mode = newMode;
   settingsBackupToFile();
 }

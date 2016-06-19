@@ -58,16 +58,16 @@ void setupFormServer(void) {
   });
   server.on("/confirm", []() {
     dispRequest();
-    target_ssid = server.arg("ssid");
-    target_pass = server.arg("password");
+    String ssid = server.arg("ssid");
+    String password = server.arg("password");
     mdns_address = server.arg("url");
     if (mdns_address == "") {
       mdns_address = MDNS_ADDRESS_DEFAULT;
     }
-    println_dbg("Target SSID: " + target_ssid);
-    println_dbg("Target Password: " + target_pass);
+    println_dbg("Target SSID: " + ssid);
+    println_dbg("Target Password: " + password);
     println_dbg("mDNS Address: " + mdns_address);
-    if (connectWifi()) {
+    if (connectWifi(ssid, password)) {
       server.send(200, "text/palin", "true");
       setMode(IR_STATION_MODE_STA);
       ESP.reset();
@@ -196,10 +196,10 @@ void setupServer(void) {
     res += "[\"";
     res += "Listening...";
     res += "\",\"";
-    if (mode == IR_STATION_MODE_STA)res += target_ssid;
+    if (mode == IR_STATION_MODE_STA)res += WiFi.SSID();
     else res += SOFTAP_SSID;
     res += "\",\"";
-    if (mode == IR_STATION_MODE_STA)res += (String)WiFi.localIP()[0] + "." + WiFi.localIP()[1] + "." + WiFi.localIP()[2] + "." + WiFi.localIP()[3];
+    if (mode == IR_STATION_MODE_STA) res += (String)WiFi.localIP()[0] + "." + WiFi.localIP()[1] + "." + WiFi.localIP()[2] + "." + WiFi.localIP()[3];
     else res += (String)WiFi.softAPIP()[0] + "." + WiFi.softAPIP()[1] + "." + WiFi.softAPIP()[2] + "." + WiFi.softAPIP()[3];
     res += "\",\"";
     res += "http://" + mdns_address + ".local";
