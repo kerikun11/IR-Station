@@ -24,6 +24,9 @@ void setup() {
   // prepare GPIO
   pinMode(PIN_LED1, OUTPUT);
   pinMode(PIN_IR_IN, INPUT);
+  pinMode(PIN_IR_OUT, OUTPUT);
+  pinMode(PIN_BUTTON, INPUT);
+  digitalWrite(PIN_IR_OUT, LOW);
 
   // Setup Start
   digitalWrite(PIN_LED1, HIGH);
