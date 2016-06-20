@@ -70,7 +70,7 @@ You can control your home appliances with your smartphone or laptop.
 | IR receiver | PL-IRM0101-3 or equivalents | 1 |
 | IR LED | anything good | 2~4 |
 | Nch FET | BS170 or equivalents | 1 |
-| IR LED Current Regulation Resistor | 10 ohms, 1W | 1 |
+| IR LED Current Regulation Resistor | 4.7 ohms, 1W | 1~2 |
 | Pull-up/down Resistor | 10k ohms | 5 |
 | Indicator LED | anything good | 2 |
 | Voltage Regulator | output: 3.3V 150mA or more | 1 |
@@ -103,10 +103,8 @@ You can control your home appliances with your smartphone or laptop.
 
 | item | select |
 | :---- | :---------------------- |
-| Board | Generic ESP8266 Module |
+| Board | ESPino (ESP-12 Module) |
 | Flash Mode | QIO |
-| Flash Frequency | 40MHz |
-| Upload Using | Serial |
 | CPU Frequency | 80MHz |
 | Flash Size | 4M\(3M SPIFFS\) |
 | Reset Method | ck |
