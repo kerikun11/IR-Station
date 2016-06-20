@@ -15,21 +15,20 @@ void modeSetup(void) {
     case IR_STATION_MODE_NULL:
       println_dbg("Boot Mode: NULL");
       mdns_address = MDNS_ADDRESS_DEFAULT;
+      setupAP();
+      setupFormServer();
+      while (1) {
+        wdt_reset();
+        formServerTask();
+      }
       break;
     case IR_STATION_MODE_AP:
       println_dbg("Boot Mode: AP");
-      return;
       break;
     case IR_STATION_MODE_STA:
       println_dbg("Boot Mode: Station");
       if (connectCachedWifi() == true) return;
       break;
-  }
-  setupAP();
-  setupFormServer();
-  while (1) {
-    wdt_reset();
-    serverTask();
   }
 }
 

@@ -1,6 +1,7 @@
 #include "server_op.h"
 
 #include <ESP8266mDNS.h>
+#include <DNSServer.h>
 #include <FS.h>
 #include "config.h"
 #include "IR_op.h"
@@ -11,7 +12,16 @@
 ESP8266WebServer server(80);
 String mdns_address = MDNS_ADDRESS_DEFAULT;
 
+// DNS server
+const byte DNS_PORT = 53;
+DNSServer dnsServer;
+
 void serverTask() {
+  server.handleClient();
+}
+
+void formServerTask() {
+  dnsServer.processNextRequest();
   server.handleClient();
 }
 
@@ -26,24 +36,9 @@ void dispRequest() {
   }
 }
 
-String getContentType(String filename) {
-  if (server.hasArg("download")) return "application/octet-stream";
-  else if (filename.endsWith(".htm")) return "text/html";
-  else if (filename.endsWith(".html")) return "text/html";
-  else if (filename.endsWith(".css")) return "text/css";
-  else if (filename.endsWith(".js")) return "application/javascript";
-  else if (filename.endsWith(".png")) return "image/png";
-  else if (filename.endsWith(".gif")) return "image/gif";
-  else if (filename.endsWith(".jpg")) return "image/jpeg";
-  else if (filename.endsWith(".ico")) return "image/x-icon";
-  else if (filename.endsWith(".xml")) return "text/xml";
-  else if (filename.endsWith(".pdf")) return "application/x-pdf";
-  else if (filename.endsWith(".zip")) return "application/x-zip";
-  else if (filename.endsWith(".gz")) return "application/x-gzip";
-  return "text/plain";
-}
-
 void setupFormServer(void) {
+  dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
+
   server.on("/wifiList", []() {
     dispRequest();
     int n = WiFi.scanNetworks();
@@ -89,16 +84,20 @@ void setupFormServer(void) {
   server.onNotFound([]() {
     // Request detail
     dispRequest();
-    println_dbg("File not found");
-    server.send(404, "text/plain", "FileNotFound");
+    File file = SPIFFS.open("/form/index.html", "r");
+    size_t sent = server.streamFile(file, "text/html");
+    file.close();
+    //    println_dbg("File not found");
+    //    server.send(404, "text/plain", "FileNotFound");
     println_dbg("End");
   });
-  
+
   server.serveStatic("/apple-touch-icon.png", SPIFFS, "/common/apple-touch-icon.png");
   server.serveStatic("/esp8266.png", SPIFFS, "/common/esp8266.png");
   server.serveStatic("/jquery-2.2.3.min.js", SPIFFS, "/common/jquery-2.2.3.min.js");
 
   server.serveStatic("/", SPIFFS, "/form/index.html");
+  server.serveStatic("/hotspot-detect.html", SPIFFS, "/form/index.html");
   server.serveStatic("/main.js", SPIFFS, "/form/main.js");
 
   // Start TCP (HTTP) server
@@ -115,6 +114,7 @@ void setupServer(void) {
   } else {
     println_dbg("mDNS responder started");
   }
+  MDNS.addService("http", "tcp", 80);
 
   server.on("/send", []() {
     // Request detail
