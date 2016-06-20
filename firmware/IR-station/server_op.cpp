@@ -89,20 +89,17 @@ void setupFormServer(void) {
   server.onNotFound([]() {
     // Request detail
     dispRequest();
-    String path = server.uri();
-    if (path.endsWith("/")) path += "form.html";
-    if (SPIFFS.exists(path)) {
-      println_dbg("file exists");
-      File file = SPIFFS.open(path, "r");
-      size_t sent = server.streamFile(file, getContentType(path));
-      file.close();
-      println_dbg("End");
-      return;
-    }
-    println_dbg("file not found");
+    println_dbg("File not found");
     server.send(404, "text/plain", "FileNotFound");
     println_dbg("End");
   });
+  
+  server.serveStatic("/apple-touch-icon.png", SPIFFS, "/common/apple-touch-icon.png");
+  server.serveStatic("/esp8266.png", SPIFFS, "/common/esp8266.png");
+  server.serveStatic("/jquery-2.2.3.min.js", SPIFFS, "/common/jquery-2.2.3.min.js");
+
+  server.serveStatic("/", SPIFFS, "/form/index.html");
+  server.serveStatic("/main.js", SPIFFS, "/form/main.js");
 
   // Start TCP (HTTP) server
   server.begin();
@@ -210,20 +207,18 @@ void setupServer(void) {
   server.onNotFound([]() {
     // Request detail
     dispRequest();
-    String path = server.uri();
-    if (path.endsWith("/")) path += "index.html";
-    if (SPIFFS.exists(path)) {
-      println_dbg("file exists");
-      File file = SPIFFS.open(path, "r");
-      size_t sent = server.streamFile(file, getContentType(path));
-      file.close();
-      println_dbg("End");
-      return;
-    }
-    println_dbg("file not found");
+    println_dbg("File not found");
     server.send(404, "text/plain", "FileNotFound");
     println_dbg("End");
   });
+
+  server.serveStatic("/apple-touch-icon.png", SPIFFS, "/common/apple-touch-icon.png");
+  server.serveStatic("/esp8266.png", SPIFFS, "/common/esp8266.png");
+  server.serveStatic("/jquery-2.2.3.min.js", SPIFFS, "/common/jquery-2.2.3.min.js");
+
+  server.serveStatic("/", SPIFFS, "/general/index.html");
+  server.serveStatic("/main.js", SPIFFS, "/general/main.js");
+
   // Start TCP (HTTP) server
   server.begin();
   println_dbg("IR Station Server Listening");
