@@ -18,7 +18,7 @@ DNSServer dnsServer;
 
 void serverTask() {
   server.handleClient();
-  if (mode = IR_STATION_MODE_NULL) dnsServer.processNextRequest();
+  if (mode == IR_STATION_MODE_NULL) dnsServer.processNextRequest();
 }
 
 void dispRequest() {
