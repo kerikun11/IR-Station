@@ -19,13 +19,6 @@ DNSServer dnsServer;
 
 void serverTask() {
   server.handleClient();
-  //  static uint32_t prev_ms;
-  //  uint32_t ms = millis();
-  //  if (ms - prev_ms > 12000) {
-  //    prev_ms = ms;
-  //    println_dbg("Update mDNS");
-  //    MDNS.update();
-  //  }
   if (mode == IR_STATION_MODE_NULL) dnsServer.processNextRequest();
 }
 

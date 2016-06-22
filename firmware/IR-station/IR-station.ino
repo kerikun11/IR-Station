@@ -29,7 +29,7 @@ void setup() {
   // Setup Start
   digitalWrite(PIN_INDICATOR, HIGH);
 
-  // WiFi setup
+  // IR-station setup
   modeSetup();
 
   // Setup Completed

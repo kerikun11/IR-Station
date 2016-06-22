@@ -13,13 +13,15 @@ uint8_t mode = IR_STATION_MODE_STA;
 
 void modeSetup(void) {
   wdt_reset();
-  
+
   // Prepare SPIFFS
   SPIFFS.begin();
 
   // Restore reserved data
   irDataRestoreFromFile();
   settingsRestoreFromFile();
+
+  setupButtonInterrupt();
 
   switch (mode) {
     case IR_STATION_MODE_NULL:
@@ -33,10 +35,9 @@ void modeSetup(void) {
       println_dbg("Boot Mode: Station");
       // set WiFi Mode
       WiFi.mode(WIFI_STA);
-      if (connectCachedWifi() == false) ESP.reset();
-      setupServer();
+      connectCachedWifi();
       setupOTA();
-      setupButtonInterrupt();
+      setupServer();
       break;
     case IR_STATION_MODE_AP:
       println_dbg("Boot Mode: AP");
@@ -44,7 +45,6 @@ void modeSetup(void) {
       WiFi.mode(WIFI_AP);
       setupAP();
       setupServer();
-      setupButtonInterrupt();
       break;
   }
 }
