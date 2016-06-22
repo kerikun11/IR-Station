@@ -12,7 +12,6 @@
 #include "IR_op.h"
 #include "OTA_op.h"
 #include "server_op.h"
-#include "time_op.h"
 
 void setup() {
   // Prepare Serial debug
@@ -27,15 +26,15 @@ void setup() {
   pinMode(PIN_BUTTON, INPUT_PULLUP);
   digitalWrite(PIN_IR_OUT, LOW);
 
+  // Setup Start
+  digitalWrite(PIN_INDICATOR, HIGH);
+
   // Prepare SPIFFS
   SPIFFS.begin();
 
   // Restore reserved data
   irDataRestoreFromFile();
   settingsRestoreFromFile();
-
-  // Setup Start
-  digitalWrite(PIN_INDICATOR, HIGH);
 
   // WiFi setup
   modeSetup();

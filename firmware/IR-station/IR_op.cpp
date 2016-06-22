@@ -28,7 +28,6 @@ void modeSetup(void) {
       WiFi.mode(WIFI_STA);
       if (connectCachedWifi() == false) ESP.reset();
       setupServer();
-      setupTime();
       setupOTA();
       setupButtonInterrupt();
       break;

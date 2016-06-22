@@ -1,11 +1,6 @@
 #include "WiFi_op.h"
 
-#include <ESP8266mDNS.h>
-#include <ESP8266WebServer.h>
-#include <FS.h>
 #include "config.h"
-#include "IR_op.h"
-#include "server_op.h"
 
 void setupAP(void) {
   wdt_reset();
@@ -67,8 +62,6 @@ bool connectCachedWifi() {
 
 bool connectWifi(String ssid, String password) {
   wdt_reset();
-  // set WiFi Mode
-  WiFi.mode(WIFI_AP_STA);
   // Connect to WiFi network
   println_dbg("");
   print_dbg("Connecting to SSID: ");
