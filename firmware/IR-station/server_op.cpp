@@ -81,21 +81,13 @@ void setupFormServer(void) {
   server.onNotFound([]() {
     // Request detail
     dispRequest();
-    File file = SPIFFS.open("/form/index.html", "r");
-    size_t sent = server.streamFile(file, "text/html");
-    file.close();
-    //    println_dbg("File not found");
-    //    server.send(404, "text/plain", "FileNotFound");
+    println_dbg("Redirect");
+    String res = "<script>location.href = \"http://" + (String)WiFi.softAPIP()[0] + "." + WiFi.softAPIP()[1] + "." + WiFi.softAPIP()[2] + "." + WiFi.softAPIP()[3] + "/\";</script>";
+    server.send(200, "text/html", res);
     println_dbg("End");
   });
 
-  server.serveStatic("/apple-touch-icon.png", SPIFFS, "/common/apple-touch-icon.png");
-  server.serveStatic("/esp8266.png", SPIFFS, "/common/esp8266.png");
-  server.serveStatic("/jquery-2.2.3.min.js", SPIFFS, "/common/jquery-2.2.3.min.js");
-
-  server.serveStatic("/", SPIFFS, "/form/index.html");
-  server.serveStatic("/hotspot-detect.html", SPIFFS, "/form/index.html");
-  server.serveStatic("/main.js", SPIFFS, "/form/main.js");
+  server.serveStatic("/", SPIFFS, "/form/");
 
   // Start TCP (HTTP) server
   server.begin();
@@ -209,12 +201,7 @@ void setupServer(void) {
     println_dbg("End");
   });
 
-  server.serveStatic("/apple-touch-icon.png", SPIFFS, "/common/apple-touch-icon.png");
-  server.serveStatic("/esp8266.png", SPIFFS, "/common/esp8266.png");
-  server.serveStatic("/jquery-2.2.3.min.js", SPIFFS, "/common/jquery-2.2.3.min.js");
-
-  server.serveStatic("/", SPIFFS, "/general/index.html");
-  server.serveStatic("/main.js", SPIFFS, "/general/main.js");
+  server.serveStatic("/", SPIFFS, "/general/", "public");
 
   // Start TCP (HTTP) server
   server.begin();
