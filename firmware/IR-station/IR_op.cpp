@@ -17,11 +17,15 @@ void modeSetup(void) {
   switch (mode) {
     case IR_STATION_MODE_NULL:
       println_dbg("Boot Mode: NULL");
+      // set WiFi Mode
+      WiFi.mode(WIFI_AP_STA);
       setupAP();
       setupFormServer();
       break;
     case IR_STATION_MODE_STA:
       println_dbg("Boot Mode: Station");
+      // set WiFi Mode
+      WiFi.mode(WIFI_STA);
       if (connectCachedWifi() == false) ESP.reset();
       setupServer();
       setupTime();
@@ -30,6 +34,8 @@ void modeSetup(void) {
       break;
     case IR_STATION_MODE_AP:
       println_dbg("Boot Mode: AP");
+      // set WiFi Mode
+      WiFi.mode(WIFI_AP);
       setupAP();
       setupServer();
       setupButtonInterrupt();

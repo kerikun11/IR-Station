@@ -9,7 +9,6 @@
 
 void setupAP(void) {
   wdt_reset();
-  WiFi.mode(WIFI_AP_STA);
   println_dbg("Configuring Access Point...");
   WiFi.softAP(SOFTAP_SSID, SOFTAP_PASS);
 
@@ -22,8 +21,6 @@ void setupAP(void) {
 
 bool connectCachedWifi() {
   wdt_reset();
-  // set WiFi Mode
-  WiFi.mode(WIFI_STA);
   // Connect to WiFi network
   String target_ssid = WiFi.SSID();
   String target_pass = WiFi.psk();

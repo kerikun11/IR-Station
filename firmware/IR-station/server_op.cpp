@@ -118,7 +118,6 @@ void setupServer(void) {
   } else {
     println_dbg("mDNS responder started");
   }
-  MDNS.addService("http", "tcp", 80);
 
   server.on("/send", []() {
     // Request detail
