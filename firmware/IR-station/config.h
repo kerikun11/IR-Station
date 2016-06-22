@@ -8,7 +8,7 @@
 #define PIN_BUTTON              (0)
 #define PIN_IR_IN               (5)
 #define PIN_IR_OUT              (14)
-#define PIN_LED1                (16)
+#define PIN_INDICATOR           (16)
 
 /* Software */
 // for Remocon

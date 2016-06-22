@@ -13,13 +13,6 @@ uint8_t mode = IR_STATION_MODE_STA;
 
 void modeSetup(void) {
   wdt_reset();
-  
-  // Prepare SPIFFS
-  SPIFFS.begin();
-
-  // Restore reserved data
-  irDataRestoreFromFile();
-  settingsRestoreFromFile();
 
   switch (mode) {
     case IR_STATION_MODE_NULL:
@@ -30,13 +23,15 @@ void modeSetup(void) {
     case IR_STATION_MODE_AP:
       println_dbg("Boot Mode: AP");
       setupServer();
+      setupButtonInterrupt();
       break;
     case IR_STATION_MODE_STA:
       println_dbg("Boot Mode: Station");
-      if (connectCachedWifi() == false) return;
+      if (connectCachedWifi() == false) ESP.reset();
       setupServer();
       setupTime();
       setupOTA();
+      setupButtonInterrupt();
       break;
   }
 }
@@ -46,19 +41,37 @@ void setMode(uint8_t newMode) {
   settingsBackupToFile();
 }
 
+void setupButtonInterrupt() {
+  attachInterrupt(PIN_BUTTON, []() {
+    static uint32_t prev_ms;
+    if (digitalRead(PIN_BUTTON) == LOW) {
+      prev_ms = millis();
+      println_dbg("the button pressed");
+    } else {
+      println_dbg("the button released");
+      if (millis() - prev_ms > 2000) {
+        println_dbg("the button long pressed");
+        setMode(IR_STATION_MODE_NULL);
+        ESP.reset();
+      }
+    }
+  }, CHANGE);
+  println_dbg("attached button interrupt");
+}
+
 void irSendSignal(int ch) {
-  digitalWrite(PIN_LED1, HIGH);
+  digitalWrite(PIN_INDICATOR, HIGH);
   ir[ch].sendSignal();
-  digitalWrite(PIN_LED1, LOW);
+  digitalWrite(PIN_INDICATOR, LOW);
 }
 
 int irRecodeSignal(int ch) {
   int ret = (-1);
-  digitalWrite(PIN_LED1, HIGH);
+  digitalWrite(PIN_INDICATOR, HIGH);
   if (ir[ch].recodeSignal() == 0) {
     irDataBackupToFile(ch);
   }
-  digitalWrite(PIN_LED1, LOW);
+  digitalWrite(PIN_INDICATOR, LOW);
   return ret;
 }
 

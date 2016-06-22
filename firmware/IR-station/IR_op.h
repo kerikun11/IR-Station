@@ -14,6 +14,8 @@ extern uint8_t mode;
 void modeSetup(void);
 void setMode(uint8_t newMode);
 
+void setupButtonInterrupt();
+
 void irSendSignal(int ch);
 int irRecodeSignal(int ch);
 
