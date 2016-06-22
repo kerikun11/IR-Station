@@ -29,13 +29,6 @@ void setup() {
   // Setup Start
   digitalWrite(PIN_INDICATOR, HIGH);
 
-  // Prepare SPIFFS
-  SPIFFS.begin();
-
-  // Restore reserved data
-  irDataRestoreFromFile();
-  settingsRestoreFromFile();
-
   // WiFi setup
   modeSetup();
 

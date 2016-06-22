@@ -13,6 +13,13 @@ uint8_t mode = IR_STATION_MODE_STA;
 
 void modeSetup(void) {
   wdt_reset();
+  
+  // Prepare SPIFFS
+  SPIFFS.begin();
+
+  // Restore reserved data
+  irDataRestoreFromFile();
+  settingsRestoreFromFile();
 
   switch (mode) {
     case IR_STATION_MODE_NULL:
