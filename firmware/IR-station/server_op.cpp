@@ -10,7 +10,7 @@
 
 // TCP server at port 80 will respond to HTTP requests
 ESP8266WebServer server(80);
-String mdns_address = MDNS_ADDRESS_DEFAULT;
+String mdns_address;
 
 // DNS server
 const byte DNS_PORT = 53;
@@ -18,6 +18,13 @@ DNSServer dnsServer;
 
 void serverTask() {
   server.handleClient();
+  //  static uint32_t prev_ms;
+  //  uint32_t ms = millis();
+  //  if (ms - prev_ms > 12000) {
+  //    prev_ms = ms;
+  //    println_dbg("Update mDNS");
+  //    MDNS.update();
+  //  }
   if (mode == IR_STATION_MODE_NULL) dnsServer.processNextRequest();
 }
 
@@ -98,11 +105,12 @@ void setupFormServer(void) {
 
   // Start TCP (HTTP) server
   server.begin();
-  println_dbg("Setup Form Listening");
+  println_dbg("Form Server Listening");
 }
 
 void setupServer(void) {
   // Set up mDNS responder:
+  if (mdns_address == "") mdns_address = MDNS_ADDRESS_DEFAULT;
   print_dbg("mDNS address: ");
   println_dbg("http://" + mdns_address + ".local");
   if (!MDNS.begin(mdns_address.c_str())) {

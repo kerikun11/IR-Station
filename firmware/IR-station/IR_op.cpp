@@ -20,17 +20,18 @@ void modeSetup(void) {
       setupAP();
       setupFormServer();
       break;
-    case IR_STATION_MODE_AP:
-      println_dbg("Boot Mode: AP");
-      setupServer();
-      setupButtonInterrupt();
-      break;
     case IR_STATION_MODE_STA:
       println_dbg("Boot Mode: Station");
       if (connectCachedWifi() == false) ESP.reset();
       setupServer();
       setupTime();
       setupOTA();
+      setupButtonInterrupt();
+      break;
+    case IR_STATION_MODE_AP:
+      println_dbg("Boot Mode: AP");
+      setupAP();
+      setupServer();
       setupButtonInterrupt();
       break;
   }
