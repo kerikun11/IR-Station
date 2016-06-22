@@ -11,7 +11,9 @@ function getWifiList(){
 			$('#form').toggle();
 			$('#ap').toggle();
 		}
-	);
+	).fail(function(){
+			$('#info-status').text('Connection Failed. Please Reload.');
+	});
 }
 function form(){
 	if(confirm("Are you sure to confirm?")){
