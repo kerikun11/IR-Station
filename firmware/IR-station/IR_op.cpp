@@ -5,29 +5,38 @@
 #include "config.h"
 #include "server_op.h"
 #include "WiFi_op.h"
+#include "time_op.h"
+#include "OTA_op.h"
 
 remocon ir[IR_CH_SIZE];
 uint8_t mode = IR_STATION_MODE_STA;
 
 void modeSetup(void) {
   wdt_reset();
+  
+  // Prepare SPIFFS
+  SPIFFS.begin();
+
+  // Restore reserved data
+  irDataRestoreFromFile();
+  settingsRestoreFromFile();
+
   switch (mode) {
     case IR_STATION_MODE_NULL:
       println_dbg("Boot Mode: NULL");
-      mdns_address = MDNS_ADDRESS_DEFAULT;
       setupAP();
       setupFormServer();
-      while (1) {
-        wdt_reset();
-        formServerTask();
-      }
       break;
     case IR_STATION_MODE_AP:
       println_dbg("Boot Mode: AP");
+      setupServer();
       break;
     case IR_STATION_MODE_STA:
       println_dbg("Boot Mode: Station");
-      if (connectCachedWifi() == true) return;
+      if (connectCachedWifi() == false) return;
+      setupServer();
+      setupTime();
+      setupOTA();
       break;
   }
 }

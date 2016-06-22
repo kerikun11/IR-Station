@@ -18,11 +18,7 @@ DNSServer dnsServer;
 
 void serverTask() {
   server.handleClient();
-}
-
-void formServerTask() {
-  dnsServer.processNextRequest();
-  server.handleClient();
+  if (mode = IR_STATION_MODE_NULL) dnsServer.processNextRequest();
 }
 
 void dispRequest() {
@@ -110,7 +106,7 @@ void setupServer(void) {
   print_dbg("mDNS address: ");
   println_dbg("http://" + mdns_address + ".local");
   if (!MDNS.begin(mdns_address.c_str())) {
-    println_dbg("Indicate setting up MDNS responder!");
+    println_dbg("Error setting up MDNS responder!");
   } else {
     println_dbg("mDNS responder started");
   }

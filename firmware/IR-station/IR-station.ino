@@ -31,24 +31,8 @@ void setup() {
   // Setup Start
   digitalWrite(PIN_LED1, HIGH);
 
-  // Prepare SPIFFS
-  SPIFFS.begin();
-
-  // Restore reserved data
-  irDataRestoreFromFile();
-  settingsRestoreFromFile();
-
   // WiFi setup
   modeSetup();
-
-  // OTA setup
-  setupOTA();
-
-  // Time setup
-  setupTime();
-
-  // WebServer Setup
-  setupServer();
 
   // Setup Completed
   digitalWrite(PIN_LED1, LOW);
@@ -67,7 +51,7 @@ void loop() {
   /* disconnect wifi by SW */
   static uint32_t timeStamp;
   if (digitalRead(PIN_BUTTON) == LOW) {
-    if (millis() - timeStamp > 5000) {
+    if (millis() - timeStamp > 2000) {
       setMode(IR_STATION_MODE_NULL);
       ESP.reset();
     }

@@ -8,7 +8,6 @@ extern String mdns_address;
 
 void dispRequest();
 void serverTask();
-void formServerTask();
 
 void setupFormServer(void);
 void setupServer(void);
