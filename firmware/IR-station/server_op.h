@@ -3,8 +3,6 @@
 
 #include <ESP8266WiFi.h>
 
-extern String mdns_address;
-
 void dispRequest();
 void serverTask();
 

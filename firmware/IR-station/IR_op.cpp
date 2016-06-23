@@ -9,7 +9,10 @@
 #include "OTA_op.h"
 
 remocon ir[IR_CH_SIZE];
-uint8_t mode = IR_STATION_MODE_STA;
+uint8_t mode;
+String ssid;
+String password;
+String mdns_address;
 
 void modeSetup(void) {
   wdt_reset();
@@ -35,7 +38,7 @@ void modeSetup(void) {
       println_dbg("Boot Mode: Station");
       // set WiFi Mode
       WiFi.mode(WIFI_STA);
-      connectCachedWifi();
+      connectWifi(ssid, password);
       setupOTA();
       setupServer();
       break;
@@ -107,16 +110,17 @@ void settingsRestoreFromFile(void) {
   DynamicJsonBuffer jsonBuffer;
   JsonObject& data = jsonBuffer.parseObject(s);
   mode = (int)data["mode"];
+  ssid = (const char*)data["ssid"];
+  password = (const char*)data["password"];
   mdns_address = (const char*)data["mdns_address"];
-  if (mdns_address == "") {
-    mdns_address = MDNS_ADDRESS_DEFAULT;
-  }
 }
 
 void settingsBackupToFile(void) {
   DynamicJsonBuffer jsonBuffer;
   JsonObject& data = jsonBuffer.createObject();
   data["mode"] = mode;
+  data["ssid"] = ssid;
+  data["password"] = password;
   data["mdns_address"] = mdns_address;
   String str;
   data.printTo(str);

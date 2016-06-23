@@ -5,8 +5,7 @@
 
 void setupAP(void);
 
-bool connectCachedWifi();
-bool connectWifi(String ssid,String password);
+bool connectWifi(String ssid, String password);
 
 #endif
 

@@ -11,7 +11,6 @@
 
 // TCP server at port 80 will respond to HTTP requests
 ESP8266WebServer server(80);
-String mdns_address;
 
 // DNS server
 const byte DNS_PORT = 53;
@@ -50,8 +49,8 @@ void setupFormServer(void) {
   });
   server.on("/confirm", []() {
     dispRequest();
-    String ssid = server.arg("ssid");
-    String password = server.arg("password");
+    ssid = server.arg("ssid");
+    password = server.arg("password");
     mdns_address = server.arg("url");
     if (mdns_address == "") {
       mdns_address = MDNS_ADDRESS_DEFAULT;
