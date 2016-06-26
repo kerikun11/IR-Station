@@ -10,6 +10,8 @@ void setupAP(void) {
   // display information
   print_dbg("AP SSID : ");
   println_dbg(SOFTAP_SSID);
+  print_dbg("AP Password : ");
+  println_dbg(SOFTAP_PASS);
   print_dbg("AP IP address: ");
   println_dbg(WiFi.softAPIP());
 }
