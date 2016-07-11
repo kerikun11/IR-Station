@@ -31,7 +31,7 @@ You can control your home appliances with your smartphone or laptop.
 
   1. Access http://DEVICE_NAME.local in a browser. DEVICE_NAME is the device name you entered in the previous form.
   1. Look at the form of the bottom of the screen.
-  1. Click Recode a Signal button.
+  1. Click "Recode a Signal" button.
   1. Select a channel you want to assign a signal.
   1. Enter a name of the signal. Don't use Japanese character.
   1. Click Recode button. An LED indicator will light.
@@ -68,7 +68,7 @@ Please Add the Libraries below to your Arduino IDE
   1. Select "Generic ESP8266 Module" and configure each item of board settings properly. See Arduino Board Settings below.
   1. Select correct serial COM port and upload program to the device. When upload program, GPIO0 and GPIO2 must be pulled-up, and GPIO15 must be pulled-down. It's necessary to reset the devie immediately before upload. It's a little difficult.
   1. The uploading takes about 30 seconds.
-  1. Upload the SPIFFS data: menu -> tool -> ESP8266 Sketch Data Upload.
+  1. Upload the SPIFFS data: menu -> tool -> ESP8266 Sketch Data Upload. (See https://github.com/esp8266/Arduino/blob/master/doc/filesystem.md)
   1. Process termination.
 
 ## Arduino Board Settings
