@@ -7,6 +7,7 @@
 #include "WiFi_op.h"
 #include "time_op.h"
 #include "OTA_op.h"
+#include "led_op.h"
 
 remocon ir[IR_CH_SIZE];
 uint8_t mode;
@@ -76,18 +77,18 @@ void setupButtonInterrupt() {
 }
 
 void irSendSignal(int ch) {
-  digitalWrite(PIN_INDICATOR, HIGH);
+  indicator.blue(1023);
   ir[ch].sendSignal();
-  digitalWrite(PIN_INDICATOR, LOW);
+  indicator.blue(0);
 }
 
 int irRecodeSignal(int ch) {
   int ret = (-1);
-  digitalWrite(PIN_INDICATOR, HIGH);
+  indicator.blue(1023);
   if (ir[ch].recodeSignal() == 0) {
     irDataBackupToFile(ch);
   }
-  digitalWrite(PIN_INDICATOR, LOW);
+  indicator.blue(0);
   return ret;
 }
 

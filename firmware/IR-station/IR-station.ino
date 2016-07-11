@@ -12,6 +12,7 @@
 #include "IR_op.h"
 #include "OTA_op.h"
 #include "server_op.h"
+#include "led_op.h"
 
 void setup() {
   // Prepare Serial debug
@@ -20,25 +21,29 @@ void setup() {
   println_dbg("Hello, I'm ESP-WROOM-02");
 
   // prepare GPIO
-  pinMode(PIN_INDICATOR, OUTPUT);
   pinMode(PIN_IR_IN, INPUT);
   pinMode(PIN_IR_OUT, OUTPUT);
   pinMode(PIN_BUTTON, INPUT_PULLUP);
   digitalWrite(PIN_IR_OUT, LOW);
 
   // Setup Start
-  digitalWrite(PIN_INDICATOR, HIGH);
+  indicator.green(1023);
 
   // IR-station setup
   modeSetup();
 
   // Setup Completed
-  digitalWrite(PIN_INDICATOR, LOW);
+  indicator.green(0);
   println_dbg("Setup Completed");
 }
 
 void loop() {
   OTATask();
   serverTask();
+  if (WiFi.status() != WL_CONNECTED) {
+    indicator.red(1023);
+  } else {
+    indicator.red(0);
+  }
 }
 
