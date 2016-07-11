@@ -1,6 +1,8 @@
 #include "server_op.h"
 
+#include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
+#include <DNSServer.h>
 #include <FS.h>
 #include "config.h"
 #include "IR_op.h"
@@ -9,10 +11,14 @@
 
 // TCP server at port 80 will respond to HTTP requests
 ESP8266WebServer server(80);
-String mdns_address = MDNS_ADDRESS_DEFAULT;
+
+// DNS server
+const byte DNS_PORT = 53;
+DNSServer dnsServer;
 
 void serverTask() {
   server.handleClient();
+  if (mode == IR_STATION_MODE_NULL) dnsServer.processNextRequest();
 }
 
 void dispRequest() {
@@ -26,24 +32,9 @@ void dispRequest() {
   }
 }
 
-String getContentType(String filename) {
-  if (server.hasArg("download")) return "application/octet-stream";
-  else if (filename.endsWith(".htm")) return "text/html";
-  else if (filename.endsWith(".html")) return "text/html";
-  else if (filename.endsWith(".css")) return "text/css";
-  else if (filename.endsWith(".js")) return "application/javascript";
-  else if (filename.endsWith(".png")) return "image/png";
-  else if (filename.endsWith(".gif")) return "image/gif";
-  else if (filename.endsWith(".jpg")) return "image/jpeg";
-  else if (filename.endsWith(".ico")) return "image/x-icon";
-  else if (filename.endsWith(".xml")) return "text/xml";
-  else if (filename.endsWith(".pdf")) return "application/x-pdf";
-  else if (filename.endsWith(".zip")) return "application/x-zip";
-  else if (filename.endsWith(".gz")) return "application/x-gzip";
-  return "text/plain";
-}
-
 void setupFormServer(void) {
+  dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
+
   server.on("/wifiList", []() {
     dispRequest();
     int n = WiFi.scanNetworks();
@@ -58,8 +49,8 @@ void setupFormServer(void) {
   });
   server.on("/confirm", []() {
     dispRequest();
-    String ssid = server.arg("ssid");
-    String password = server.arg("password");
+    ssid = server.arg("ssid");
+    password = server.arg("password");
     mdns_address = server.arg("url");
     if (mdns_address == "") {
       mdns_address = MDNS_ADDRESS_DEFAULT;
@@ -89,32 +80,26 @@ void setupFormServer(void) {
   server.onNotFound([]() {
     // Request detail
     dispRequest();
-    String path = server.uri();
-    if (path.endsWith("/")) path += "form.html";
-    if (SPIFFS.exists(path)) {
-      println_dbg("file exists");
-      File file = SPIFFS.open(path, "r");
-      size_t sent = server.streamFile(file, getContentType(path));
-      file.close();
-      println_dbg("End");
-      return;
-    }
-    println_dbg("file not found");
-    server.send(404, "text/plain", "FileNotFound");
+    println_dbg("Redirect");
+    String res = "<script>location.href = \"http://" + (String)WiFi.softAPIP()[0] + "." + WiFi.softAPIP()[1] + "." + WiFi.softAPIP()[2] + "." + WiFi.softAPIP()[3] + "/\";</script>";
+    server.send(200, "text/html", res);
     println_dbg("End");
   });
 
+  server.serveStatic("/", SPIFFS, "/form/");
+
   // Start TCP (HTTP) server
   server.begin();
-  println_dbg("Setup Form Listening");
+  println_dbg("Form Server Listening");
 }
 
 void setupServer(void) {
   // Set up mDNS responder:
+  if (mdns_address == "") mdns_address = MDNS_ADDRESS_DEFAULT;
   print_dbg("mDNS address: ");
   println_dbg("http://" + mdns_address + ".local");
   if (!MDNS.begin(mdns_address.c_str())) {
-    println_dbg("Indicate setting up MDNS responder!");
+    println_dbg("Error setting up MDNS responder!");
   } else {
     println_dbg("mDNS responder started");
   }
@@ -210,20 +195,13 @@ void setupServer(void) {
   server.onNotFound([]() {
     // Request detail
     dispRequest();
-    String path = server.uri();
-    if (path.endsWith("/")) path += "index.html";
-    if (SPIFFS.exists(path)) {
-      println_dbg("file exists");
-      File file = SPIFFS.open(path, "r");
-      size_t sent = server.streamFile(file, getContentType(path));
-      file.close();
-      println_dbg("End");
-      return;
-    }
-    println_dbg("file not found");
+    println_dbg("File not found");
     server.send(404, "text/plain", "FileNotFound");
     println_dbg("End");
   });
+
+  server.serveStatic("/", SPIFFS, "/general/", "public");
+
   // Start TCP (HTTP) server
   server.begin();
   println_dbg("IR Station Server Listening");

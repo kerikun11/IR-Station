@@ -5,31 +5,50 @@
 #include "config.h"
 #include "server_op.h"
 #include "WiFi_op.h"
+#include "time_op.h"
+#include "OTA_op.h"
 
 remocon ir[IR_CH_SIZE];
-uint8_t mode = IR_STATION_MODE_STA;
+uint8_t mode;
+String ssid;
+String password;
+String mdns_address;
 
 void modeSetup(void) {
   wdt_reset();
+
+  // Prepare SPIFFS
+  SPIFFS.begin();
+
+  // Restore reserved data
+  irDataRestoreFromFile();
+  settingsRestoreFromFile();
+
+  setupButtonInterrupt();
+
   switch (mode) {
     case IR_STATION_MODE_NULL:
       println_dbg("Boot Mode: NULL");
-      mdns_address = MDNS_ADDRESS_DEFAULT;
-      break;
-    case IR_STATION_MODE_AP:
-      println_dbg("Boot Mode: AP");
-      return;
+      // set WiFi Mode
+      WiFi.mode(WIFI_AP_STA);
+      setupAP();
+      setupFormServer();
       break;
     case IR_STATION_MODE_STA:
       println_dbg("Boot Mode: Station");
-      if (connectCachedWifi() == true) return;
+      // set WiFi Mode
+      WiFi.mode(WIFI_STA);
+      connectWifi(ssid, password);
+      setupOTA();
+      setupServer();
       break;
-  }
-  setupAP();
-  setupFormServer();
-  while (1) {
-    wdt_reset();
-    serverTask();
+    case IR_STATION_MODE_AP:
+      println_dbg("Boot Mode: AP");
+      // set WiFi Mode
+      WiFi.mode(WIFI_AP);
+      setupAP();
+      setupServer();
+      break;
   }
 }
 
@@ -38,19 +57,37 @@ void setMode(uint8_t newMode) {
   settingsBackupToFile();
 }
 
+void setupButtonInterrupt() {
+  attachInterrupt(PIN_BUTTON, []() {
+    static uint32_t prev_ms;
+    if (digitalRead(PIN_BUTTON) == LOW) {
+      prev_ms = millis();
+      println_dbg("the button pressed");
+    } else {
+      println_dbg("the button released");
+      if (millis() - prev_ms > 2000) {
+        println_dbg("the button long pressed");
+        setMode(IR_STATION_MODE_NULL);
+        ESP.reset();
+      }
+    }
+  }, CHANGE);
+  println_dbg("attached button interrupt");
+}
+
 void irSendSignal(int ch) {
-  digitalWrite(PIN_LED1, HIGH);
+  digitalWrite(PIN_INDICATOR, HIGH);
   ir[ch].sendSignal();
-  digitalWrite(PIN_LED1, LOW);
+  digitalWrite(PIN_INDICATOR, LOW);
 }
 
 int irRecodeSignal(int ch) {
   int ret = (-1);
-  digitalWrite(PIN_LED1, HIGH);
+  digitalWrite(PIN_INDICATOR, HIGH);
   if (ir[ch].recodeSignal() == 0) {
     irDataBackupToFile(ch);
   }
-  digitalWrite(PIN_LED1, LOW);
+  digitalWrite(PIN_INDICATOR, LOW);
   return ret;
 }
 
@@ -73,16 +110,17 @@ void settingsRestoreFromFile(void) {
   DynamicJsonBuffer jsonBuffer;
   JsonObject& data = jsonBuffer.parseObject(s);
   mode = (int)data["mode"];
+  ssid = (const char*)data["ssid"];
+  password = (const char*)data["password"];
   mdns_address = (const char*)data["mdns_address"];
-  if (mdns_address == "") {
-    mdns_address = MDNS_ADDRESS_DEFAULT;
-  }
 }
 
 void settingsBackupToFile(void) {
   DynamicJsonBuffer jsonBuffer;
   JsonObject& data = jsonBuffer.createObject();
   data["mode"] = mode;
+  data["ssid"] = ssid;
+  data["password"] = password;
   data["mdns_address"] = mdns_address;
   String str;
   data.printTo(str);

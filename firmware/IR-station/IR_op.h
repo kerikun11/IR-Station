@@ -10,9 +10,14 @@
 
 extern remocon ir[IR_CH_SIZE];
 extern uint8_t mode;
+extern String ssid;
+extern String password;
+extern String mdns_address;
 
 void modeSetup(void);
 void setMode(uint8_t newMode);
+
+void setupButtonInterrupt();
 
 void irSendSignal(int ch);
 int irRecodeSignal(int ch);
