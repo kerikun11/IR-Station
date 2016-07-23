@@ -12,7 +12,7 @@ chName = [
 ]
 
 get '/' do
-	send_file File.join(settings.public_folder,'index.html')
+	send_file File.join(settings.public_folder,'index.htm')
 end
 
 get "/recode" do
@@ -51,7 +51,7 @@ end
 
 get"/info" do
 	sleep(1)
-	info = ["Listening...","Buffalo-G-46BB","192.168.11.8","http://esp8266.local"]
+	info = ["Listening...","WiFi-2.4GHz","192.168.11.8","http://esp8266.local"]
 	json info
 end
 
