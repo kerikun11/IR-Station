@@ -8,7 +8,10 @@
 #define PIN_BUTTON              (0)
 #define PIN_IR_IN               (5)
 #define PIN_IR_OUT              (14)
-#define PIN_INDICATOR           (16)
+
+#define PIN_LED_R               (12)
+#define PIN_LED_G               (15)
+#define PIN_LED_B               (13)
 
 /* Software */
 // for Remocon
@@ -25,14 +28,14 @@
 // WiFi connection Timeout
 #define WIFI_CONNECT_TIMEOUT    (10) // seconds
 
-// http://MDNS_ADDRESS_DEFAULT.local
-#define MDNS_ADDRESS_DEFAULT    "ir"
+// http://MDNS_HOSTNAME_DEFAULT.local
+#define MDNS_HOSTNAME_DEFAULT   "ir"
 
 // OTA update
 #define USE_OTA_UPDATE          true
 
 #if USE_OTA_UPDATE == true
-#define OTA_HOSTNAME            "ir-station"
+#define OTA_HOSTNAME            "IR-Station"
 #define OTA_PASSWORD            "1234"
 #endif
 

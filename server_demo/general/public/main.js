@@ -83,6 +83,7 @@ $('#disconnectWifi').click(
 		if(confirm('Are you sure to disconnect this WiFi?')){
 			$.get('/disconnectWifi');
 			$('#advanced').toggle();
+			$('#main').toggle();
 		}
 	}
 );

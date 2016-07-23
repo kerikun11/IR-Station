@@ -1,4 +1,4 @@
-#include "IR-lib.h"
+#include "ir-remote.h"
 
 #include <ArduinoJson.h>
 
