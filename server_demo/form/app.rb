@@ -1,6 +1,5 @@
 require 'sinatra'
 require 'sinatra/reloader'
-require 'active_record'
 require 'sinatra/json'
 
 wifiList = [
@@ -27,7 +26,7 @@ end
 
 get '/confirm' do
 	sleep(1)
-	"true"
+	"192.168.11.6"
 end
 
 get '/accessPointMode' do

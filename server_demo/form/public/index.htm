@@ -25,13 +25,14 @@
 				font-size:1em;
 			}
 		</style>
-		<link rel="shortcut icon" href="/apple-touch-icon.png"/>
+		<link rel="shortcut icon" href="/favicon.ico"/>
 	</head>
 	<body>
 		<h1>IR Station setup</h1>
 		<div id="info">
 			<h2>Information</h2>
-			<p><span id="info-status">Loading... Please wait.</span></p>
+			<p><span id="info-status">Loading... Please wait...</span></p>
+			<p><a href="/"><button type="submit">Reload</button></a></p>
 		</div>
 		<div id="form" style="display:none;">
 			<h2>WiFi Station Mode</h2>
@@ -40,12 +41,12 @@
 				</select>
 			</p>
 			<p>Password: <input type="password" name="password" style="width:8em"></p>
-			<p>URL: http://<input type="text" name="url" style="width:6em">.local</p>
+			<p>URL: http://<input type="text" name="url" value="ir" style="width:6em">.local</p>
 			<p><button type="submit">Confirm</button></p>
 		</div>
 		<div id="ap" style="display:none;">
 			<h2>Access Point Mode</h2>
-			<p>URL: http://<input type="text" name="url" style="width:6em">.local</p>
+			<p>URL: http://<input type="text" name="url" value="ir" style="width:6em">.local</p>
 			<p><button>Access Point Mode</button></p>
 		</div>
 
