@@ -42,6 +42,14 @@ You can control your home appliances with your smartphone or laptop.
   1. Access http://DEVICE_NAME.local in a browser.
   1. Click a button which assigned a signal you want to send.
 
+## LED Indicator
+
+|Color	|Status	|
+|:----------|:-----------|
+|Red	|Error	|
+|Green	|Booting, Sending Signal or Receiving Signal	|
+|Blue	|Listening	|
+
 ## Display Sample
 
 ![display](display.png)
@@ -94,7 +102,7 @@ Please Add the Libraries below to your Arduino IDE
 | Nch FET | BS170 or equivalents | 1 |
 | IR LED Current Regulation Resistor | 4.7 ohms, 1W | 1~2 |
 | Pull-up/down Resistor | 10k ohms | 5 |
-| Indicator LED | anything good | 1 |
+| Indicator LED | RGB full-color LED | 1 |
 | Voltage Regulator | output: 3.3V 150mA or more | 1 |
 | Bypass Capacitor | 0.1uF | 2~3 |
 | Power Stabilization Capacitor | 470uF~1000uF | 1 |
