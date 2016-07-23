@@ -3,9 +3,9 @@
 
 #include <ESP8266WiFi.h>
 
-void setupAP(void);
+void setupAP(String ssid, String password);
 
-bool connectWifi(String target_ssid, String target_pass);
+bool connectWifi(String ssid, String pass);
 
 #endif
 

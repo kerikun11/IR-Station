@@ -58,18 +58,18 @@ void setupFormServer(void) {
     println_dbg("Target SSID: " + station.ssid);
     println_dbg("Target Password: " + station.password);
     println_dbg("mDNS Address: " + station.mdns_hostname);
-    indicator.green(1023);
+    indicator.set(0, 1023, 0);
     if (connectWifi(station.ssid, station.password)) {
       String res = (String)WiFi.localIP()[0] + "." + WiFi.localIP()[1] + "." + WiFi.localIP()[2] + "." + WiFi.localIP()[3];
       server.send(200, "text/palin", res);
       station.setMode(IR_STATION_MODE_STA);
-      delay(1000);
+      indicator.set(0, 0, 1023);
+      delay(5000);
       ESP.reset();
     } else {
       server.send(200, "text/plain", "false");
       println_dbg("End");
-      indicator.green(0);
-      indicator.red(1023);
+      indicator.set(1023, 0, 0);
     }
   });
   server.on("/accessPointMode", []() {
@@ -177,7 +177,7 @@ void setupServer(void) {
     dispRequest();
     server.send(200, "text/json", "Disconnected this WiFi, Please connect again");
     println_dbg("Change WiFi SSID");
-    station.setMode(IR_STATION_MODE_NULL);
+    station.reset();
     ESP.reset();
   });
   server.on("/info", []() {

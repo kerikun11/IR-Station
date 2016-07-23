@@ -26,14 +26,10 @@ void setup() {
   pinMode(PIN_BUTTON, INPUT_PULLUP);
   digitalWrite(PIN_IR_OUT, LOW);
 
-  // Setup Start
-  indicator.green(1023);
-
   // IR-station setup
   station.modeSetup();
 
   // Setup Completed
-  indicator.green(0);
   println_dbg("Setup Completed");
 }
 
@@ -42,17 +38,18 @@ void loop() {
   serverTask();
 
   switch (station.mode) {
+    case IR_STATION_MODE_NULL:
+      break;
     case IR_STATION_MODE_STA:
-      indicator.blue(1023);
       if ((WiFi.status() != WL_CONNECTED)) {
         indicator.red(1023);
+        indicator.blue(0);
       } else {
         indicator.red(0);
+        indicator.blue(1023);
       }
       break;
     case IR_STATION_MODE_AP:
-    case IR_STATION_MODE_NULL:
-      indicator.blue(1023);
       break;
   }
 }

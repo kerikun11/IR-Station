@@ -15,6 +15,7 @@ IR_Station station;
 
 void IR_Station::modeSetup(void) {
   wdt_reset();
+  indicator.green(1023);
 
   // Prepare SPIFFS
   SPIFFS.begin();
@@ -32,24 +33,35 @@ void IR_Station::modeSetup(void) {
       println_dbg("Boot Mode: NULL");
       // set WiFi Mode
       WiFi.mode(WIFI_AP_STA);
-      setupAP();
+      setupAP(SOFTAP_SSID, SOFTAP_PASS);
       setupFormServer();
       break;
     case IR_STATION_MODE_STA:
       println_dbg("Boot Mode: Station");
       // set WiFi Mode
       WiFi.mode(WIFI_STA);
-      connectWifi(ssid, password);
-      setupOTA();
-      setupServer();
-      setupTime();
+      if (connectWifi(ssid, password)) {
+        setupOTA();
+        setupServer();
+        setupTime();
+        indicator.green(0);
+        indicator.blue(1023);
+      } else {
+        WiFi.mode(WIFI_AP_STA);
+        setupAP(SOFTAP_SSID, SOFTAP_PASS);
+        setupFormServer();
+        indicator.green(0);
+        indicator.red(1023);
+      }
       break;
     case IR_STATION_MODE_AP:
       println_dbg("Boot Mode: AP");
       // set WiFi Mode
       WiFi.mode(WIFI_AP);
-      setupAP();
+      setupAP(SOFTAP_SSID, SOFTAP_PASS);
       setupServer();
+      indicator.green(0);
+      indicator.blue(1023);
       break;
   }
 }
@@ -77,8 +89,7 @@ void IR_Station::setupButtonInterrupt() {
       println_dbg("the button released");
       if (millis() - prev_ms > 2000) {
         println_dbg("the button long pressed");
-        station.setMode(IR_STATION_MODE_NULL);
-        ESP.reset();
+        station.reset();
       }
     }
   }, CHANGE);
@@ -86,18 +97,18 @@ void IR_Station::setupButtonInterrupt() {
 }
 
 void IR_Station::irSendSignal(int ch) {
-  indicator.blue(1023);
+  indicator.green(1023);
   ir[ch].sendSignal();
-  indicator.blue(0);
+  indicator.green(0);
 }
 
 int IR_Station::irRecodeSignal(int ch) {
   int ret = (-1);
-  indicator.blue(1023);
+  indicator.green(1023);
   if (ir[ch].recodeSignal() == 0) {
     irDataBackupToFile(ch);
   }
-  indicator.blue(0);
+  indicator.green(0);
   return ret;
 }
 
