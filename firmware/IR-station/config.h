@@ -28,8 +28,8 @@
 // WiFi connection Timeout
 #define WIFI_CONNECT_TIMEOUT    (10) // seconds
 
-// http://MDNS_ADDRESS_DEFAULT.local
-#define MDNS_ADDRESS_DEFAULT    "ir"
+// http://MDNS_HOSTNAME_DEFAULT.local
+#define MDNS_HOSTNAME_DEFAULT    "ir"
 
 // OTA update
 #define USE_OTA_UPDATE          true

@@ -1,21 +1,19 @@
-#include "IR_op.h"
+#include "ir-stationTask.h"
 
 #include <ArduinoJson.h>
 #include <FS.h>
 #include "config.h"
-#include "server_op.h"
-#include "WiFi_op.h"
-#include "time_op.h"
-#include "OTA_op.h"
-#include "led_op.h"
+#include "httpServerTask.h"
+#include "wifiTask.h"
+#include "timeTask.h"
+#include "otaTask.h"
+#include "ledTask.h"
+#include "crc8.h"
 
 remocon ir[IR_CH_SIZE];
-uint8_t mode;
-String ssid;
-String password;
-String mdns_address;
+IR_Station station;
 
-void modeSetup(void) {
+void IR_Station::modeSetup(void) {
   wdt_reset();
 
   // Prepare SPIFFS
@@ -23,7 +21,9 @@ void modeSetup(void) {
 
   // Restore reserved data
   irDataRestoreFromFile();
-  settingsRestoreFromFile();
+  if (settingsRestoreFromFile() == false) {
+    reset();
+  }
 
   setupButtonInterrupt();
 
@@ -42,6 +42,7 @@ void modeSetup(void) {
       connectWifi(ssid, password);
       setupOTA();
       setupServer();
+      setupTime();
       break;
     case IR_STATION_MODE_AP:
       println_dbg("Boot Mode: AP");
@@ -53,12 +54,20 @@ void modeSetup(void) {
   }
 }
 
-void setMode(uint8_t newMode) {
+void IR_Station::reset() {
+  ssid = "";
+  password = "";
+  mdns_hostname = MDNS_HOSTNAME_DEFAULT;
+  setMode(IR_STATION_MODE_NULL);
+  ESP.reset();
+}
+
+void IR_Station::setMode(uint8_t newMode) {
   mode = newMode;
   settingsBackupToFile();
 }
 
-void setupButtonInterrupt() {
+void IR_Station::setupButtonInterrupt() {
   attachInterrupt(PIN_BUTTON, []() {
     static uint32_t prev_ms;
     if (digitalRead(PIN_BUTTON) == LOW) {
@@ -68,7 +77,7 @@ void setupButtonInterrupt() {
       println_dbg("the button released");
       if (millis() - prev_ms > 2000) {
         println_dbg("the button long pressed");
-        setMode(IR_STATION_MODE_NULL);
+        station.setMode(IR_STATION_MODE_NULL);
         ESP.reset();
       }
     }
@@ -76,13 +85,13 @@ void setupButtonInterrupt() {
   println_dbg("attached button interrupt");
 }
 
-void irSendSignal(int ch) {
+void IR_Station::irSendSignal(int ch) {
   indicator.blue(1023);
   ir[ch].sendSignal();
   indicator.blue(0);
 }
 
-int irRecodeSignal(int ch) {
+int IR_Station::irRecodeSignal(int ch) {
   int ret = (-1);
   indicator.blue(1023);
   if (ir[ch].recodeSignal() == 0) {
@@ -92,40 +101,55 @@ int irRecodeSignal(int ch) {
   return ret;
 }
 
-void irDataBackupToFile(int ch) {
+bool IR_Station::irDataBackupToFile(int ch) {
   String dataString = ir[ch].getBackupString();
-  writeStringToFile(IR_DATA_PATH(ch + 1), dataString);
+  return writeStringToFile(IR_DATA_PATH(ch + 1), dataString);
 }
 
-void irDataRestoreFromFile(void) {
+bool IR_Station::irDataRestoreFromFile(void) {
   for (uint8_t ch = 0; ch < IR_CH_SIZE; ch++) {
     String str;
-    getStringFromFile(IR_DATA_PATH(ch + 1), str);
+    if (getStringFromFile(IR_DATA_PATH(ch + 1), str) == false)return false;
     ir[ch].restoreFromString(str);
   }
+  return true;
 }
 
-void settingsRestoreFromFile(void) {
+String IR_Station::settingsCrcSerial(void) {
+  return String(mode, DEC) + ssid + password + mdns_hostname;
+}
+
+bool IR_Station::settingsRestoreFromFile(void) {
   String s;
-  if (getStringFromFile(SETTINGS_DATA_PATH, s) == false) return;
+  if (getStringFromFile(SETTINGS_DATA_PATH, s) == false) return false;
   DynamicJsonBuffer jsonBuffer;
   JsonObject& data = jsonBuffer.parseObject(s);
   mode = (int)data["mode"];
   ssid = (const char*)data["ssid"];
   password = (const char*)data["password"];
-  mdns_address = (const char*)data["mdns_address"];
+  mdns_hostname = (const char*)data["mdns_hostname"];
+  uint8_t crc = (uint8_t)data["crc"];
+  String serial = settingsCrcSerial();
+  if (crc != crc8((uint8_t*)serial.c_str(), serial.length(), CRC8INIT)) {
+    println_dbg("CRC8 difference");
+    return false;
+  }
+  println_dbg("CRC8 OK");
+  return true;
 }
 
-void settingsBackupToFile(void) {
+bool IR_Station::settingsBackupToFile(void) {
   DynamicJsonBuffer jsonBuffer;
   JsonObject& data = jsonBuffer.createObject();
   data["mode"] = mode;
   data["ssid"] = ssid;
   data["password"] = password;
-  data["mdns_address"] = mdns_address;
+  data["mdns_hostname"] = mdns_hostname;
+  String serial = settingsCrcSerial();
+  data["crc"] = crc8((uint8_t*)serial.c_str(), serial.length(), CRC8INIT);
   String str;
   data.printTo(str);
-  writeStringToFile(SETTINGS_DATA_PATH, str);
+  return writeStringToFile(SETTINGS_DATA_PATH, str);
 }
 
 bool writeStringToFile(String path, String dataString) {

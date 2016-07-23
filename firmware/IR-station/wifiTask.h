@@ -5,7 +5,7 @@
 
 void setupAP(void);
 
-bool connectWifi(String ssid, String password);
+bool connectWifi(String target_ssid, String target_pass);
 
 #endif
 

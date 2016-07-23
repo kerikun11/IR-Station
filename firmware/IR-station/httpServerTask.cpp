@@ -1,13 +1,13 @@
-#include "server_op.h"
+#include "httpServerTask.h"
 
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <DNSServer.h>
 #include <FS.h>
 #include "config.h"
-#include "IR_op.h"
-#include "WiFi_op.h"
-#include "server_op.h"
+#include "ir-stationTask.h"
+#include "wifiTask.h"
+#include "ledTask.h"
 
 // TCP server at port 80 will respond to HTTP requests
 ESP8266WebServer server(80);
@@ -18,7 +18,7 @@ DNSServer dnsServer;
 
 void serverTask() {
   server.handleClient();
-  if (mode == IR_STATION_MODE_NULL) dnsServer.processNextRequest();
+  if (station.mode == IR_STATION_MODE_NULL) dnsServer.processNextRequest();
 }
 
 void dispRequest() {
@@ -49,32 +49,37 @@ void setupFormServer(void) {
   });
   server.on("/confirm", []() {
     dispRequest();
-    ssid = server.arg("ssid");
-    password = server.arg("password");
-    mdns_address = server.arg("url");
-    if (mdns_address == "") {
-      mdns_address = MDNS_ADDRESS_DEFAULT;
+    station.ssid = server.arg("ssid");
+    station.password = server.arg("password");
+    station.mdns_hostname = server.arg("url");
+    if (station.mdns_hostname == "") {
+      station.mdns_hostname = MDNS_HOSTNAME_DEFAULT;
     }
-    println_dbg("Target SSID: " + ssid);
-    println_dbg("Target Password: " + password);
-    println_dbg("mDNS Address: " + mdns_address);
-    if (connectWifi(ssid, password)) {
-      server.send(200, "text/palin", "true");
-      setMode(IR_STATION_MODE_STA);
+    println_dbg("Target SSID: " + station.ssid);
+    println_dbg("Target Password: " + station.password);
+    println_dbg("mDNS Address: " + station.mdns_hostname);
+    indicator.green(1023);
+    if (connectWifi(station.ssid, station.password)) {
+      String res = (String)WiFi.localIP()[0] + "." + WiFi.localIP()[1] + "." + WiFi.localIP()[2] + "." + WiFi.localIP()[3];
+      server.send(200, "text/palin", res);
+      station.setMode(IR_STATION_MODE_STA);
+      delay(1000);
       ESP.reset();
     } else {
       server.send(200, "text/plain", "false");
       println_dbg("End");
+      indicator.green(0);
+      indicator.red(1023);
     }
   });
   server.on("/accessPointMode", []() {
     dispRequest();
-    mdns_address = server.arg("url");
-    if (mdns_address == "") {
-      mdns_address = MDNS_ADDRESS_DEFAULT;
+    station.mdns_hostname = server.arg("url");
+    if (station.mdns_hostname == "") {
+      station.mdns_hostname = MDNS_HOSTNAME_DEFAULT;
     }
     server.send(200, "text/plain", "Setting up Access Point Successful");
-    setMode(IR_STATION_MODE_AP);
+    station.setMode(IR_STATION_MODE_AP);
     ESP.reset();
   });
   server.onNotFound([]() {
@@ -95,10 +100,10 @@ void setupFormServer(void) {
 
 void setupServer(void) {
   // Set up mDNS responder:
-  if (mdns_address == "") mdns_address = MDNS_ADDRESS_DEFAULT;
+  if (station.mdns_hostname == "") station.mdns_hostname = MDNS_HOSTNAME_DEFAULT;
   print_dbg("mDNS address: ");
-  println_dbg("http://" + mdns_address + ".local");
-  if (!MDNS.begin(mdns_address.c_str())) {
+  println_dbg("http://" + station.mdns_hostname + ".local");
+  if (!MDNS.begin(station.mdns_hostname.c_str())) {
     println_dbg("Error setting up MDNS responder!");
   } else {
     println_dbg("mDNS responder started");
@@ -112,7 +117,7 @@ void setupServer(void) {
     ch -= 1; // display: 1 ch ~ IR_CH_SIZE ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
     if (0 <= ch  && ch < IR_CH_SIZE) {
       res = "Sent a signal of ch " + String(ch + 1, DEC) + ": " + ir[ch].chName;
-      irSendSignal(ch);
+      station.irSendSignal(ch);
     } else {
       res = "Invalid channel selected. Sending failed";
       println_dbg("Invalid channel selected. Sending failed.");
@@ -132,7 +137,7 @@ void setupServer(void) {
       String chName = server.arg("chName");
       if (chName == "") chName = "ch " + String(ch + 1, DEC);
       ir[ch].chName = chName;
-      if (irRecodeSignal(ch) == 0) {
+      if (station.irRecodeSignal(ch) == 0) {
         status = "Recoding Successful: ch " + String(ch + 1);
       } else {
         status = "No Signal Recieved";
@@ -162,7 +167,7 @@ void setupServer(void) {
       ir[i].period = 0;
       ir[i].chName = "ch " + String(i + 1, DEC);
       ir[i].irData = "";
-      irDataBackupToFile(i);
+      station.irDataBackupToFile(i);
     }
     println_dbg("Cleared All Signals");
     server.send(200, "text/plain", "Cleared All Signals");
@@ -172,7 +177,7 @@ void setupServer(void) {
     dispRequest();
     server.send(200, "text/json", "Disconnected this WiFi, Please connect again");
     println_dbg("Change WiFi SSID");
-    setMode(IR_STATION_MODE_NULL);
+    station.setMode(IR_STATION_MODE_NULL);
     ESP.reset();
   });
   server.on("/info", []() {
@@ -181,13 +186,13 @@ void setupServer(void) {
     res += "[\"";
     res += "Listening...";
     res += "\",\"";
-    if (mode == IR_STATION_MODE_STA)res += WiFi.SSID();
+    if (station.mode == IR_STATION_MODE_STA)res += WiFi.SSID();
     else res += SOFTAP_SSID;
     res += "\",\"";
-    if (mode == IR_STATION_MODE_STA) res += (String)WiFi.localIP()[0] + "." + WiFi.localIP()[1] + "." + WiFi.localIP()[2] + "." + WiFi.localIP()[3];
+    if (station.mode == IR_STATION_MODE_STA) res += (String)WiFi.localIP()[0] + "." + WiFi.localIP()[1] + "." + WiFi.localIP()[2] + "." + WiFi.localIP()[3];
     else res += (String)WiFi.softAPIP()[0] + "." + WiFi.softAPIP()[1] + "." + WiFi.softAPIP()[2] + "." + WiFi.softAPIP()[3];
     res += "\",\"";
-    res += "http://" + mdns_address + ".local";
+    res += "http://" + station.mdns_hostname + ".local";
     res += "\"]";
     server.send(200, "text/json", res);
     println_dbg("End");

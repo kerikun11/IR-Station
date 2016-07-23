@@ -1,10 +1,11 @@
-#include "WiFi_op.h"
+#include "wifiTask.h"
 
 #include "config.h"
 
 void setupAP(void) {
   wdt_reset();
   println_dbg("Configuring Access Point...");
+  if (WiFi.isConnected())WiFi.disconnect();
   WiFi.softAP(SOFTAP_SSID, SOFTAP_PASS);
 
   // display information
@@ -18,6 +19,11 @@ void setupAP(void) {
 
 bool connectWifi(String target_ssid, String target_pass) {
   wdt_reset();
+  if ((WiFi.status() == WL_CONNECTED) && (target_ssid == (String)WiFi.SSID())) {
+    println_dbg("Already connected!");
+    return true;
+  }
+
   int n = WiFi.scanNetworks();
   for (int i = 0; i < n; ++i) {
     println_dbg("SSID: " + String(WiFi.SSID(i)));
