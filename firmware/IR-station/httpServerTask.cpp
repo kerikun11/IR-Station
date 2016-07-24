@@ -59,7 +59,12 @@ void setupFormServer(void) {
     println_dbg("Target Password: " + station.password);
     println_dbg("mDNS Address: " + station.mdns_hostname);
     indicator.set(0, 1023, 0);
-    if (connectWifi(station.ssid, station.password)) {
+    server.send(200);
+    WiFi.begin(station.ssid.c_str(), station.password.c_str());
+  });
+  server.on("/isConnected", []() {
+    dispRequest();
+    if (WiFi.status() == WL_CONNECTED) {
       String res = (String)WiFi.localIP()[0] + "." + WiFi.localIP()[1] + "." + WiFi.localIP()[2] + "." + WiFi.localIP()[3];
       server.send(200, "text/palin", res);
       station.setMode(IR_STATION_MODE_STA);
@@ -67,6 +72,7 @@ void setupFormServer(void) {
       delay(5000);
       ESP.reset();
     } else {
+      println_dbg("Not connected yet.");
       server.send(200, "text/plain", "false");
       println_dbg("End");
       indicator.set(1023, 0, 0);

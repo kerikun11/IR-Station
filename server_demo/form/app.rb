@@ -25,7 +25,11 @@ get"/status" do
 end
 
 get '/confirm' do
-	sleep(1)
+	"OK"
+end
+
+get '/isConnected' do
+	"false"
 	"192.168.11.6"
 end
 
