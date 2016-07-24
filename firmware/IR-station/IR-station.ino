@@ -47,8 +47,8 @@ void loop() {
     case IR_STATION_MODE_STA:
       static bool lost = false;
       if ((WiFi.status() != WL_CONNECTED)) {
-        println_dbg("Lost WiFi: " + station.ssid);
         if (lost == false) {
+          println_dbg("Lost WiFi: " + station.ssid);
           WiFi.mode(WIFI_AP_STA);
           delay(1000);
           setupAP(SOFTAP_SSID, SOFTAP_PASS);
