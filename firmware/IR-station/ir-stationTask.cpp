@@ -38,21 +38,13 @@ void IR_Station::modeSetup(void) {
       break;
     case IR_STATION_MODE_STA:
       println_dbg("Boot Mode: Station");
-      // set WiFi Mode
       WiFi.mode(WIFI_STA);
-      if (connectWifi(ssid, password)) {
-        setupOTA();
-        setupServer();
-        setupTime();
-        indicator.green(0);
-        indicator.blue(1023);
-      } else {
-        WiFi.mode(WIFI_AP_STA);
-        setupAP(SOFTAP_SSID, SOFTAP_PASS);
-        setupFormServer();
-        indicator.green(0);
-        indicator.red(1023);
-      }
+      connectWifi(ssid, password);
+      setupOTA();
+      setupServer();
+      setupTime();
+      indicator.green(0);
+      indicator.blue(1023);
       break;
     case IR_STATION_MODE_AP:
       println_dbg("Boot Mode: AP");
@@ -97,18 +89,18 @@ void IR_Station::setupButtonInterrupt() {
 }
 
 void IR_Station::irSendSignal(int ch) {
-  indicator.green(1023);
+  indicator.set(0, 1023, 0);
   ir[ch].sendSignal();
-  indicator.green(0);
+  indicator.set(0, 0, 1023);
 }
 
 int IR_Station::irRecodeSignal(int ch) {
   int ret = (-1);
-  indicator.green(1023);
+  indicator.set(0, 1023, 0);
   if (ir[ch].recodeSignal() == 0) {
     irDataBackupToFile(ch);
   }
-  indicator.green(0);
+  indicator.set(0, 0, 1023);
   return ret;
 }
 

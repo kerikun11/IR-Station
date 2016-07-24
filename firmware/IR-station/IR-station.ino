@@ -13,6 +13,7 @@
 #include "otaTask.h"
 #include "httpServerTask.h"
 #include "ledTask.h"
+#include "wifiTask.h"
 
 void setup() {
   // Prepare Serial debug
@@ -39,14 +40,27 @@ void loop() {
 
   switch (station.mode) {
     case IR_STATION_MODE_NULL:
+      if ((WiFi.status() == WL_CONNECTED)) {
+        indicator.set(0, 0, 1023);
+      }
       break;
     case IR_STATION_MODE_STA:
+      static bool lost = false;
       if ((WiFi.status() != WL_CONNECTED)) {
-        indicator.red(1023);
-        indicator.blue(0);
+        println_dbg("Lost WiFi: " + station.ssid);
+        if (lost == false) {
+          WiFi.mode(WIFI_AP_STA);
+          setupAP(SOFTAP_SSID, SOFTAP_PASS);
+          indicator.set(1023, 0, 0);
+        }
+        lost = true;
       } else {
-        indicator.red(0);
-        indicator.blue(1023);
+        if (lost == true) {
+          println_dbg("Found WiFi: " + station.ssid);
+          WiFi.mode(WIFI_STA);
+          indicator.set(0, 0, 1023);
+        }
+        lost = false;
       }
       break;
     case IR_STATION_MODE_AP:

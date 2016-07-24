@@ -33,7 +33,7 @@ function form(){
 		var cnt = 0;
 		timerID = setInterval(function(){
 			cnt++;
-			if(cnt > 5){
+			if(cnt > 10){
 				$('#form').show();
 				$('#ap').show();
 				$('#info-status').text("Connection failed. Please try again.");

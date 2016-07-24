@@ -75,7 +75,6 @@ void setupFormServer(void) {
       println_dbg("Not connected yet.");
       server.send(200, "text/plain", "false");
       println_dbg("End");
-      indicator.set(1023, 0, 0);
     }
   });
   server.on("/accessPointMode", []() {
