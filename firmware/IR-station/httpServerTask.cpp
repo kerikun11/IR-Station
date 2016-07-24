@@ -60,6 +60,8 @@ void setupFormServer(void) {
     println_dbg("mDNS Address: " + station.mdns_hostname);
     indicator.set(0, 1023, 0);
     server.send(200);
+    WiFi.disconnect(true);
+    delay(1000);
     WiFi.begin(station.ssid.c_str(), station.password.c_str());
   });
   server.on("/isConnected", []() {

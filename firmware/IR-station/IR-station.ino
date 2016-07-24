@@ -50,6 +50,7 @@ void loop() {
         println_dbg("Lost WiFi: " + station.ssid);
         if (lost == false) {
           WiFi.mode(WIFI_AP_STA);
+          delay(1000);
           setupAP(SOFTAP_SSID, SOFTAP_PASS);
           indicator.set(1023, 0, 0);
         }
