@@ -11,6 +11,7 @@
 #include "config.h"
 #include "ir-stationTask.h"
 #include "otaTask.h"
+#include "httpClientTask.h"
 #include "httpServerTask.h"
 #include "ledTask.h"
 #include "wifiTask.h"
@@ -45,6 +46,7 @@ void loop() {
       }
       break;
     case IR_STATION_MODE_STA:
+      notifyTask();
       static bool lost = false;
       if ((WiFi.status() != WL_CONNECTED)) {
         if (lost == false) {
