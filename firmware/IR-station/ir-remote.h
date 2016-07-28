@@ -5,7 +5,7 @@
 #define IR_OPERATION_H
 
 // IR recode timeouts
-#define TIMEOUT_RECODE_NOSIGNAL (40000)   // [us]
+#define TIMEOUT_RECODE_NOSIGNAL (200000)   // [us]
 #define TIMEOUT_RECODE          (5000000) // [us]
 
 // for period

@@ -95,9 +95,9 @@ void IR_Station::irSendSignal(int ch) {
 }
 
 int IR_Station::irRecodeSignal(int ch) {
-  int ret = (-1);
   indicator.set(0, 1023, 0);
-  if (ir[ch].recodeSignal() == 0) {
+  int ret = ir[ch].recodeSignal();
+  if (ret == 0) {
     irDataBackupToFile(ch);
   }
   indicator.set(0, 0, 1023);
