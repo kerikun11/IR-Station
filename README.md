@@ -97,22 +97,23 @@ Please Add the Libraries below to your Arduino IDE
 |Components|Details|Quantity|
 |:-------------|:-------|:--------|
 | ESP8266 WiFi Module | ESP-WROOM-02 | 1 |
-| IR receiver | PL-IRM0101-3 or equivalents | 1 |
+| IR receiver | PL-IRM1261 or equivalents (3.3V) | 1 |
 | IR LED | anything good | 2 or 4 |
-| Nch FET | BS170 or equivalents | 1 |
-| IR LED Current Regulation Resistor | 4.7 ohms, 1W | 1~2 |
-| Pull-up/down Resistor | 10k ohms | 5 |
+| Nch FET | IRLML6344 or equivalents | 1 |
+| IR LED Current Regulation Resistor | 4.7 ohms, 1W | 1 or 2 |
+| Pull-up/down Resistor | 10k ohms | 2 |
 | Indicator LED | RGB full-color LED | 1 |
+| Current Regulation Resistor for LED | 100~220 ohms | 3 |
 | Voltage Regulator | output: 3.3V 150mA or more | 1 |
 | Bypass Capacitor | 0.1uF | 2~3 |
 | Power Stabilization Capacitor | 470uF~1000uF | 1 |
+| User Button | tact switch | 1 |
 
 ### Optional Device Components
 
 |Components|Details|Quantity|
 |:-------------|:-------|:--------|
 | Reset Switch | tact switch | 1 |
-| Program Upload Switch | tact switch | 1 |
 
 ### Requires
 
