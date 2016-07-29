@@ -33,6 +33,7 @@ void IR_Station::modeSetup(void) {
       println_dbg("Boot Mode: NULL");
       // set WiFi Mode
       WiFi.mode(WIFI_AP_STA);
+      setupOTA();
       setupAP(SOFTAP_SSID, SOFTAP_PASS);
       setupFormServer();
       break;

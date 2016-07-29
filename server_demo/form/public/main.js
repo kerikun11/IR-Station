@@ -1,5 +1,4 @@
 function getWifiList(){
-	console.log("Getting wifi list")
 	$.ajax({
 		type:"GET",
 		url:"/wifiList",
@@ -34,7 +33,7 @@ function form(){
 		var cnt = 0;
 		timerID = setInterval(function(){
 			cnt++;
-			if(cnt > 10){
+			if(cnt > 20){
 				$('#form').show();
 				$('#ap').show();
 				$('#info-status').text("Connection failed. Please try again.");
@@ -61,7 +60,7 @@ function form(){
 			}).fail(function(){
 				$('#info-status').text('Connection Failed. Please Reload.');
 			});
-		}, 2000);
+		}, 1000);
 	}
 }
 function setAP(){
