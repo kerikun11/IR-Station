@@ -5,7 +5,7 @@
 #include "timeTask.h"
 #include "ir-stationTask.h"
 
-#define SERVER_HOSTNAME   "ir.kerikeri.top"
+#define SERVER_HOSTNAME   "ir-station.link"
 #define SERVER_PORT       80
 
 bool notifyIP(bool isUpdate) {
