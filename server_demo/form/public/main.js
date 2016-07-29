@@ -11,6 +11,7 @@ function getWifiList(){
 		$.each(data,function(index,wifi){
 			$('#wifiList').append($('<option>').val(wifi).text(wifi));
 		});
+		$('#wifiList').append($('<option>').val("stealth-ssid").text("- use a stealth SSID -"));
 		$('#info-status').text("Loading successful. Select a mode.")
 		$('#form').show();
 		$('#ap').show();
@@ -24,7 +25,7 @@ function form(){
 		$('#ap').hide();
 		$('#info-status').text("Connecting... Please wait...");
 		$.get('/confirm',{
-			ssid: $('#form [name="ssid"]').val(),
+			ssid: ($('#form [name="ssid"]').val()=="stealth-ssid")?$('#form [name="stealth-ssid"]').val():$('#form [name="ssid"]').val(),
 			password: $('#form input[name="password"]').val(),
 			url: $('#form input[name="url"]').val()
 		}).fail(function(){
@@ -89,6 +90,14 @@ $('#ap button').click(setAP);
 $('#ap input').keypress(function(e){
 	if(e.which == 13){
 		setAP();
+	}
+});
+
+$('#wifiList').change(function(){
+	if($('#wifiList option:selected').val()=="stealth-ssid"){
+		$('#stealth-ssid-form').show();
+	}else{
+		$('#stealth-ssid-form').hide();
 	}
 });
 
