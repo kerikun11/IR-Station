@@ -62,7 +62,7 @@ void IR_Station::modeSetup(void) {
 void IR_Station::reset() {
   ssid = "";
   password = "";
-  mdns_hostname = MDNS_HOSTNAME_DEFAULT;
+  hostname = HOSTNAME_DEFAULT;
   setMode(IR_STATION_MODE_NULL);
   ESP.reset();
 }
@@ -120,7 +120,7 @@ bool IR_Station::irDataRestoreFromFile(void) {
 }
 
 String IR_Station::settingsCrcSerial(void) {
-  return String(mode, DEC) + ssid + password + mdns_hostname;
+  return String(mode, DEC) + ssid + password + hostname;
 }
 
 bool IR_Station::settingsRestoreFromFile(void) {
@@ -131,7 +131,7 @@ bool IR_Station::settingsRestoreFromFile(void) {
   mode = (int)data["mode"];
   ssid = (const char*)data["ssid"];
   password = (const char*)data["password"];
-  mdns_hostname = (const char*)data["mdns_hostname"];
+  hostname = (const char*)data["hostname"];
   uint8_t crc = (uint8_t)data["crc"];
   String serial = settingsCrcSerial();
   if (crc != crc8((uint8_t*)serial.c_str(), serial.length(), CRC8INIT)) {
@@ -148,7 +148,7 @@ bool IR_Station::settingsBackupToFile(void) {
   data["mode"] = mode;
   data["ssid"] = ssid;
   data["password"] = password;
-  data["mdns_hostname"] = mdns_hostname;
+  data["hostname"] = hostname;
   String serial = settingsCrcSerial();
   data["crc"] = crc8((uint8_t*)serial.c_str(), serial.length(), CRC8INIT);
   String str;

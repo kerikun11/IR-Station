@@ -15,7 +15,7 @@ class IR_Station {
     uint8_t mode;
     String ssid;
     String password;
-    String mdns_hostname;
+    String hostname;
 
     void modeSetup(void);
     void setMode(uint8_t newMode);

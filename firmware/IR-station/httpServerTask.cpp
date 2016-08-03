@@ -51,13 +51,13 @@ void setupFormServer(void) {
     dispRequest();
     station.ssid = server.arg("ssid");
     station.password = server.arg("password");
-    station.mdns_hostname = server.arg("url");
-    if (station.mdns_hostname == "") {
-      station.mdns_hostname = MDNS_HOSTNAME_DEFAULT;
+    station.hostname = server.arg("url");
+    if (station.hostname == "") {
+      station.hostname = HOSTNAME_DEFAULT;
     }
     println_dbg("Target SSID: " + station.ssid);
     println_dbg("Target Password: " + station.password);
-    println_dbg("mDNS Address: " + station.mdns_hostname);
+    println_dbg("mDNS Address: " + station.hostname);
     indicator.set(0, 1023, 0);
     server.send(200);
     WiFi.disconnect(true);
@@ -81,9 +81,9 @@ void setupFormServer(void) {
   });
   server.on("/accessPointMode", []() {
     dispRequest();
-    station.mdns_hostname = server.arg("url");
-    if (station.mdns_hostname == "") {
-      station.mdns_hostname = MDNS_HOSTNAME_DEFAULT;
+    station.hostname = server.arg("url");
+    if (station.hostname == "") {
+      station.hostname = HOSTNAME_DEFAULT;
     }
     server.send(200, "text/plain", "Setting up Access Point Successful");
     station.setMode(IR_STATION_MODE_AP);
@@ -107,10 +107,10 @@ void setupFormServer(void) {
 
 void setupServer(void) {
   // Set up mDNS responder:
-  if (station.mdns_hostname == "") station.mdns_hostname = MDNS_HOSTNAME_DEFAULT;
+  if (station.hostname == "") station.hostname = HOSTNAME_DEFAULT;
   print_dbg("mDNS address: ");
-  println_dbg("http://" + station.mdns_hostname + ".local");
-  if (!MDNS.begin(station.mdns_hostname.c_str())) {
+  println_dbg("http://" + station.hostname + ".local");
+  if (!MDNS.begin(station.hostname.c_str())) {
     println_dbg("Error setting up MDNS responder!");
   } else {
     println_dbg("mDNS responder started");
@@ -182,9 +182,20 @@ void setupServer(void) {
   });
   server.on("/disconnectWifi", []() {
     dispRequest();
-    server.send(200, "text/json", "Disconnected this WiFi, Please connect again");
-    println_dbg("Change WiFi SSID");
-    station.reset();
+    server.send(200, "text/plain", "Disconnected this WiFi, Please connect again");
+    println_dbg("Change WiFi");
+    station.reset();  // automatically rebooted
+  });
+  server.on("/changeHostname", []() {
+    dispRequest();
+    println_dbg("Change Hostname");
+    station.hostname = server.arg("hostname");
+    if (station.hostname == "") {
+      station.hostname = HOSTNAME_DEFAULT;
+    }
+    server.send(200, "text/plain", "My hostname was changed to " + station.hostname + ".");
+    station.settingsBackupToFile();
+    delay(2000);
     ESP.reset();
   });
   server.on("/info", []() {
@@ -199,7 +210,7 @@ void setupServer(void) {
     if (station.mode == IR_STATION_MODE_STA) res += (String)WiFi.localIP()[0] + "." + WiFi.localIP()[1] + "." + WiFi.localIP()[2] + "." + WiFi.localIP()[3];
     else res += (String)WiFi.softAPIP()[0] + "." + WiFi.softAPIP()[1] + "." + WiFi.softAPIP()[2] + "." + WiFi.softAPIP()[3];
     res += "\",\"";
-    res += "http://" + station.mdns_hostname + ".local";
+    res += "http://" + station.hostname + ".local";
     res += "\"]";
     server.send(200, "text/json", res);
     println_dbg("End");

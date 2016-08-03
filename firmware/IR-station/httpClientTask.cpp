@@ -15,7 +15,7 @@ bool notifyIP(bool isUpdate) {
     return false;
   }
   String local_ip = String(WiFi.localIP()[0], DEC) + "." + String(WiFi.localIP()[1], DEC) + "." + String(WiFi.localIP()[2], DEC) + "." + String(WiFi.localIP()[3], DEC);
-  client.println((String)"GET /app.rb?notify=" + (isUpdate ? "update" : "remove") + "&name=" + station.mdns_hostname + "&local_ip=" + local_ip + " HTTP/1.1");
+  client.println((String)"GET /app.rb?notify=" + (isUpdate ? "update" : "remove") + "&name=" + station.hostname + "&local_ip=" + local_ip + " HTTP/1.1");
   client.println("Host: "SERVER_HOSTNAME);
   client.println("");
 
