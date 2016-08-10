@@ -18,7 +18,7 @@
 #define IR_CH_SIZE              (25)
 
 // SPIFFS saving path
-#define IR_DATA_PATH(i)         ("/IR_data/" + String(i,DEC) + ".json")
+#define IR_DATA_PATH(i)         ("/general/IR_data/" + String(i + 1, DEC) + ".json")
 #define SETTINGS_DATA_PATH      ("/settings.json")
 
 // SSID & Password of ESP8266 Access Point Mode

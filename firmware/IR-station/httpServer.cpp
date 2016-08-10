@@ -1,13 +1,14 @@
-#include "httpServerTask.h"
+#include "httpServer.h"
 
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <DNSServer.h>
 #include <FS.h>
 #include "config.h"
-#include "ir-stationTask.h"
-#include "wifiTask.h"
-#include "ledTask.h"
+#include "file.h"
+#include "station.h"
+#include "wifi.h"
+#include "led.h"
 
 // TCP server at port 80 will respond to HTTP requests
 ESP8266WebServer server(80);
@@ -123,7 +124,7 @@ void setupServer(void) {
     uint8_t ch = server.arg("ch").toInt();
     ch -= 1; // display: 1 ch ~ IR_CH_SIZE ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
     if (0 <= ch  && ch < IR_CH_SIZE) {
-      res = "Sent a signal of ch " + String(ch + 1, DEC) + ": " + ir[ch].chName;
+      res = "Sent a signal of ch " + String(ch + 1, DEC) + ": " + station.chName[ch];
       station.irSendSignal(ch);
     } else {
       res = "Invalid channel selected. Sending failed";
@@ -142,9 +143,7 @@ void setupServer(void) {
     ch -= 1; // display: 1 ch ~ IR_CH_SIZE ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
     if (0 <= ch  && ch < IR_CH_SIZE) {
       String chName = server.arg("chName");
-      if (chName == "") chName = "ch " + String(ch + 1, DEC);
-      ir[ch].chName = chName;
-      if (station.irRecodeSignal(ch) == 0) {
+      if (station.irRecodeSignal(ch, chName)) {
         status = "Recoding Successful: ch " + String(ch + 1);
       } else {
         status = "No Signal Recieved";
@@ -161,7 +160,7 @@ void setupServer(void) {
     String res = "";
     res += "[";
     for (uint8_t i = 0; i < IR_CH_SIZE; i++) {
-      res += "\"" + ir[i].chName + "\"";
+      res += "\"" + station.chName[i] + "\"";
       if (i != IR_CH_SIZE - 1) res += ",";
     }
     res += "]";

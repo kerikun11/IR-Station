@@ -1,34 +1,27 @@
-#include "ir-stationTask.h"
+#include "station.h"
 
 #include <ArduinoJson.h>
 #include <FS.h>
 #include "config.h"
-#include "httpServerTask.h"
-#include "wifiTask.h"
-#include "otaTask.h"
-#include "ledTask.h"
+#include "httpServer.h"
+#include "file.h"
+#include "wifi.h"
+#include "ota.h"
+#include "led.h"
 #include "crc8.h"
 
 IR_Station station;
-IR_Signal ir[IR_CH_SIZE];
-IRsend irsend(PIN_IR_OUT);
-IRrecv irrecv(PIN_IR_IN);
+IR_Signal ir(PIN_IR_OUT, PIN_IR_IN);
 
 void IR_Station::begin(void) {
   wdt_reset();
   indicator.green(1023);
 
-  // Prepare SPIFFS
   SPIFFS.begin();
-
-  // Prepare IR Transmitter
-  irsend.begin();
-
-  // Restore reserved data
-  irDataRestoreFromFile();
   if (settingsRestoreFromFile() == false) {
     reset();
   }
+  restoreChName();
 
   setupButtonInterrupt();
 
@@ -49,6 +42,9 @@ void IR_Station::begin(void) {
       setupServer();
       indicator.green(0);
       indicator.blue(1023);
+      attachInterrupt(ir.rxPin, []() {
+        ir.isr();
+      }, CHANGE);
       break;
     case IR_STATION_MODE_AP:
       println_dbg("Boot Mode: AP");
@@ -58,6 +54,9 @@ void IR_Station::begin(void) {
       setupServer();
       indicator.green(0);
       indicator.blue(1023);
+      attachInterrupt(ir.rxPin, []() {
+        ir.isr();
+      }, CHANGE);
       break;
   }
 }
@@ -94,46 +93,72 @@ void IR_Station::setupButtonInterrupt() {
 
 void IR_Station::clearSignals() {
   for (uint8_t ch = 0; ch < IR_CH_SIZE; ch++) {
-    ir[ch].chName = "ch " + String(ch + 1, DEC);
-    ir[ch].rawDataLength = 0;
-    station.irDataBackupToFile(ch);
+    station.chName[ch] = "ch " + String(ch + 1, DEC);
+    removeFile(IR_DATA_PATH(ch));
   }
   println_dbg("Cleared All Signals");
 }
 
 void IR_Station::irSendSignal(int ch) {
-  //  indicator.set(0, 1023, 0);
-  //  ir[ch].sendSignal();
-  //  indicator.set(0, 0, 1023);
-}
-
-int IR_Station::irRecodeSignal(int ch) {
-  //  indicator.set(0, 1023, 0);
-  //  int ret = ir[ch].recodeSignal();
-  //  if (ret == 0) {
-  //    irDataBackupToFile(ch);
-  //  }
-  //  indicator.set(0, 0, 1023);
-  //  return ret;
-  return 0;
-}
-
-bool IR_Station::irDataBackupToFile(int ch) {
-  String dataString = ir[ch].getBackupString();
-  return writeStringToFile(IR_DATA_PATH(ch + 1), dataString);
-}
-
-bool IR_Station::irDataRestoreFromFile(void) {
-  for (uint8_t ch = 0; ch < IR_CH_SIZE; ch++) {
-    String str;
-    if (getStringFromFile(IR_DATA_PATH(ch + 1), str) == false)return false;
-    ir[ch].restoreFromString(str);
+  String json;
+  if (getStringFromFile(IR_DATA_PATH(ch), json)) {
+    indicator.set(0, 1023, 0);
+    ir.send(json);
+    indicator.set(0, 0, 1023);
   }
-  return true;
+}
+
+bool IR_Station::irRecodeSignal(int ch, String name, uint32_t timeout_ms) {
+  indicator.set(0, 1023, 0);
+  ir.resume();
+  int timeStamp = millis();
+  while (!ir.available()) {
+    wdt_reset();
+    ir.handle();
+    if (millis() - timeStamp > timeout_ms) {
+      indicator.set(1023, 0, 0);
+      String data;
+      if (getStringFromFile(IR_DATA_PATH(ch), data)) {
+        DynamicJsonBuffer jsonBuffer;
+        JsonObject& root = jsonBuffer.parseObject(data);
+        root["name"] = name;
+        chName[ch] = name;
+        data = "";
+        root.printTo(data);
+        writeStringToFile(IR_DATA_PATH(ch), data);
+      }
+      return false;
+    }
+  }
+  String data = ir.read();
+  DynamicJsonBuffer jsonBuffer;
+  JsonObject& root = jsonBuffer.parseObject(data);
+  root["name"] = name;
+  chName[ch] = name;
+  data = "";
+  root.printTo(data);
+  int res = writeStringToFile(IR_DATA_PATH(ch), data);
+  indicator.set(0, 0, 1023);
+  return res;
 }
 
 String IR_Station::settingsCrcSerial(void) {
   return String(mode, DEC) + ssid + password + hostname;
+}
+
+void IR_Station::restoreChName(void) {
+  for (int ch = 0; ch < IR_CH_SIZE; ch++) {
+    String json;
+    if (getStringFromFile(IR_DATA_PATH(ch), json)) {
+      DynamicJsonBuffer jsonBuffer;
+      JsonObject& data = jsonBuffer.parseObject(json);
+      chName[ch] = (const char*)data["name"];
+    }
+    if (chName[ch] = "") {
+      chName[ch] = "ch " + String(ch + 1, DEC);
+    }
+    println_dbg("ch name: " + chName[ch]);
+  }
 }
 
 bool IR_Station::settingsRestoreFromFile(void) {
@@ -167,33 +192,5 @@ bool IR_Station::settingsBackupToFile(void) {
   String str;
   data.printTo(str);
   return writeStringToFile(SETTINGS_DATA_PATH, str);
-}
-
-bool writeStringToFile(String path, String dataString) {
-  SPIFFS.remove(path);
-  File file = SPIFFS.open(path, "w");
-  if (!file) {
-    println_dbg("File open Error: " + path);
-    return false;
-  }
-  file.print(dataString);
-  file.close();
-  println_dbg("Backup successful: " + path);
-  println_dbg("data: " + dataString);
-  return true;
-}
-
-bool getStringFromFile(String path, String& dataString) {
-  File file = SPIFFS.open(path, "r");
-  if (!file) {
-    println_dbg("File open Error: " + path);
-    return false;
-  }
-  file.setTimeout(10);
-  dataString = file.readString();
-  file.close();
-  println_dbg("Restore successful: " + path);
-  println_dbg("data: " + dataString);
-  return true;
 }
 

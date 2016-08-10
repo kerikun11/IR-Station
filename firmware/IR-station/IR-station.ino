@@ -9,11 +9,11 @@
 #include <ESP8266WiFi.h>
 #include <FS.h>
 #include "config.h"
-#include "ir-stationTask.h"
-#include "otaTask.h"
-#include "httpServerTask.h"
-#include "ledTask.h"
-#include "wifiTask.h"
+#include "station.h"
+#include "ota.h"
+#include "httpServer.h"
+#include "led.h"
+#include "wifi.h"
 
 void setup() {
   // Prepare Serial debug
@@ -34,6 +34,7 @@ void setup() {
 void loop() {
   OTATask();
   serverTask();
+  ir.handle();
 
   switch (station.mode) {
     case IR_STATION_MODE_NULL:

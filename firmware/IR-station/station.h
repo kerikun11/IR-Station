@@ -2,7 +2,6 @@
 #define IR_OPERATION
 
 #include <ESP8266WiFi.h>
-#include <IRremoteESP8266.h>
 #include "irSignal.h"
 #include "config.h"
 
@@ -17,6 +16,8 @@ class IR_Station {
     String password;
     String hostname;
 
+    String chName[IR_CH_SIZE];
+
     void begin(void);
     void setMode(uint8_t newMode);
     void reset();
@@ -25,20 +26,19 @@ class IR_Station {
 
     void clearSignals();
     void irSendSignal(int ch);
-    int irRecodeSignal(int ch);
+    bool irRecodeSignal(int ch, String name, uint32_t timeout_ms = 3000);
 
     String settingsCrcSerial(void);
-    bool irDataBackupToFile(int ch);
-    bool irDataRestoreFromFile(void);
-
     bool settingsRestoreFromFile(void);
     bool settingsBackupToFile(void);
+    void restoreChName(void);
 
   private:
+
 };
 
 extern IR_Station station;
-extern IR_Signal ir[IR_CH_SIZE];
+extern IR_Signal ir;
 
 bool writeStringToFile(String path, String dataString);
 bool getStringFromFile(String path, String& dataString);
