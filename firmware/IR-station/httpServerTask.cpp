@@ -170,13 +170,7 @@ void setupServer(void) {
   });
   server.on("/clearAllSignals", []() {
     dispRequest();
-    for (uint8_t i = 0; i < IR_CH_SIZE; i++) {
-      ir[i].period = 0;
-      ir[i].chName = "ch " + String(i + 1, DEC);
-      ir[i].irData = "";
-      station.irDataBackupToFile(i);
-    }
-    println_dbg("Cleared All Signals");
+    station.clearSignals();
     server.send(200, "text/plain", "Cleared All Signals");
     println_dbg("End");
   });

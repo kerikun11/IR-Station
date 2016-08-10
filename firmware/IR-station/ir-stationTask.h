@@ -2,13 +2,13 @@
 #define IR_OPERATION
 
 #include <ESP8266WiFi.h>
-#include "ir-remote.h"
+#include <IRremoteESP8266.h>
+#include "irSignal.h"
+#include "config.h"
 
 #define IR_STATION_MODE_NULL  0
 #define IR_STATION_MODE_STA   1
 #define IR_STATION_MODE_AP    2
-
-extern remocon ir[IR_CH_SIZE];
 
 class IR_Station {
   public:
@@ -17,12 +17,13 @@ class IR_Station {
     String password;
     String hostname;
 
-    void modeSetup(void);
+    void begin(void);
     void setMode(uint8_t newMode);
     void reset();
 
     void setupButtonInterrupt();
 
+    void clearSignals();
     void irSendSignal(int ch);
     int irRecodeSignal(int ch);
 
@@ -37,6 +38,7 @@ class IR_Station {
 };
 
 extern IR_Station station;
+extern IR_Signal ir[IR_CH_SIZE];
 
 bool writeStringToFile(String path, String dataString);
 bool getStringFromFile(String path, String& dataString);

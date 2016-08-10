@@ -11,7 +11,6 @@
 #include "config.h"
 #include "ir-stationTask.h"
 #include "otaTask.h"
-#include "httpClientTask.h"
 #include "httpServerTask.h"
 #include "ledTask.h"
 #include "wifiTask.h"
@@ -23,13 +22,10 @@ void setup() {
   println_dbg("Hello, I'm ESP-WROOM-02");
 
   // prepare GPIO
-  pinMode(PIN_IR_IN, INPUT);
-  pinMode(PIN_IR_OUT, OUTPUT);
   pinMode(PIN_BUTTON, INPUT_PULLUP);
-  digitalWrite(PIN_IR_OUT, LOW);
 
   // IR-station setup
-  station.modeSetup();
+  station.begin();
 
   // Setup Completed
   println_dbg("Setup Completed");
@@ -46,7 +42,6 @@ void loop() {
       }
       break;
     case IR_STATION_MODE_STA:
-      notifyTask();
       static bool lost = false;
       if ((WiFi.status() != WL_CONNECTED)) {
         if (lost == false) {

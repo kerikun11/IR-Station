@@ -5,20 +5,24 @@
 #include "config.h"
 #include "httpServerTask.h"
 #include "wifiTask.h"
-#include "timeTask.h"
 #include "otaTask.h"
 #include "ledTask.h"
 #include "crc8.h"
 
-remocon ir[IR_CH_SIZE];
 IR_Station station;
+IR_Signal ir[IR_CH_SIZE];
+IRsend irsend(PIN_IR_OUT);
+IRrecv irrecv(PIN_IR_IN);
 
-void IR_Station::modeSetup(void) {
+void IR_Station::begin(void) {
   wdt_reset();
   indicator.green(1023);
 
   // Prepare SPIFFS
   SPIFFS.begin();
+
+  // Prepare IR Transmitter
+  irsend.begin();
 
   // Restore reserved data
   irDataRestoreFromFile();
@@ -43,7 +47,6 @@ void IR_Station::modeSetup(void) {
       connectWifi(ssid, password);
       setupOTA();
       setupServer();
-      setupTime();
       indicator.green(0);
       indicator.blue(1023);
       break;
@@ -89,20 +92,30 @@ void IR_Station::setupButtonInterrupt() {
   println_dbg("attached button interrupt");
 }
 
+void IR_Station::clearSignals() {
+  for (uint8_t ch = 0; ch < IR_CH_SIZE; ch++) {
+    ir[ch].chName = "ch " + String(ch + 1, DEC);
+    ir[ch].rawDataLength = 0;
+    station.irDataBackupToFile(ch);
+  }
+  println_dbg("Cleared All Signals");
+}
+
 void IR_Station::irSendSignal(int ch) {
-  indicator.set(0, 1023, 0);
-  ir[ch].sendSignal();
-  indicator.set(0, 0, 1023);
+  //  indicator.set(0, 1023, 0);
+  //  ir[ch].sendSignal();
+  //  indicator.set(0, 0, 1023);
 }
 
 int IR_Station::irRecodeSignal(int ch) {
-  indicator.set(0, 1023, 0);
-  int ret = ir[ch].recodeSignal();
-  if (ret == 0) {
-    irDataBackupToFile(ch);
-  }
-  indicator.set(0, 0, 1023);
-  return ret;
+  //  indicator.set(0, 1023, 0);
+  //  int ret = ir[ch].recodeSignal();
+  //  if (ret == 0) {
+  //    irDataBackupToFile(ch);
+  //  }
+  //  indicator.set(0, 0, 1023);
+  //  return ret;
+  return 0;
 }
 
 bool IR_Station::irDataBackupToFile(int ch) {
