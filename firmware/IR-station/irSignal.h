@@ -22,11 +22,12 @@ class IR_Signal {
 
     bool available();
     String read();
-    void send(String dataJson);
     void resume();
+    void send(String dataJson);
 
     void isr();
     void handle();
+
   private:
     volatile enum IR_RECEIVER_STATE state;
     volatile uint16_t rawIndex;
@@ -34,8 +35,6 @@ class IR_Signal {
     volatile uint32_t prev_us = 0;
 
     String irJson;
-
-    void setState(enum IR_RECEIVER_STATE newState);
 };
 
 #endif

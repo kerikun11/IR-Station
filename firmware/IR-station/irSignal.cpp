@@ -10,10 +10,6 @@ IR_Signal::IR_Signal(uint8_t tx, uint8_t rx) {
   pinMode(rx, INPUT);
 }
 
-void IR_Signal::setState(enum IR_RECEIVER_STATE newState) {
-  state = newState;
-}
-
 bool IR_Signal::available() {
   return state == IR_RECEIVER_AVAILABLE;
 }
@@ -23,7 +19,7 @@ String IR_Signal::read() {
 }
 
 void IR_Signal::resume() {
-  setState(IR_RECEIVER_READY);
+  state = IR_RECEIVER_READY;
 }
 
 void IR_Signal::send(String dataJson) {

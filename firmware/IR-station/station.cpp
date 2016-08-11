@@ -37,7 +37,7 @@ void IR_Station::begin(void) {
     case IR_STATION_MODE_STA:
       println_dbg("Boot Mode: Station");
       WiFi.mode(WIFI_STA);
-      connectWifi(ssid, password);
+      connectWifi(ssid, password, stealth);
       setupOTA();
       setupServer();
       indicator.green(0);
@@ -91,12 +91,17 @@ void IR_Station::setupButtonInterrupt() {
   println_dbg("attached button interrupt");
 }
 
-void IR_Station::clearSignals() {
+bool IR_Station::clearSignals() {
   for (uint8_t ch = 0; ch < IR_CH_SIZE; ch++) {
-    station.chName[ch] = "ch " + String(ch + 1, DEC);
-    removeFile(IR_DATA_PATH(ch));
+    clearSignal(ch);
   }
   println_dbg("Cleared All Signals");
+  return true;
+}
+
+bool IR_Station::clearSignal(int ch) {
+  station.chName[ch] = "ch " + String(ch + 1, DEC);
+  return removeFile(IR_DATA_PATH(ch));
 }
 
 void IR_Station::irSendSignal(int ch) {
@@ -108,6 +113,20 @@ void IR_Station::irSendSignal(int ch) {
   }
 }
 
+bool IR_Station::renameSignal(int ch, String name) {
+  String data;
+  if (!getStringFromFile(IR_DATA_PATH(ch), data)) {
+    return false;
+  }
+  DynamicJsonBuffer jsonBuffer;
+  JsonObject& root = jsonBuffer.parseObject(data);
+  root["name"] = name;
+  chName[ch] = name;
+  data = "";
+  root.printTo(data);
+  return writeStringToFile(IR_DATA_PATH(ch), data);
+}
+
 bool IR_Station::irRecodeSignal(int ch, String name, uint32_t timeout_ms) {
   indicator.set(0, 1023, 0);
   ir.resume();
@@ -117,16 +136,6 @@ bool IR_Station::irRecodeSignal(int ch, String name, uint32_t timeout_ms) {
     ir.handle();
     if (millis() - timeStamp > timeout_ms) {
       indicator.set(1023, 0, 0);
-      String data;
-      if (getStringFromFile(IR_DATA_PATH(ch), data)) {
-        DynamicJsonBuffer jsonBuffer;
-        JsonObject& root = jsonBuffer.parseObject(data);
-        root["name"] = name;
-        chName[ch] = name;
-        data = "";
-        root.printTo(data);
-        writeStringToFile(IR_DATA_PATH(ch), data);
-      }
       return false;
     }
   }
@@ -137,13 +146,20 @@ bool IR_Station::irRecodeSignal(int ch, String name, uint32_t timeout_ms) {
   chName[ch] = name;
   data = "";
   root.printTo(data);
-  int res = writeStringToFile(IR_DATA_PATH(ch), data);
   indicator.set(0, 0, 1023);
-  return res;
+  return writeStringToFile(IR_DATA_PATH(ch), data);
 }
 
-String IR_Station::settingsCrcSerial(void) {
-  return String(mode, DEC) + ssid + password + hostname;
+bool IR_Station::uploadSignal(int ch, String name, String data) {
+  indicator.set(0, 1023, 0);
+  DynamicJsonBuffer jsonBuffer;
+  JsonObject& root = jsonBuffer.parseObject(data);
+  root["name"] = name;
+  chName[ch] = name;
+  data = "";
+  root.printTo(data);
+  indicator.set(0, 0, 1023);
+  return writeStringToFile(IR_DATA_PATH(ch), data);
 }
 
 void IR_Station::restoreChName(void) {
@@ -154,11 +170,11 @@ void IR_Station::restoreChName(void) {
       JsonObject& data = jsonBuffer.parseObject(json);
       chName[ch] = (const char*)data["name"];
     }
-    if (chName[ch] = "") {
-      chName[ch] = "ch " + String(ch + 1, DEC);
-    }
-    println_dbg("ch name: " + chName[ch]);
   }
+}
+
+String IR_Station::settingsCrcSerial(void) {
+  return String(mode, DEC) + ssid + password + hostname + String(stealth, DEC);
 }
 
 bool IR_Station::settingsRestoreFromFile(void) {
@@ -170,6 +186,7 @@ bool IR_Station::settingsRestoreFromFile(void) {
   ssid = (const char*)data["ssid"];
   password = (const char*)data["password"];
   hostname = (const char*)data["hostname"];
+  stealth = (bool)data["stealth"];
   uint8_t crc = (uint8_t)data["crc"];
   String serial = settingsCrcSerial();
   if (crc != crc8((uint8_t*)serial.c_str(), serial.length(), CRC8INIT)) {
@@ -182,15 +199,16 @@ bool IR_Station::settingsRestoreFromFile(void) {
 
 bool IR_Station::settingsBackupToFile(void) {
   DynamicJsonBuffer jsonBuffer;
-  JsonObject& data = jsonBuffer.createObject();
-  data["mode"] = mode;
-  data["ssid"] = ssid;
-  data["password"] = password;
-  data["hostname"] = hostname;
+  JsonObject& root = jsonBuffer.createObject();
+  root["mode"] = mode;
+  root["ssid"] = ssid;
+  root["password"] = password;
+  root["hostname"] = hostname;
+  root["stealth"] = stealth;
   String serial = settingsCrcSerial();
-  data["crc"] = crc8((uint8_t*)serial.c_str(), serial.length(), CRC8INIT);
-  String str;
-  data.printTo(str);
+  root["crc"] = crc8((uint8_t*)serial.c_str(), serial.length(), CRC8INIT);
+  String str = "";
+  root.printTo(str);
   return writeStringToFile(SETTINGS_DATA_PATH, str);
 }
 

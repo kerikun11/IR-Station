@@ -36,7 +36,7 @@ void dispRequest() {
 void setupFormServer(void) {
   dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
 
-  server.on("/wifiList", []() {
+  server.on("/wifi-list", []() {
     dispRequest();
     int n = WiFi.scanNetworks();
     String res = "[";
@@ -52,6 +52,7 @@ void setupFormServer(void) {
     dispRequest();
     station.ssid = server.arg("ssid");
     station.password = server.arg("password");
+    station.stealth = server.arg("stealth") == "true";
     station.hostname = server.arg("url");
     if (station.hostname == "") {
       station.hostname = HOSTNAME_DEFAULT;
@@ -80,7 +81,7 @@ void setupFormServer(void) {
       println_dbg("End");
     }
   });
-  server.on("/accessPointMode", []() {
+  server.on("/set-ap-mode", []() {
     dispRequest();
     station.hostname = server.arg("url");
     if (station.hostname == "") {
@@ -118,7 +119,6 @@ void setupServer(void) {
   }
 
   server.on("/send", []() {
-    // Request detail
     dispRequest();
     String res;
     uint8_t ch = server.arg("ch").toInt();
@@ -130,15 +130,12 @@ void setupServer(void) {
       res = "Invalid channel selected. Sending failed";
       println_dbg("Invalid channel selected. Sending failed.");
     }
-    // Send the response
     server.send(200, "text/plain", res);
     println_dbg("End");
   });
   server.on("/recode", []() {
-    // Request detail
     dispRequest();
     String status;
-    // Match the request
     uint8_t ch = server.arg("ch").toInt();
     ch -= 1; // display: 1 ch ~ IR_CH_SIZE ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
     if (0 <= ch  && ch < IR_CH_SIZE) {
@@ -151,45 +148,89 @@ void setupServer(void) {
     } else {
       status = "Invalid Request";
     }
-    // Send the response
     server.send(200, "text/plain", status);
     println_dbg("End");
   });
-  server.on("/chName", []() {
+  server.on("/rename", []() {
+    dispRequest();
+    String status;
+    uint8_t ch = server.arg("ch").toInt();
+    ch -= 1; // display: 1 ch ~ IR_CH_SIZE ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
+    if (0 <= ch  && ch < IR_CH_SIZE) {
+      if (station.renameSignal(ch, server.arg("name"))) {
+        status = "Rename successful";
+      } else {
+        status = "Rename Failed";
+      }
+    } else {
+      status = "Invalid Request";
+    }
+    server.send(200, "text/plain", status);
+    println_dbg("End");
+  });
+  server.on("/upload", []() {
+    // Request detail
+    dispRequest();
+    String status;
+    // Match the request
+    uint8_t ch = server.arg("ch").toInt();
+    ch -= 1; // display: 1 ch ~ IR_CH_SIZE ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
+    if (0 <= ch  && ch < IR_CH_SIZE) {
+      if (station.uploadSignal(ch, server.arg("name"), server.arg("irJson"))) {
+        status = "Upload successful";
+      } else {
+        status = "Upload Failed";
+      }
+    } else {
+      status = "Invalid Request";
+    }
+    server.send(200, "text/plain", status);
+    println_dbg("End");
+  });
+  server.on("/name-list", []() {
     dispRequest();
     String res = "";
     res += "[";
-    for (uint8_t i = 0; i < IR_CH_SIZE; i++) {
-      res += "\"" + station.chName[i] + "\"";
-      if (i != IR_CH_SIZE - 1) res += ",";
+    for (uint8_t ch = 0; ch < IR_CH_SIZE; ch++) {
+      String name;
+      if (station.chName[ch] == "")name = "ch " + String(ch + 1, DEC);
+      else name = station.chName[ch];
+      res += "\"" + name + "\"";
+      if (ch != IR_CH_SIZE - 1) res += ",";
     }
     res += "]";
     server.send(200, "text/json", res);
     println_dbg("End");
   });
-  server.on("/clearAllSignals", []() {
+  server.on("/clear", []() {
+    dispRequest();
+    String status;
+    uint8_t ch = server.arg("ch").toInt();
+    ch -= 1; // display: 1 ch ~ IR_CH_SIZE ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
+    if (0 <= ch  && ch < IR_CH_SIZE) {
+      if (station.clearSignal(ch)) {
+        status = "Cleared Signal";
+      } else {
+        status = "Clean Failed";
+      }
+    } else {
+      status = "Invalid Request";
+    }
+    server.send(200, "text/plain", status);
+    println_dbg("End");
+  });
+  server.on("/clear-all", []() {
     dispRequest();
     station.clearSignals();
     server.send(200, "text/plain", "Cleared All Signals");
     println_dbg("End");
   });
-  server.on("/disconnectWifi", []() {
+  server.on("/disconnect-wifi", []() {
     dispRequest();
     server.send(200, "text/plain", "Disconnected this WiFi, Please connect again");
     println_dbg("Change WiFi");
+    delay(1000);
     station.reset();  // automatically rebooted
-  });
-  server.on("/changeHostname", []() {
-    dispRequest();
-    println_dbg("Change Hostname");
-    station.hostname = server.arg("hostname");
-    if (station.hostname == "") {
-      station.hostname = HOSTNAME_DEFAULT;
-    }
-    server.send(200, "text/plain", "My hostname was changed to " + station.hostname + ".");
-    station.settingsBackupToFile();
-    delay(2000);
-    ESP.reset();
   });
   server.on("/info", []() {
     dispRequest();
@@ -209,10 +250,10 @@ void setupServer(void) {
     println_dbg("End");
   });
   server.onNotFound([]() {
-    // Request detail
     dispRequest();
-    println_dbg("File not found");
-    server.send(404, "text/plain", "FileNotFound");
+    println_dbg("Redirect");
+    String res = "<script>location.href = \"http://" + (String)WiFi.softAPIP()[0] + "." + WiFi.softAPIP()[1] + "." + WiFi.softAPIP()[2] + "." + WiFi.softAPIP()[3] + "/\";</script>";
+    server.send(200, "text/html", res);
     println_dbg("End");
   });
 

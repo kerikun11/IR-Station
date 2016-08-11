@@ -68,46 +68,64 @@
 			</div>
 
 			<div id="menu">
-				<button id="menu-recode">Recode a new Signal</button>
+				<button id="menu-signal">Manage Signals</button>
 				<button id="menu-advanced">Advanced Settings</button>
-			</div>
 
-			<div id="advanced" style="display:none">
-				<button id="clearAllSignals">Clear All Signals</button>
-				<button id="disconnectWifi">Disconnect from this WiFi</button>
-			</div>
+				<div id="advanced" style="display:none">
+					<button id="disconnect-wifi">Disconnect from this WiFi</button>
+					<button id="clear-all">Clear All Signals</button>
+				</div>
 
-			<div id="recode" style="display:none">
-				<select name="ch">
-					<option value="-1">Select</option>
-					<option value="1">Ch 1</option>
-					<option value="2">Ch 2</option>
-					<option value="3">Ch 3</option>
-					<option value="4">Ch 4</option>
-					<option value="5">Ch 5</option>
-					<option value="6">Ch 6</option>
-					<option value="7">Ch 7</option>
-					<option value="8">Ch 8</option>
-					<option value="9">Ch 9</option>
-					<option value="10">Ch 10</option>
-					<option value="11">Ch 11</option>
-					<option value="12">Ch 12</option>
-					<option value="13">Ch 13</option>
-					<option value="14">Ch 14</option>
-					<option value="15">Ch 15</option>
-					<option value="16">Ch 16</option>
-					<option value="17">Ch 17</option>
-					<option value="18">Ch 18</option>
-					<option value="19">Ch 19</option>
-					<option value="20">Ch 20</option>
-					<option value="21">Ch 21</option>
-					<option value="22">Ch 22</option>
-					<option value="23">Ch 23</option>
-					<option value="24">Ch 24</option>
-					<option value="25">Ch 25</option>
-				</select>
-				<input type="text" name="chName">
-				<button>Recode</button>
+				<div id="signal" style="display:none">
+					<h2>1. Select a channel</h2>
+					<select name="ch">
+						<option value="-1">Select</option>
+						<option value="1">Ch 1</option>
+						<option value="2">Ch 2</option>
+						<option value="3">Ch 3</option>
+						<option value="4">Ch 4</option>
+						<option value="5">Ch 5</option>
+						<option value="6">Ch 6</option>
+						<option value="7">Ch 7</option>
+						<option value="8">Ch 8</option>
+						<option value="9">Ch 9</option>
+						<option value="10">Ch 10</option>
+						<option value="11">Ch 11</option>
+						<option value="12">Ch 12</option>
+						<option value="13">Ch 13</option>
+						<option value="14">Ch 14</option>
+						<option value="15">Ch 15</option>
+						<option value="16">Ch 16</option>
+						<option value="17">Ch 17</option>
+						<option value="18">Ch 18</option>
+						<option value="19">Ch 19</option>
+						<option value="20">Ch 20</option>
+						<option value="21">Ch 21</option>
+						<option value="22">Ch 22</option>
+						<option value="23">Ch 23</option>
+						<option value="24">Ch 24</option>
+						<option value="25">Ch 25</option>
+					</select>
+					<h2>2. Select a function</h2>
+					<button id="signal-recode">Recode a new Signal</button>
+					<button id="signal-rename">Rename a Signal</button>
+					<button id="signal-upload">Upload a new Signal</button>
+					<button id="signal-clear">Clear this Signal</button>
+
+					<div id="recode" style="display:none">
+						Name:<input type="text" name="name">
+						<button>Recode</button>
+					</div>
+					<div id="rename" style="display:none">
+						Name:<input type="text" name="name">
+						<button>Rename</button>
+					</div>
+					<div id="upload" style="display:none">
+						<input id="upload-file" type="file" name="irJson">
+						Name:<input type="text" name="name">
+						<button type="submit">Upload</button>
+					</div>
+				</div>
 			</div>
 
 			<div id="info">

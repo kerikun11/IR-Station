@@ -15,26 +15,28 @@ class IR_Station {
     String ssid;
     String password;
     String hostname;
+    bool stealth;
 
     String chName[IR_CH_SIZE];
 
     void begin(void);
-    void setMode(uint8_t newMode);
     void reset();
+    void setMode(uint8_t newMode);
 
     void setupButtonInterrupt();
 
-    void clearSignals();
+    bool clearSignal(int ch);
+    bool clearSignals();
+    bool uploadSignal(int ch, String name, String data);
+    bool renameSignal(int ch, String name);
     void irSendSignal(int ch);
     bool irRecodeSignal(int ch, String name, uint32_t timeout_ms = 3000);
 
+  private:
     String settingsCrcSerial(void);
     bool settingsRestoreFromFile(void);
     bool settingsBackupToFile(void);
     void restoreChName(void);
-
-  private:
-
 };
 
 extern IR_Station station;

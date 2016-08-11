@@ -5,7 +5,7 @@
 
 void setupAP(String ssid, String password);
 
-bool connectWifi(String ssid, String pass);
+bool connectWifi(String ssid, String pass, bool stealth = false);
 
 #endif
 

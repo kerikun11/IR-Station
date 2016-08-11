@@ -1,16 +1,16 @@
 function getWifiList(){
 	$.ajax({
 		type:"GET",
-		url:"/wifiList",
+		url:"/wifi-list",
 		dataType:"json",
 		cache:false,
 		timeout:10000
 	}).done(function(data) {
-		$('#wifiList').empty();
+		$('#wifi-list').empty();
 		$.each(data,function(index,wifi){
-			$('#wifiList').append($('<option>').val(wifi).text(wifi));
+			$('#wifi-list').append($('<option>').val(wifi).text(wifi));
 		});
-		$('#wifiList').append($('<option>').val("stealth-ssid").text("- use a stealth SSID -"));
+		$('#wifi-list').append($('<option>').val("stealth-ssid").text("- use a stealth SSID -"));
 		$('#info-status').text("Loading successful. Select a mode.")
 		$('#form').show();
 		$('#ap').show();
@@ -25,6 +25,7 @@ function form(){
 		$('#info-status').text("Connecting... Please wait...");
 		$.get('/confirm',{
 			ssid: ($('#form [name="ssid"]').val()=="stealth-ssid")?$('#form [name="stealth-ssid"]').val():$('#form [name="ssid"]').val(),
+			stealth: ($('#form [name="ssid"]').val()=="stealth-ssid"),
 			password: $('#form input[name="password"]').val(),
 			url: $('#form input[name="url"]').val()
 		}).fail(function(){
@@ -68,7 +69,7 @@ function setAP(){
 		$('#form').toggle();
 		$('#ap').toggle();
 		$('#info-status').text("Connecting... Please wait.");
-		$.get('/accessPointMode',{
+		$.get('/set-ap-mode',{
 			url: $('#ap input[name="url"]').val()
 		}).done(function(res){
 			$('#info-status').text(res);
@@ -92,8 +93,8 @@ $('#ap input').keypress(function(e){
 	}
 });
 
-$('#wifiList').change(function(){
-	if($('#wifiList option:selected').val()=="stealth-ssid"){
+$('#wifi-list').change(function(){
+	if($('#wifi-list option:selected').val()=="stealth-ssid"){
 		$('#stealth-ssid-form').show();
 	}else{
 		$('#stealth-ssid-form').hide();

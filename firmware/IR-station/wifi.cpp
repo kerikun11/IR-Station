@@ -16,7 +16,7 @@ void setupAP(String ssid, String password) {
   println_dbg(WiFi.softAPIP());
 }
 
-bool connectWifi(String ssid, String password) {
+bool connectWifi(String ssid, String password, bool stealth) {
   wdt_reset();
   if (WiFi.status() == WL_CONNECTED) {
     if ((ssid == (String)WiFi.SSID()) && (password == (String)WiFi.psk())) {
@@ -25,17 +25,19 @@ bool connectWifi(String ssid, String password) {
     }
   }
 
-  int n = WiFi.scanNetworks();
-  for (int i = 0; i < n; ++i) {
-    println_dbg("SSID: " + String(WiFi.SSID(i)));
-    if (ssid == String(WiFi.SSID(i))) {
-      break;
-    }
-    if (i == n - 1) {
-      println_dbg("");
-      print_dbg("Couldn't find SSID: ");
-      println_dbg(ssid);
-      return false;
+  if (!stealth) {
+    int n = WiFi.scanNetworks();
+    for (int i = 0; i < n; ++i) {
+      println_dbg("SSID: " + String(WiFi.SSID(i)));
+      if (ssid == String(WiFi.SSID(i))) {
+        break;
+      }
+      if (i == n - 1) {
+        println_dbg("");
+        print_dbg("Couldn't find SSID: ");
+        println_dbg(ssid);
+        return false;
+      }
     }
   }
   println_dbg("");
