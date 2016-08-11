@@ -124,11 +124,13 @@ void setupServer(void) {
     uint8_t ch = server.arg("ch").toInt();
     ch -= 1; // display: 1 ch ~ IR_CH_SIZE ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
     if (0 <= ch  && ch < IR_CH_SIZE) {
-      res = "Sent a signal of ch " + String(ch + 1, DEC) + ": " + station.chName[ch];
-      station.irSendSignal(ch);
+      if (station.irSendSignal(ch)) {
+        res = "Sent a signal of ch " + String(ch + 1, DEC) + ": " + station.chName[ch];
+      } else {
+        res = "No signal was sent";
+      }
     } else {
       res = "Invalid channel selected. Sending failed";
-      println_dbg("Invalid channel selected. Sending failed.");
     }
     server.send(200, "text/plain", res);
     println_dbg("End");
@@ -139,8 +141,8 @@ void setupServer(void) {
     uint8_t ch = server.arg("ch").toInt();
     ch -= 1; // display: 1 ch ~ IR_CH_SIZE ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
     if (0 <= ch  && ch < IR_CH_SIZE) {
-      String chName = server.arg("chName");
-      if (station.irRecodeSignal(ch, chName)) {
+      String name = server.arg("name");
+      if (station.irRecodeSignal(ch, name)) {
         status = "Recoding Successful: ch " + String(ch + 1);
       } else {
         status = "No Signal Recieved";

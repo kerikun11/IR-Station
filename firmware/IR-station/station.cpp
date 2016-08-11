@@ -91,6 +91,17 @@ void IR_Station::setupButtonInterrupt() {
   println_dbg("attached button interrupt");
 }
 
+bool IR_Station::irSendSignal(int ch) {
+  String json;
+  if (getStringFromFile(IR_DATA_PATH(ch), json)) {
+    indicator.set(0, 1023, 0);
+    ir.send(json);
+    indicator.set(0, 0, 1023);
+    return true;
+  }
+  return false;
+}
+
 bool IR_Station::clearSignals() {
   for (uint8_t ch = 0; ch < IR_CH_SIZE; ch++) {
     clearSignal(ch);
@@ -102,15 +113,6 @@ bool IR_Station::clearSignals() {
 bool IR_Station::clearSignal(int ch) {
   station.chName[ch] = "ch " + String(ch + 1, DEC);
   return removeFile(IR_DATA_PATH(ch));
-}
-
-void IR_Station::irSendSignal(int ch) {
-  String json;
-  if (getStringFromFile(IR_DATA_PATH(ch), json)) {
-    indicator.set(0, 1023, 0);
-    ir.send(json);
-    indicator.set(0, 0, 1023);
-  }
 }
 
 bool IR_Station::renameSignal(int ch, String name) {
@@ -154,6 +156,7 @@ bool IR_Station::uploadSignal(int ch, String name, String data) {
   indicator.set(0, 1023, 0);
   DynamicJsonBuffer jsonBuffer;
   JsonObject& root = jsonBuffer.parseObject(data);
+  if (name == "")name = (const char*)root["name"];
   root["name"] = name;
   chName[ch] = name;
   data = "";

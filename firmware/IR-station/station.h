@@ -29,7 +29,7 @@ class IR_Station {
     bool clearSignals();
     bool uploadSignal(int ch, String name, String data);
     bool renameSignal(int ch, String name);
-    void irSendSignal(int ch);
+    bool irSendSignal(int ch);
     bool irRecodeSignal(int ch, String name, uint32_t timeout_ms = 3000);
 
   private:
