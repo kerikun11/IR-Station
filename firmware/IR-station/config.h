@@ -39,6 +39,9 @@
 #define OTA_PASSWORD            "1234"
 #endif
 
+// Capital Portal
+#define USE_CAPITAL_PORTAL      true
+
 /* for Debug */
 #define SERIAL_DEBUG            true
 
