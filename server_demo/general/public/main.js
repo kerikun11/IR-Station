@@ -4,9 +4,13 @@ function updateStatus(status){
 }
 function loadChName(){
 	$.getJSON('/name-list',{},function(data) {
-		for(var i=0;i<25;i++){
-			$('#send button').eq(i).text(data[i]);
-			$('#signal option').eq(i+1).text("ch "+(i+1).toString()+": "+data[i]);
+		$('#send').empty();
+		$('#manage select[name="ch"]').empty();
+		$('#manage select[name="ch"]').append($('<option>').val(-1).text("-select-"));
+		for(var i=0;i<data.length;i++){
+			var name = data[i];
+			$('#send').append($('<button>').val(i+1).text((name=="")?("ch "+(i+1)):name));
+			$('#manage select[name="ch"]').append($('<option>').val(i+1).text("ch"+(i+1)+"("+name+")"));
 		}
 	});
 }
@@ -15,100 +19,79 @@ function loadChName(){
 $('#menu-signal').click(
 	function(){
 		$('#advanced').hide();
-		$('#signal').toggle();
+		$('#manage').toggle();
 	}
 );
 $('#menu-advanced').click(
 	function(){
-		$('#signal').hide();
+		$('#manage').hide();
 		$('#advanced').toggle();
 	}
 );
 
 /* send */
-$('#send button').click(
-	function(){
-		var el = $(this);
-		el.addClass("sending");
-		$.get('/send',{ch: el.val()}).done(
-			function(res){
-				//$('#log').prepend('<p>'+Date().match(/.+(\d\d:\d\d:\d\d).+/)[1]+' => '+res+'</p>');
-				el.removeClass("sending");
-				updateStatus(res);
-			}
-		);
-	}
-);
-
-/* recode */
-$('#signal-recode').click(function(){
-	$('#recode').toggle();
-	$('#rename').hide();
-	$('#upload').hide();
+$(document).on('click','#send button',function(){
+	var el = $(this);
+	el.addClass("sending");
+	$.get('/send',{ch: el.val()}).done(
+		function(res){
+			//$('#log').prepend('<p>'+Date().match(/.+(\d\d:\d\d:\d\d).+/)[1]+' => '+res+'</p>');
+			el.removeClass("sending");
+			updateStatus(res);
+		}
+	);
 });
-function recode(){
-	if($('#signal select[name="ch"]').val() == -1){
+
+/* manage signals */
+$('#manage select[name="action"]').change(function(){
+	var action = $(this).val();
+	if(action == "recode"){
+		$('#p-name').show();
+		$('#p-file').hide();
+	}else if(action == "rename"){
+		$('#p-name').show();
+		$('#p-file').hide();
+	}else if(action == "upload"){
+		$('#p-name').show();
+		$('#p-file').show();
+	}else if(action == "download"){
+		$('#p-name').hide();
+		$('#p-file').hide();
+	}else if(action == "clear"){
+		$('#p-name').hide();
+		$('#p-file').hide();
+	}
+});
+function manage(){
+	if($('#manage select[name="ch"]').val() == -1){
 		alert("Please select a channel!");
-	}else{
-		$('#signal').hide();
+		return;
+	}
+	var ch = $('#input-ch').val();
+	var name = $('#input-name').val();
+	var action = $('#manage select[name="action"]').val();
+	if(action == "recode"){
+		$('#manage').hide();
 		$.get('/recode',{
-			ch: $('#signal select[name="ch"]').val(),
-			name: $('#recode input[name="name"]').val()
+			ch: ch,
+			name: name
 		}).done(function(res){
-			$('#recode input[name="name"]').val("");
-			$('#recode').hide();
+			$('#input-name').val("");
 			updateStatus(res);
 			loadChName();
 		});
-	}
-}
-$('#recode button').click(recode);
-$('#recode input').keypress(function(e){
-	if(e.which == 13){
-		recode();
-	}
-});
-
-/* rename */
-$('#signal-rename').click(function(){
-	$('#recode').hide();
-	$('#rename').toggle();
-	$('#upload').hide();
-});
-function rename(){
-	if($('#signal select[name="ch"]').val() == -1){
-		alert("Please select a channel!");
-	}else{
-		$('#signal').hide();
+	}else if(action == "rename"){
+		$('#manage').hide();
 		$.get('/rename',{
-			ch: $('#signal select[name="ch"]').val(),
-			name: $('#rename input[name="name"]').val()
+			ch: ch,
+			name: name
 		}).done(function(res){
-			$('#rename input[name="name"]').val("");
-			$('#rename').hide();
+			$('#input-name').val("");
 			updateStatus(res);
 			loadChName();
 		});
-	}
-}
-$('#rename button').click(rename);
-$('#rename input').keypress(function(e){
-	if(e.which == 13){
-		rename();
-	}
-});
-
-/* upload */
-$('#signal-upload').click(function(){
-	$('#recode').hide();
-	$('#rename').hide();
-	$('#upload').toggle();
-});
-function upload(){
-	if($('#signal select[name="ch"]').val() == -1){
-		alert("Please select a channel!");
-	}else{
-		var uploadFile = document.getElementById('upload-file');
+	}else if(action == "upload"){
+		var uploadFile = document.getElementById('input-file');
 		var file = uploadFile.files[0];
 		if(!file){
 			alert("Please select a file");
@@ -117,45 +100,45 @@ function upload(){
 			reader.readAsText(file);
 			reader.onload = function(){
 				$.get('/upload',{
-					ch: $('#signal select[name="ch"]').val(),
-					name: $('#upload input[name="name"]').val(),
+					ch: ch,
+					name: name,
 					irJson: reader.result
 				}).done(function(res){
-					$('#signal').hide();
-					$('#upload').hide();
+					$('#input-name').val("");
+					$('#input-file').val("");
+					$('#manage').hide();
 					updateStatus(res);
 					loadChName();
 				});
 			}
 		}
+	}else if(action == "download"){
+		var a = document.createElement('a');
+		var ch = ch
+		a.download = ch+".json",
+		a.href = "/IR_data/"+ch+".json"
+		var evt = document.createEvent('MouseEvent');
+		evt.initEvent("click", true, false);
+		a.dispatchEvent(evt);
+		$('#input-ch').attr('selected',false);
+		$('#input-ch').val(ch-0+1);
+	}else if(action == "clear"){
+		updateStatus("Cleaning...");
+		$('#manage').hide();
+		$.get('/clear',{
+			ch: ch,
+		}).done(function(res){
+			updateStatus(res);
+			loadChName();
+		});
 	}
 }
-$('#upload button').click(upload);
-$('#upload input').keypress(function(e){
+$('#manage button').click(manage);
+$('#manage input').keypress(function(e){
 	if(e.which == 13){
-		upload();
+		manage();
 	}
 });
-
-/* clear*/
-$('#signal-clear').click(
-	function(){
-		if($('#signal select[name="ch"]').val() == -1){
-			alert("Please select a channel!");
-		}else{
-			if(confirm('Are you sure to delete this signal?')){
-				updateStatus("Cleaning...");
-				$('#signal').hide();
-				$.get('/clear',{
-					ch: $('#signal select[name="ch"]').val(),
-				}).done(function(res){
-					updateStatus(res);
-					loadChName();
-				});
-			}
-		}
-	}
-);
 
 /* advanced */
 $('#disconnect-wifi').click(

@@ -2,9 +2,11 @@ require 'sinatra'
 require 'sinatra/reloader'
 require 'sinatra/json'
 
+ch_size = 25
+
 name = []
-for i in 0...25 do
-	name[i]="ch #{i+1}"
+for i in 0...ch_size do
+	name[i]="ch name #{i+1}"
 end
 
 get '/' do
@@ -13,45 +15,37 @@ end
 
 get "/recode" do
 	sleep(1)
-	logger.info "ch = "+params[:ch]
-	logger.info "name = "+params[:name]
 	name[params[:ch].to_i-1]=params[:name]
 	json "Recode a signal ch"+params[:ch]+" as "+name[params[:ch].to_i-1]
 end
 
 get "/rename" do
 	#sleep(1)
-	logger.info "ch = "+params[:ch]
-	logger.info "name = "+params[:name]
 	name[params[:ch].to_i-1]=params[:name]
 	json "Rename a signal ch"+params[:ch]+" as "+name[params[:ch].to_i-1]
 end
 
 get "/upload" do
 	#sleep(2)
-	logger.info "ch = "+params[:ch]
-	logger.info "name = "+params[:name]
 	name[params[:ch].to_i-1]=params[:name]
 	json "Rename a signal ch"+params[:ch]+" as "+name[params[:ch].to_i-1]
 end
 
 get "/clear" do
 	#sleep(2)
-	logger.info "ch = "+params[:ch]
-	name[params[:ch].to_i-1]="ch #{params[:ch]}"
+	name[params[:ch].to_i-1]=""
 	json "Cleared a signal ch"+params[:ch]
 end
 
 get "/send" do
 	#sleep(1)
-	logger.info "ch = "+params[:ch]
 	json "Sent a signal ch"+params[:ch]+": "+name[params[:ch].to_i-1]
 end
 
 get "/clear-all" do
 	sleep(1)
-	for i in 0...25 do
-		name[i]="ch #{i+1}"
+	for i in 0...ch_size do
+		name[i]=""
 	end
 	json "Cleared"
 end
