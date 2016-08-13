@@ -38,8 +38,8 @@ get "/clear" do
 end
 
 get "/send" do
-	#sleep(1)
-	json "Sent a signal ch"+params[:ch]+": "+name[params[:ch].to_i-1]
+	sleep(0.5)
+	json "Sent ch"+params[:ch]+" ("+name[params[:ch].to_i-1]+")"
 end
 
 get "/clear-all" do

@@ -6,78 +6,115 @@
 		<style type="text/css">
 			body {
 				background-color:#BBDDFF;
-				margin:5%;
-				text-align:center;
+				margin:auto;
+				max-width:1000px;
 			}
 			#send button {
-				font-size:1.2em;
+				font-size:1.5em;
+				line-height:4em;
+				overflow:hidden;
 				height:4em;
-				font-weight:bold;
 				width:19%;
-				vertical-align:center;
-			}
-			div {
-				margin:10px 0;
+				margin:0.2%;
 			}
 			.sending {
 				background-color:magenta;
 			}
+			.container{
+				float:left;
+				width:auto;
+				margin: 15px 30px;
+				min-width:14em;
+			}
+			.container>div{
+				margin-left:15px;
+			}
+			.form-group{
+				margin-top:5px;
+			}
 		</style>
 		<link rel="shortcut icon" href="/apple-touch-icon.png"/>
+		<!--
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+		-->
 	</head>
 	<body>
-		<h1>IR Station</h1>
+		<h1 style="text-align:center">IR Station</h1>
 
 		<div id="main" style="display:none">
-			<div id="send">
-				<!-- js adds buttons -->
+			<div id="send" class="container btn-group" style="text-align:center;margin:15px;">
+				<!-- js adds buttons x25-->
 			</div>
 
-			<div id="menu">
-				<button id="menu-signal">Manage Signals</button>
-				<button id="menu-advanced">Advanced Settings</button>
-
-				<div id="advanced" style="display:none">
-					<button id="disconnect-wifi">Disconnect from this WiFi</button>
-					<button id="clear-all">Clear All Signals</button>
+			<div id="settings" class="container" style="margin-left:60px;">
+				<h2>Settings</h2>
+				<div id="manage" class="form-horizontal">
+					<div class="form-group" id="form-action">
+						<label class="control-label col-sm-2">Action</label>
+						<div class="col-sm-4">
+							<select id="input-action" class="form-control" name="action">
+								<option value="recode">Recode a new Signal</option>
+								<option value="rename">Rename a Signal</option>
+								<option value="upload">Upload a new Signal</option>
+								<option value="download">Download a Signal</option>
+								<option value="clear">Clear a Signal</option>
+								<option value="clear-all">Clear All Signals</option>
+								<option value="disconnect-wifi">Change WiFi</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-group" id="form-ch">
+						<label class="control-label col-sm-2">Channel</label>
+						<div class="col-sm-4">
+							<select id="input-ch" name="ch">
+								<!-- js adds options -->
+							</select>
+						</div>
+					</div>
+					<div class="form-group" id="form-file" style="display:none">
+						<label class="control-label col-sm-2">Json</label>
+						<div class="col-sm-4">
+							<input id="input-file" type="file" name="irJson">
+						</div>
+					</div>
+					<div class="form-group" id="form-name">
+						<label class="control-label col-sm-2">Name</label>
+						<div class="col-sm-4">
+							<input id="input-name" type="text" name="name">
+						</div>
+					</div>
+					<div class="form-group" id="form-submit">
+						<label style="color:red;"></label>
+						<div class="col-sm-offset-2 col-sm-4">
+							<button>Submit</button>
+						</div>
+					</div>
 				</div>
+			</div>
 
-				<div id="manage" style="display:none">
-					<p>	CH: 
-						<select id="input-ch" name="ch">
-							<!-- js adds options -->
-						</select>
-					</p>
-					<p>Action: 
-						<select id="input-ch" name="action">
-							<option value="recode">Recode a new Signal</option>
-							<option value="rename">Rename a Signal</option>
-							<option value="upload">Upload a new Signal</option>
-							<option value="download">Download this Signal</option>
-							<option value="clear">Clear this Signal</option>
-						</select>
-					</p>
-					<p id="p-file" style="display:none">Json: <input id="input-file" type="file" name="irJson"></p>
-					<p id="p-name">Name: <input id="input-name" type="text" name="name"></p>
-					<button>Submit</button>
+			<div id="info" class="container">
+				<h2>Informations</h2>
+				<div>
+					<p>Status: <span id="info-status"></span></p>
+					<p>WiFi SSID: <span id="info-ssid"></span></p>
+					<p>IP Address: <span id="info-ipaddress"></span></p>
+					<p>URL: <span id="info-url"></span></p>
 				</div>
 			</div>
 
-			<div id="info">
-				<p>Status: <span id="info-status"></span></p>
-				<p>WiFi SSID: <span id="info-ssid"></span></p>
-				<p>IP Address: <span id="info-ipaddress"></span></p>
-				<p>URL: <span id="info-url"></span></p>
-			</div>
-
-			<div id="log">
+			<div id="log" class="container">
+				<h2>Logs</h2>
+				<div id="log-area">
+				</div>
 			</div>
 		</div>
 
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 		<!--
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
-		-->
 		<script src="/jquery-2.2.3.min.js"></script>
+		-->
 		<script src="/main.js"></script>
 	</body>
 </html>

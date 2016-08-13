@@ -13,13 +13,17 @@
 // TCP server at port 80 will respond to HTTP requests
 ESP8266WebServer server(80);
 
+#if USE_CAPITAL_PORTAL == true
 // DNS server
 const byte DNS_PORT = 53;
 DNSServer dnsServer;
+#endif
 
 void serverTask() {
   server.handleClient();
+#if USE_CAPITAL_PORTAL == true
   if (station.mode == IR_STATION_MODE_NULL) dnsServer.processNextRequest();
+#endif
 }
 
 void dispRequest() {
@@ -34,7 +38,9 @@ void dispRequest() {
 }
 
 void setupFormServer(void) {
+#if USE_CAPITAL_PORTAL == true
   dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
+#endif
 
   server.on("/wifi-list", []() {
     dispRequest();
@@ -118,6 +124,18 @@ void setupServer(void) {
     println_dbg("mDNS responder started");
   }
 
+  server.on("/name-list", []() {
+    dispRequest();
+    String res = "";
+    res += "[";
+    for (uint8_t ch = 0; ch < IR_CH_SIZE; ch++) {
+      res += "\"" + station.chName[ch] + "\"";
+      if (ch != IR_CH_SIZE - 1) res += ",";
+    }
+    res += "]";
+    server.send(200, "text/json", res);
+    println_dbg("End");
+  });
   server.on("/send", []() {
     dispRequest();
     String res;
@@ -125,7 +143,7 @@ void setupServer(void) {
     ch -= 1; // display: 1 ch ~ IR_CH_SIZE ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
     if (0 <= ch  && ch < IR_CH_SIZE) {
       if (station.irSendSignal(ch)) {
-        res = "Sent a signal of ch " + String(ch + 1, DEC) + ": " + station.chName[ch];
+        res = "Sent ch " + String(ch + 1, DEC) + " (" + station.chName[ch] + ")";
       } else {
         res = "No signal was sent";
       }
@@ -187,21 +205,6 @@ void setupServer(void) {
       status = "Invalid Request";
     }
     server.send(200, "text/plain", status);
-    println_dbg("End");
-  });
-  server.on("/name-list", []() {
-    dispRequest();
-    String res = "";
-    res += "[";
-    for (uint8_t ch = 0; ch < IR_CH_SIZE; ch++) {
-      String name;
-      if (station.chName[ch] == "")name = "ch " + String(ch + 1, DEC);
-      else name = station.chName[ch];
-      res += "\"" + name + "\"";
-      if (ch != IR_CH_SIZE - 1) res += ",";
-    }
-    res += "]";
-    server.send(200, "text/json", res);
     println_dbg("End");
   });
   server.on("/clear", []() {
