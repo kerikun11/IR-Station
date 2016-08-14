@@ -16,6 +16,9 @@ class IR_Station {
     String password;
     String hostname;
     bool stealth;
+    IPAddress local_ip;
+    IPAddress gateway;
+    IPAddress subnet_mask;
 
     String chName[IR_CH_SIZE];
 

@@ -79,13 +79,16 @@ void setupFormServer(void) {
       server.send(200, "text/palin", res);
       station.setMode(IR_STATION_MODE_STA);
       indicator.set(0, 0, 1023);
-      delay(5000);
-      ESP.reset();
     } else {
       println_dbg("Not connected yet.");
       server.send(200, "text/plain", "false");
       println_dbg("End");
     }
+  });
+  server.on("/reboot", []() {
+    server.send(200);
+    delay(100);
+    ESP.reset();
   });
   server.on("/set-ap-mode", []() {
     dispRequest();

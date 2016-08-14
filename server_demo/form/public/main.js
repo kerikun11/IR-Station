@@ -57,6 +57,8 @@ function form(){
 						+'<br/>'+
 							'For all device: <a href="http://'+res+'/">http://'+res+'/</a>'
 					);
+					$('#info button[name="reload"]').hide();
+					$('#info button[name="reboot"]').show();
 				}
 			}).fail(function(){
 				$('#info-status').text('Connection Failed. Please Reload.');
@@ -78,6 +80,9 @@ function setAP(){
 		});
 	}
 }
+$('#info button[name="reboot"]').click(function(){
+	$.get('/reboot');
+});
 
 $('#form button').click(form);
 $('#form input').keypress(function(e){
