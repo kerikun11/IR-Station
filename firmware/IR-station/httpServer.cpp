@@ -1,6 +1,7 @@
 #include "httpServer.h"
 
 #include <ESP8266WebServer.h>
+#include <ESP8266HTTPUpdateServer.h>
 #include <ESP8266mDNS.h>
 #include <DNSServer.h>
 #include <FS.h>
@@ -12,6 +13,7 @@
 
 // TCP server at port 80 will respond to HTTP requests
 ESP8266WebServer server(80);
+ESP8266HTTPUpdateServer httpUpdater(SERIAL_DEBUG);
 
 #if USE_CAPITAL_PORTAL == true
 // DNS server
@@ -68,8 +70,6 @@ void setupFormServer(void) {
     println_dbg("mDNS Address: " + station.hostname);
     indicator.set(0, 1023, 0);
     server.send(200);
-    WiFi.disconnect(true);
-    delay(1000);
     WiFi.begin(station.ssid.c_str(), station.password.c_str());
   });
   server.on("/isConnected", []() {
@@ -100,6 +100,19 @@ void setupFormServer(void) {
     station.setMode(IR_STATION_MODE_AP);
     ESP.reset();
   });
+  server.on("/test", []() {
+    dispRequest();
+    station.ssid = server.arg("ssid");
+    station.password = server.arg("password");
+    println_dbg("Target SSID: " + station.ssid);
+    println_dbg("Target Password: " + station.password);
+    indicator.set(0, 1023, 0);
+    if (connectWifi(station.ssid.c_str(), station.password.c_str())) {
+      server.send(200, "text/plain", "Connection Successful");
+    } else {
+      server.send(200, "text/plain", "Connection Failed");
+    }
+  });
   server.onNotFound([]() {
     // Request detail
     dispRequest();
@@ -109,6 +122,7 @@ void setupFormServer(void) {
     println_dbg("End");
   });
 
+  httpUpdater.setup(&server, "/firmware");
   server.serveStatic("/", SPIFFS, "/form/");
 
   // Start TCP (HTTP) server

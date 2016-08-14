@@ -7,7 +7,6 @@
 */
 
 #include <ESP8266WiFi.h>
-#include <FS.h>
 #include "config.h"
 #include "station.h"
 #include "ota.h"
