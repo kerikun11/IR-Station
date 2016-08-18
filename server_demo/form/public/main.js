@@ -27,7 +27,7 @@ function form(){
 			ssid: ($('#form [name="ssid"]').val()=="stealth-ssid")?$('#form [name="stealth-ssid"]').val():$('#form [name="ssid"]').val(),
 			stealth: ($('#form [name="ssid"]').val()=="stealth-ssid"),
 			password: $('#form input[name="password"]').val(),
-			url: $('#form input[name="url"]').val()
+			hostname: $('#form input[name="hostname"]').val()
 		}).fail(function(){
 			$('#info-status').text('Connection Failed. Please Reload.');
 		});

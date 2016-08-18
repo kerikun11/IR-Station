@@ -61,7 +61,7 @@ void setupFormServer(void) {
     station.ssid = server.arg("ssid");
     station.password = server.arg("password");
     station.stealth = server.arg("stealth") == "true";
-    station.hostname = server.arg("url");
+    station.hostname = server.arg("hostname");
     if (station.hostname == "") {
       station.hostname = HOSTNAME_DEFAULT;
     }
