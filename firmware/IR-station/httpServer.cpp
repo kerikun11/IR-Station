@@ -78,6 +78,9 @@ void setupFormServer(void) {
       String res = (String)WiFi.localIP()[0] + "." + WiFi.localIP()[1] + "." + WiFi.localIP()[2] + "." + WiFi.localIP()[3];
       server.send(200, "text/palin", res);
       station.setMode(IR_STATION_MODE_STA);
+      station.local_ip = WiFi.localIP();
+      station.subnet_mask = WiFi.subnetMask();
+      station.gateway = WiFi.gatewayIP();
       indicator.set(0, 0, 1023);
     } else {
       println_dbg("Not connected yet.");
@@ -92,7 +95,7 @@ void setupFormServer(void) {
   });
   server.on("/set-ap-mode", []() {
     dispRequest();
-    station.hostname = server.arg("url");
+    station.hostname = server.arg("hostname");
     if (station.hostname == "") {
       station.hostname = HOSTNAME_DEFAULT;
     }

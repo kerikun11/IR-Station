@@ -37,6 +37,7 @@ void IR_Station::begin(void) {
     case IR_STATION_MODE_STA:
       println_dbg("Boot Mode: Station");
       WiFi.mode(WIFI_STA);
+      WiFi.config(local_ip, subnet_mask, gateway);
       connectWifi(ssid, password, stealth);
       setupOTA();
       setupServer();
@@ -177,7 +178,7 @@ void IR_Station::restoreChName(void) {
 }
 
 String IR_Station::settingsCrcSerial(void) {
-  return String(mode, DEC) + ssid + password + hostname + String(stealth, DEC);
+  return String(mode, DEC) + ssid + password + hostname + String(stealth, DEC) + String(uint32_t(local_ip), DEC) + String(uint32_t(subnet_mask), DEC) + String(uint32_t(gateway), DEC);
 }
 
 bool IR_Station::settingsRestoreFromFile(void) {
@@ -190,6 +191,9 @@ bool IR_Station::settingsRestoreFromFile(void) {
   password = (const char*)data["password"];
   hostname = (const char*)data["hostname"];
   stealth = (bool)data["stealth"];
+  local_ip = IPAddress((uint32_t)data["local_ip"]);
+  subnet_mask = IPAddress((uint32_t)data["subnet_mask"]);
+  gateway = IPAddress((uint32_t)data["gateway"]);
   uint8_t crc = (uint8_t)data["crc"];
   String serial = settingsCrcSerial();
   if (crc != crc8((uint8_t*)serial.c_str(), serial.length(), CRC8INIT)) {
@@ -208,6 +212,9 @@ bool IR_Station::settingsBackupToFile(void) {
   root["password"] = password;
   root["hostname"] = hostname;
   root["stealth"] = stealth;
+  root["local_ip"] = uint32_t(local_ip);
+  root["local_ip"] = uint32_t(subnet_mask);
+  root["local_ip"] = uint32_t(gateway);
   String serial = settingsCrcSerial();
   root["crc"] = crc8((uint8_t*)serial.c_str(), serial.length(), CRC8INIT);
   String str = "";

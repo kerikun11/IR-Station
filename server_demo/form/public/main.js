@@ -42,7 +42,7 @@ function form(){
 				timerID = null;
 			}
 			$.get('/isConnected').done(function(res){
-				var url = $('#form input[name="url"]').val();
+				var hostname = $('#form input[name="hostname"]').val();
 				if(res!="false"){
 					clearInterval(timerID);
 					timerID = null;
@@ -53,9 +53,9 @@ function form(){
 						+'<br/>'+
 							'Screenshot is also good!'
 						+'<br/>'+
-							'For Apple device: <a href="http://'+url+'.local/">http://'+url+'.local/</a>'
+							'For Apple device: http://'+hostname+'.local/'
 						+'<br/>'+
-							'For all device: <a href="http://'+res+'/">http://'+res+'/</a>'
+							'For all device: http://'+res+'/'
 					);
 					$('#info button[name="reload"]').hide();
 					$('#info button[name="reboot"]').show();
@@ -72,7 +72,7 @@ function setAP(){
 		$('#ap').toggle();
 		$('#info-status').text("Connecting... Please wait.");
 		$.get('/set-ap-mode',{
-			url: $('#ap input[name="url"]').val()
+			hostname: $('#ap input[name="hostname"]').val()
 		}).done(function(res){
 			$('#info-status').text(res);
 		}).fail(function(){
