@@ -3,7 +3,9 @@
 Infrared Remote Controller with ESP8266 WiFi-module  
 You can control your home appliances with your smartphone or laptop.
 
-# Main parts
+[TOC]
+
+## Main parts
 
   * ESP-WROOM-02 (ESP8266 WiFi Module)
   * IR Receiver
@@ -20,9 +22,9 @@ You can control your home appliances with your smartphone or laptop.
 
 ![display](display.png)
 
-# How to Use
+## How to Use
 
-## Setup the Device
+### Setup the Device
 
   1. Supply power to the device.
   1. Connect your cellphone or laptop to Wi-Fi SSID "IR-Station".
@@ -34,7 +36,7 @@ You can control your home appliances with your smartphone or laptop.
   1. Access http:/xxx.xxx.xx.xx (IR-Station's local IP address) in a browser. (for example http://192.168.1.3 )
   1. If something appears, setup is complete.
 
-## Store Signals
+### Store Signals
 
   1. Access http:/192.168.xx.xx (one example) in a browser.   1. Look at the form of the bottom of the screen.
   1. Select "Recode a new Signal" action.
@@ -43,12 +45,12 @@ You can control your home appliances with your smartphone or laptop.
   1. When you click the "Submit" button, the green LED of your IR-Station will light up.
   1. Press a button on your remote controller toward your IR-Station to store a new signal.
 
-## Remote Control
+### Remote Control
 
   1. Access your IR-Station in a browser.
   1. Click a button which assigned a signal you want to send.
 
-## Meanings of LED Indicator
+### Meanings of LED Indicator
 
 |Color	|Status	|
 |:----------|:-----------|
@@ -56,16 +58,16 @@ You can control your home appliances with your smartphone or laptop.
 |Green	|Booting, Sending Signal or Receiving Signal	|
 |Blue	|Listening	|
 
-# How to Make
+## How to Make
 
-## Required Library
+### Required Library
 
 Please Add the Libraries below to your Arduino IDE
 
   * Arduino TimeLib (https://github.com/PaulStoffregen/Time/blob/master/TimeLib.h)
   * Arduino Json (https://github.com/bblanchon/ArduinoJson)
 
-## Steps
+### Steps
 
   1. Gather the components.
   1. Assemble the components according to the circuit diagram.
@@ -81,7 +83,7 @@ Please Add the Libraries below to your Arduino IDE
   1. Upload the SPIFFS data: menu -> tool -> ESP8266 Sketch Data Upload. (See https://github.com/esp8266/Arduino/blob/master/doc/filesystem.md)
   1. Process termination.
 
-## Arduino Board Settings
+### Arduino Board Settings
 
 | item | select |
 | :---- | :---------------------- |
@@ -92,9 +94,9 @@ Please Add the Libraries below to your Arduino IDE
 | Reset Method | ck |
 | Upload Speed | 115200 |
 
-## Components
+### Components
 
-### Device Components
+#### Device Components
 
 |Components					|Details		|Quantity	|Remarks					|
 |:--------------------------|:--------------|:----------|:--------------------------|
@@ -117,16 +119,251 @@ Please Add the Libraries below to your Arduino IDE
 
 ![Components](components.jpg)
 
-### Requires
+#### Requires
 
 | Requires |Details|Quantity|
 |:------|:-------|:--------|
 | Serial-to-USB conversion Module | such as FT232  | 1 |
 
-## Circuit Diagram
+### Circuit Diagram
 
 ![sketch](sketch.png)
 
-## Sample
+### Sample
 
 ![sample](sample.jpg)
+
+## HTTP API
+
+### Setup Form
+
+#### GET /
+
+|Parameter	|Type	|Remarks	|
+|:----------|:------|:----------|
+|none		|		|			|
+
+|Response	|Code	|Type	|Remarks	|
+|:----------|:------|:------|:----------|
+|Setup Page	|200	|text/html	|			|
+
+#### GET /wifi-list
+
+|Parameter	|Type	|Remarks	|
+|:----------|:------|:----------|
+|none		|		|			|
+
+|Response	|Code	|Type	|Remarks	|
+|:----------|:------|:------|:----------|
+|a list of WiFi SSIDs which exist	|200	|list of string	|takes a little time	|
+
+Response Sample
+
+~~~
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Content-Length: ???
+Connection: close
+Access-Control-Allow-Origin: *
+
+["SSID1","SSID2","SSID3",...,"SSIDn"]
+~~~
+
+#### GET /confirm
+
+|Parameter	|Type	|Remarks	|
+|:----------|:------|:----------|
+|ssid		|text/plain	|			|
+|password	|text/plain	|			|
+|hostname	|text/plain	|			|
+|stealth	|text/plain	|"true" or "false"	|
+
+|Response	|Code	|Type	|Remarks	|
+|:----------|:------|:------|:----------|
+|only code	|200	|		|			|
+
+#### GET /isConnected
+
+|Parameter	|Type	|Remarks	|
+|:----------|:------|:----------|
+|none		|		|			|
+
+|Response	|Code	|Type	|Remarks	|
+|:----------|:------|:------|:----------|
+|status		|200	|text/plain	|"false" or local IP address|
+
+#### GET /reboot
+
+|Parameter	|Type	|Remarks	|
+|:----------|:------|:----------|
+|none		|		|			|
+
+|Response	|Code	|Type	|Remarks	|
+|:----------|:------|:------|:----------|
+|only code	|200	|		|			|
+
+#### GET /test
+
+for developers
+
+|Parameter	|Type	|Remarks	|
+|:----------|:------|:----------|
+|ssid		|text/plain	|			|
+|password	|text/plain	|			|
+
+|Response	|Code	|Type	|Remarks	|
+|:----------|:------|:------|:----------|
+|status		|200	|text/plain	|"successful" or "failed"|
+
+
+### Main Page
+
+#### GET /
+
+|Parameter	|Type	|Remarks	|
+|:----------|:------|:----------|
+|none		|		|			|
+
+|Response	|Code	|Type	|Remarks	|
+|:----------|:------|:------|:----------|
+|Main Page	|200	|text/html	|			|
+
+#### GET /name-list
+
+|Parameter	|Type	|Remarks	|
+|:----------|:------|:----------|
+|none		|		|			|
+
+|Response	|Code	|Type	|Remarks	|
+|:----------|:------|:------|:----------|
+|a list of channel names |200	|list of string	|	|
+
+Response Sample
+
+~~~
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Content-Length: ???
+Connection: close
+Access-Control-Allow-Origin: *
+
+["name of ch 1","name of ch 2",...,"name of ch n"]
+~~~
+
+#### GET /name-list
+
+|Parameter	|Type	|Remarks	|
+|:----------|:------|:----------|
+|none		|		|			|
+
+|Response	|Code	|Type	|Remarks	|
+|:----------|:------|:------|:----------|
+|a list of channel names |200	|Json	|	|
+
+#### GET /send
+
+|Parameter	|Type	|Remarks	|
+|:----------|:------|:----------|
+|ch			|number	|			|
+
+|Response	|Code	|Type	|Remarks	|
+|:----------|:------|:------|:----------|
+|status		|200	|text/plain	|			|
+
+#### GET /recode
+
+|Parameter	|Type	|Remarks	|
+|:----------|:------|:----------|
+|ch			|number	|			|
+
+|Response	|Code	|Type	|Remarks	|
+|:----------|:------|:------|:----------|
+|status		|200	|text/plain	|			|
+
+#### GET /rename
+
+|Parameter	|Type	|Remarks	|
+|:----------|:------|:----------|
+|ch			|number	|			|
+|name		|string	|new name	|
+
+|Response	|Code	|Type	|Remarks	|
+|:----------|:------|:------|:----------|
+|status		|200	|text/plain	|			|
+
+#### GET /IR\_data/1.json
+
+1.json, 2.json, ... , n.json  
+n is channel number
+
+|Parameter	|Type	|Remarks	|
+|:----------|:------|:----------|
+|none		|		|			|
+
+|Response	|Code	|Type	|Remarks	|
+|:----------|:------|:------|:----------|
+|irJson		|200	|application/json	|			|
+
+#### GET /upload
+
+|Parameter	|Type	|Remarks	|
+|:----------|:------|:----------|
+|ch			|number	|			|
+|name		|string	|new name	|
+|irJson		|json	|signal data|
+
+|Response	|Code	|Type	|Remarks	|
+|:----------|:------|:------|:----------|
+|status		|200	|text/plain	|			|
+
+#### GET /clear
+
+|Parameter	|Type	|Remarks	|
+|:----------|:------|:----------|
+|ch			|number	|			|
+
+|Response	|Code	|Type	|Remarks	|
+|:----------|:------|:------|:----------|
+|status		|200	|text/plain	|			|
+
+#### GET /clear-all
+
+|Parameter	|Type	|Remarks	|
+|:----------|:------|:----------|
+|none		|		|			|
+
+|Response	|Code	|Type	|Remarks	|
+|:----------|:------|:------|:----------|
+|status		|200	|text/plain	|			|
+
+#### GET /disconnect-wifi
+
+|Parameter	|Type	|Remarks	|
+|:----------|:------|:----------|
+|none		|		|			|
+
+|Response	|Code	|Type	|Remarks	|
+|:----------|:------|:------|:----------|
+|status		|200	|text/plain	|			|
+
+#### GET /info
+
+|Parameter	|Type	|Remarks	|
+|:----------|:------|:----------|
+|none		|		|			|
+
+|Response	|Code	|Type	|Remarks	|
+|:----------|:------|:------|:----------|
+|a list of information |200	|list of string	|	|
+
+Response Sample
+
+~~~
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Content-Length: ???
+Connection: close
+Access-Control-Allow-Origin: *
+
+["status","SSID","Local IP address","mDNS URL"]
+~~~
