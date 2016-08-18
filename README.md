@@ -10,6 +10,15 @@ You can control your home appliances with your smartphone or laptop.
   * IR LED
   * Indicator LED
 
+## Looks
+
+### The Device's Appearance
+
+![body](body.jpg)
+
+### Display Sample
+
+![display](display.png)
 
 # How to Use
 
@@ -19,40 +28,33 @@ You can control your home appliances with your smartphone or laptop.
   1. Connect your cellphone or laptop to Wi-Fi SSID "IR-Station".
   1. Access http://192.168.4.1 in a browser
   1. Enter Wi-Fi SSID of your home and its password
-  1. Enter a device name you like. Because it will be a part of URL, you cannot use space or symbol character.
-  1. Click OK button.
-  1. If connection succeeded, Wi-Fi "IR-Station" will automatically disappear.
+  1. Enter a device name you like. We call it the hostname. Because it will be a part of URL, you cannot use space character.
+  1. If connection succeeded, IR-Station's local IP address is displayed. Please make a note of it.
   1. Connect your cellphone or laptop to your home's Wi-Fi.
-  1. Access http://DEVICE_NAME.local in a browser. (the smart phones or laptops with Bonjour)
-  1. Access http:/192.168.xx.xx (one example) in a browser. Please see the device log data to get the device IP address. (the smart phones or laptops with no Bonjour)
+  1. Access http:/xxx.xxx.xx.xx (IR-Station's local IP address) in a browser. (for example http://192.168.1.3 )
   1. If something appears, setup is complete.
 
 ## Store Signals
 
-  1. Access http://DEVICE_NAME.local in a browser. DEVICE_NAME is the device name you entered in the previous form.
-  1. Look at the form of the bottom of the screen.
-  1. Click "Recode a Signal" button.
-  1. Select a channel you want to assign a signal.
-  1. Enter a name of the signal. Don't use Japanese character.
-  1. Click Recode button. An LED indicator will light.
-  1. Press the button on the remote controller toward the device to store the signal.
+  1. Access http:/192.168.xx.xx (one example) in a browser.   1. Look at the form of the bottom of the screen.
+  1. Select "Recode a new Signal" action.
+  1. Select a channel you want to assign a new signal.
+  1. Enter a name of the signal.
+  1. When you click the "Submit" button, the green LED of your IR-Station will light up.
+  1. Press a button on your remote controller toward your IR-Station to store a new signal.
 
 ## Remote Control
 
-  1. Access http://DEVICE_NAME.local in a browser.
+  1. Access your IR-Station in a browser.
   1. Click a button which assigned a signal you want to send.
 
-## LED Indicator
+## Meanings of LED Indicator
 
 |Color	|Status	|
 |:----------|:-----------|
 |Red	|Error	|
 |Green	|Booting, Sending Signal or Receiving Signal	|
 |Blue	|Listening	|
-
-## Display Sample
-
-![display](display.png)
 
 # How to Make
 
@@ -94,33 +96,32 @@ Please Add the Libraries below to your Arduino IDE
 
 ### Device Components
 
-|Components|Details|Quantity|
-|:-------------|:-------|:--------|
-| ESP8266 WiFi Module | ESP-WROOM-02 | 1 |
-| IR receiver | PL-IRM1261 or equivalents (3.3V) | 1 |
-| IR LED | anything good | 2 or 4 |
-| Nch FET | IRLML6344 or equivalents | 1 |
-| IR LED Current Regulation Resistor | 4.7 ohms, 1W | 1 or 2 |
-| Pull-up/down Resistor | 10k ohms | 2 |
-| Indicator LED | RGB full-color LED | 1 |
-| Current Regulation Resistor for LED | 100~220 ohms | 3 |
-| Voltage Regulator | output: 3.3V 150mA or more | 1 |
-| Bypass Capacitor | 0.1uF | 2~3 |
-| Power Stabilization Capacitor | 470uF~1000uF | 1 |
-| User Button | tact switch | 1 |
+|Components					|Details		|Quantity	|Remarks					|
+|:--------------------------|:--------------|:----------|:--------------------------|
+|ESP8266 WiFi Module		|ESP-WROOM-02	| 1 		|							|
+|IR receiver				|OSRB38C9AA		| 1 		|Power: 3.3V				|
+|IR LED						|OSI5FU3A11C	| 2 or 4 	|anything maybe OK			|
+|Voltage Regulator			|TAR5SB33		| 1 		|output: 3.3V 200mA or more	|
+|Nch MOS-FET				|IRLML6344		| 1 		|							|
+|Resistor for IR LED		|4.7 ohms, 1W	| 1 or 2 	|							|
+|Pull-up/down Resistor		|10k ohms 		| 3 		|							|
+|Indicator LED				|LATBT66B		| 1 		|							|
+|Resistor for LED			|100~220 ohms	| 3 		|							|
+|Resistor for IR receiver	|220 ohms		| 1 		|							|
+|Capacitor for IR receiver	|4.7uF 			| 3 		|							|
+|Power Stabilization Capacitor	|220uF~470uF| 1			|							|
+|Bypass Capacitor			|0.1uF 			| 3 		|							|
+|User Button				|SKRPACE010 	| 1			|							|
+|Poly Switch				|MICROSMD035F-02| 1			|up to 350mA				|
+|USB Conncector				|USB-Micro-B	| 1			|Power Only					|
 
-### Optional Device Components
-
-|Components|Details|Quantity|
-|:-------------|:-------|:--------|
-| Reset Switch | tact switch | 1 |
+![Components](components.jpg)
 
 ### Requires
 
 | Requires |Details|Quantity|
 |:------|:-------|:--------|
 | Serial-to-USB conversion Module | such as FT232  | 1 |
-| Power Supplyer | over 3.3V | 1 |
 
 ## Circuit Diagram
 
@@ -129,4 +130,3 @@ Please Add the Libraries below to your Arduino IDE
 ## Sample
 
 ![sample](sample.jpg)
-
