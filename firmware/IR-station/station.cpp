@@ -21,7 +21,6 @@ void IR_Station::begin(void) {
   if (settingsRestoreFromFile() == false) {
     reset();
   }
-  restoreChName();
 
   setupButtonInterrupt();
 
@@ -36,6 +35,7 @@ void IR_Station::begin(void) {
       break;
     case IR_STATION_MODE_STA:
       println_dbg("Boot Mode: Station");
+      restoreChName();
       WiFi.mode(WIFI_STA);
       WiFi.config(local_ip, subnet_mask, gateway);
       connectWifi(ssid, password, stealth);
@@ -49,6 +49,7 @@ void IR_Station::begin(void) {
       break;
     case IR_STATION_MODE_AP:
       println_dbg("Boot Mode: AP");
+      restoreChName();
       // set WiFi Mode
       WiFi.mode(WIFI_AP);
       setupAP(SOFTAP_SSID, SOFTAP_PASS);

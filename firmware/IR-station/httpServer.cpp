@@ -70,6 +70,8 @@ void setupFormServer(void) {
     println_dbg("mDNS Address: " + station.hostname);
     indicator.set(0, 1023, 0);
     server.send(200);
+    WiFi.disconnect();
+    delay(1000);
     WiFi.begin(station.ssid.c_str(), station.password.c_str());
   });
   server.on("/isConnected", []() {
@@ -111,7 +113,8 @@ void setupFormServer(void) {
     println_dbg("Target Password: " + station.password);
     indicator.set(0, 1023, 0);
     if (connectWifi(station.ssid.c_str(), station.password.c_str())) {
-      server.send(200, "text/plain", "Connection Successful");
+      String res = (String)WiFi.localIP()[0] + "." + WiFi.localIP()[1] + "." + WiFi.localIP()[2] + "." + WiFi.localIP()[3];
+      server.send(200, "text/plain", res);
     } else {
       server.send(200, "text/plain", "Connection Failed");
     }
