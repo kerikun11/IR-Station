@@ -33,7 +33,7 @@ You can control your home appliances with your smartphone or laptop.
   1. Enter a device name you like. We call it the hostname. Because it will be a part of URL, you cannot use space character.
   1. If connection succeeded, IR-Station's local IP address is displayed. Please make a note of it.
   1. Connect your cellphone or laptop to your home's Wi-Fi.
-  1. Access http:/xxx.xxx.xx.xx (IR-Station's local IP address) in a browser. (for example http://192.168.1.3 )
+  1. Access http:/xxx.xxx.xx.xx (IR-Station's local IP address) in a browser. (for example http://192.168.11.3 )
   1. If something appears, setup is complete.
 
 ### Store Signals
@@ -133,6 +133,28 @@ Please Add the Libraries below to your Arduino IDE
 
 ![sample](sample.jpg)
 
+## IR data JSON format
+
+### format
+
+~~~json
+{
+	"data":[uint16_t microseconds_high, uint16_t microseconds_low, uint16_t microseconds_high, uint16_t microseconds_low, ... ],
+	"name":"name of button"
+}
+~~~
+
+### Sample
+
+~~~json
+{
+	"data":[
+		3300,1786,363,1305,390,473,364,476,317,548,289,577,288,501,364,474,390,475,290,550,289,1403,290,551,314,1377,290,552,313,502,362,1379,289,1378,289,1378,314,1377,389,1304,364,476,312,552,290,553,312,474,391,1305,362,501,364,474,361,504,289,553,312,477,363,500,364,476,287,578,289,1377,314,551,290,502,363,476,388,474,391,451,313,551,313,553,288,500,363,1304,385,1362,310,475,389,475,364,477,313,552,288,1380,317,50215,3305,3489,314
+	],
+	"name":"TV Power"
+}
+~~~
+
 ## HTTP API
 
 ### Setup Form
@@ -159,7 +181,7 @@ Please Add the Libraries below to your Arduino IDE
 
 Response Sample
 
-~~~
+~~~http
 HTTP/1.1 200 OK
 Content-Type: text/plain
 Content-Length: ???
@@ -240,7 +262,7 @@ for developers
 
 Response Sample
 
-~~~
+~~~http
 HTTP/1.1 200 OK
 Content-Type: text/plain
 Content-Length: ???
@@ -249,16 +271,6 @@ Access-Control-Allow-Origin: *
 
 ["name of ch 1","name of ch 2",...,"name of ch n"]
 ~~~
-
-#### GET /name-list
-
-|Parameter	|Type	|Remarks	|
-|:----------|:------|:----------|
-|none		|		|			|
-
-|Response	|Code	|Type	|Remarks	|
-|:----------|:------|:------|:----------|
-|a list of channel names |200	|Json	|	|
 
 #### GET /send
 
@@ -358,7 +370,7 @@ n is channel number
 
 Response Sample
 
-~~~
+~~~http
 HTTP/1.1 200 OK
 Content-Type: text/plain
 Content-Length: ???
