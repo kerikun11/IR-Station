@@ -81,9 +81,6 @@ void setupFormServer(void) {
       String res = (String)WiFi.localIP()[0] + "." + WiFi.localIP()[1] + "." + WiFi.localIP()[2] + "." + WiFi.localIP()[3];
       server.send(200, "text/palin", res);
       station.setMode(IR_STATION_MODE_STA);
-      station.local_ip = WiFi.localIP();
-      station.subnet_mask = WiFi.subnetMask();
-      station.gateway = WiFi.gatewayIP();
       indicator.set(0, 0, 1023);
       delay(6000);
       ESP.reset();
@@ -149,114 +146,13 @@ void setupServer(void) {
     dispRequest();
     String res = "";
     res += "[";
-    for (uint8_t ch = 0; ch < IR_CH_SIZE; ch++) {
+    for (uint8_t ch = 0; ch < station.channels; ch++) {
       res += "\"" + station.chName[ch] + "\"";
-      if (ch != IR_CH_SIZE - 1) res += ",";
+      if (ch != station.channels - 1) res += ",";
     }
     res += "]";
     server.send(200, "text/json", res);
     println_dbg("End");
-  });
-  server.on("/send", []() {
-    dispRequest();
-    String res;
-    uint8_t ch = server.arg("ch").toInt();
-    ch -= 1; // display: 1 ch ~ IR_CH_SIZE ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
-    if (0 <= ch  && ch < IR_CH_SIZE) {
-      if (station.irSendSignal(ch)) {
-        res = "Sent ch " + String(ch + 1, DEC) + " (" + station.chName[ch] + ")";
-      } else {
-        res = "No signal was sent";
-      }
-    } else {
-      res = "Invalid channel selected. Sending failed";
-    }
-    server.send(200, "text/plain", res);
-    println_dbg("End");
-  });
-  server.on("/recode", []() {
-    dispRequest();
-    String status;
-    uint8_t ch = server.arg("ch").toInt();
-    ch -= 1; // display: 1 ch ~ IR_CH_SIZE ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
-    if (0 <= ch  && ch < IR_CH_SIZE) {
-      String name = server.arg("name");
-      if (station.irRecodeSignal(ch, name)) {
-        status = "Recoding Successful: ch " + String(ch + 1);
-      } else {
-        status = "No Signal Recieved";
-      }
-    } else {
-      status = "Invalid Request";
-    }
-    server.send(200, "text/plain", status);
-    println_dbg("End");
-  });
-  server.on("/rename", []() {
-    dispRequest();
-    String status;
-    uint8_t ch = server.arg("ch").toInt();
-    ch -= 1; // display: 1 ch ~ IR_CH_SIZE ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
-    if (0 <= ch  && ch < IR_CH_SIZE) {
-      if (station.renameSignal(ch, server.arg("name"))) {
-        status = "Rename successful";
-      } else {
-        status = "Rename Failed";
-      }
-    } else {
-      status = "Invalid Request";
-    }
-    server.send(200, "text/plain", status);
-    println_dbg("End");
-  });
-  server.on("/upload", []() {
-    // Request detail
-    dispRequest();
-    String status;
-    // Match the request
-    uint8_t ch = server.arg("ch").toInt();
-    ch -= 1; // display: 1 ch ~ IR_CH_SIZE ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
-    if (0 <= ch  && ch < IR_CH_SIZE) {
-      if (station.uploadSignal(ch, server.arg("name"), server.arg("irJson"))) {
-        status = "Upload successful";
-      } else {
-        status = "Upload Failed";
-      }
-    } else {
-      status = "Invalid Request";
-    }
-    server.send(200, "text/plain", status);
-    println_dbg("End");
-  });
-  server.on("/clear", []() {
-    dispRequest();
-    String status;
-    uint8_t ch = server.arg("ch").toInt();
-    ch -= 1; // display: 1 ch ~ IR_CH_SIZE ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
-    if (0 <= ch  && ch < IR_CH_SIZE) {
-      if (station.clearSignal(ch)) {
-        status = "Cleared Signal";
-      } else {
-        status = "Clean Failed";
-      }
-    } else {
-      status = "Invalid Request";
-    }
-    server.send(200, "text/plain", status);
-    println_dbg("End");
-  });
-  server.on("/clear-all", []() {
-    dispRequest();
-    station.clearSignals();
-    server.send(200, "text/plain", "Cleared All Signals");
-    println_dbg("End");
-  });
-  server.on("/disconnect-wifi", []() {
-    dispRequest();
-    server.send(200, "text/plain", "Disconnected this WiFi, Please connect again");
-    println_dbg("Change WiFi");
-    delay(1000);
-    station.reset();  // automatically rebooted
   });
   server.on("/info", []() {
     dispRequest();
@@ -274,6 +170,125 @@ void setupServer(void) {
     res += "\"]";
     server.send(200, "text/json", res);
     println_dbg("End");
+  });
+  server.on("/send", []() {
+    dispRequest();
+    String res;
+    uint8_t ch = server.arg("ch").toInt();
+    ch -= 1; // display: 1 ch ~ channels ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
+    if (0 <= ch  && ch < station.channels) {
+      if (station.irSendSignal(ch)) {
+        res = "Sent ch " + String(ch + 1, DEC) + " (" + station.chName[ch] + ")";
+      } else {
+        res = "No signal was sent";
+      }
+    } else {
+      res = "Invalid channel selected. Sending failed";
+    }
+    server.send(200, "text/plain", res);
+    println_dbg("End");
+  });
+  server.on("/recode", []() {
+    dispRequest();
+    String status;
+    uint8_t ch = server.arg("ch").toInt();
+    ch -= 1; // display: 1 ch ~ channels ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
+    if (0 <= ch  && ch < station.channels) {
+      String name = server.arg("name");
+      if (station.irRecodeSignal(ch, name)) {
+        status = "Recoding Successful: ch " + String(ch + 1);
+      } else {
+        status = "No Signal Recieved";
+      }
+    } else {
+      status = "Invalid Request";
+    }
+    server.send(200, "text/plain", status);
+    println_dbg("End");
+  });
+  server.on("/rename", []() {
+    dispRequest();
+    String status;
+    uint8_t ch = server.arg("ch").toInt();
+    ch -= 1; // display: 1 ch ~ channels ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
+    if (0 <= ch  && ch < station.channels) {
+      if (station.renameSignal(ch, server.arg("name"))) {
+        status = "Rename successful";
+      } else {
+        status = "Rename Failed";
+      }
+    } else {
+      status = "Invalid Request";
+    }
+    server.send(200, "text/plain", status);
+    println_dbg("End");
+  });
+  server.on("/upload", []() {
+    // Request detail
+    dispRequest();
+    String status;
+    // Match the request
+    uint8_t ch = server.arg("ch").toInt();
+    ch -= 1; // display: 1 ch ~ channels ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
+    if (0 <= ch  && ch < station.channels) {
+      if (station.uploadSignal(ch, server.arg("name"), server.arg("irJson"))) {
+        status = "Upload successful";
+      } else {
+        status = "Upload Failed";
+      }
+    } else {
+      status = "Invalid Request";
+    }
+    server.send(200, "text/plain", status);
+    println_dbg("End");
+  });
+  server.on("/clear", []() {
+    dispRequest();
+    String status;
+    uint8_t ch = server.arg("ch").toInt();
+    ch -= 1; // display: 1 ch ~ channels ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
+    if (0 <= ch  && ch < station.channels) {
+      if (station.clearSignal(ch)) {
+        status = "Cleared Signal";
+      } else {
+        status = "Clean Failed";
+      }
+    } else {
+      status = "Invalid Request";
+    }
+    server.send(200, "text/plain", status);
+    println_dbg("End");
+  });
+  server.on("/clear-all", []() {
+    dispRequest();
+    station.clearSignals();
+    server.send(200, "text/plain", "Cleared All Signals");
+    println_dbg("End");
+  });
+  server.on("/increment-channels", []() {
+    dispRequest();
+    int num = server.arg("number").toInt();
+    if (station.increaseChannel(num)) {
+      server.send(200, "text/plain", "Increment " + String(num, DEC) + " channels");
+    } else {
+      server.send(200, "text/plain", "reached the maximum");
+    }
+  });
+  server.on("/decrement-channels", []() {
+    dispRequest();
+    int num = server.arg("number").toInt();
+    if (station.decreaseChannel(num)) {
+      server.send(200, "text/plain", "Decrement " + String(num, DEC) + " channels");
+    } else {
+      server.send(200, "text/plain", "reached the minimum");
+    }
+  });
+  server.on("/disconnect-wifi", []() {
+    dispRequest();
+    server.send(200, "text/plain", "Disconnected this WiFi, Please connect again");
+    println_dbg("Change WiFi");
+    delay(1000);
+    station.reset();  // automatically rebooted
   });
   server.onNotFound([]() {
     dispRequest();
@@ -294,11 +309,11 @@ void setupServer(void) {
   println_dbg("IR Station Server Listening");
 
   println_dbg("Starting SSDP...");
-  SSDP.setSchemaURL("/description.xml");
+  SSDP.setSchemaURL("description.xml");
   SSDP.setHTTPPort(80);
   SSDP.setName(station.hostname);
   SSDP.setSerialNumber(String(ESP.getChipId() , HEX));
-  SSDP.setURL("/index.htm");
+  SSDP.setURL("index.htm");
   SSDP.setModelName("IR-Station");
   SSDP.setModelNumber("20160821");
   SSDP.setModelURL("https://github.com/kerikun11/IR-station");

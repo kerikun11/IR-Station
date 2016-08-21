@@ -37,7 +37,6 @@ void IR_Station::begin(void) {
       println_dbg("Boot Mode: Station");
       restoreChName();
       WiFi.mode(WIFI_STA);
-      WiFi.config(local_ip, subnet_mask, gateway);
       connectWifi(ssid, password, stealth);
       setupOTA();
       setupServer();
@@ -67,6 +66,8 @@ void IR_Station::reset() {
   ssid = "";
   password = "";
   hostname = HOSTNAME_DEFAULT;
+  stealth = false;
+  channels = NUM_OF_CH_DEFAULT;
   setMode(IR_STATION_MODE_NULL);
   ESP.reset();
 }
@@ -93,6 +94,26 @@ void IR_Station::setupButtonInterrupt() {
   println_dbg("attached button interrupt");
 }
 
+bool IR_Station::increaseChannel(int num) {
+  if (station.channels + num > IR_CH_SIZE_MAX) {
+    return false;
+  } else {
+    station.channels += num;
+    station.settingsBackupToFile();
+    return true;
+  }
+}
+
+bool IR_Station::decreaseChannel(int num) {
+  if (station.channels - num < 0) {
+    return false;
+  } else {
+    station.channels -= num;
+    station.settingsBackupToFile();
+    return true;
+  }
+}
+
 bool IR_Station::irSendSignal(int ch) {
   String json;
   if (getStringFromFile(IR_DATA_PATH(ch), json)) {
@@ -105,7 +126,7 @@ bool IR_Station::irSendSignal(int ch) {
 }
 
 bool IR_Station::clearSignals() {
-  for (uint8_t ch = 0; ch < IR_CH_SIZE; ch++) {
+  for (uint8_t ch = 0; ch < channels; ch++) {
     clearSignal(ch);
   }
   println_dbg("Cleared All Signals");
@@ -168,7 +189,7 @@ bool IR_Station::uploadSignal(int ch, String name, String data) {
 }
 
 void IR_Station::restoreChName(void) {
-  for (int ch = 0; ch < IR_CH_SIZE; ch++) {
+  for (int ch = 0; ch < channels; ch++) {
     String json;
     if (getStringFromFile(IR_DATA_PATH(ch), json)) {
       DynamicJsonBuffer jsonBuffer;
@@ -179,23 +200,22 @@ void IR_Station::restoreChName(void) {
 }
 
 String IR_Station::settingsCrcSerial(void) {
-  return String(mode, DEC) + ssid + password + hostname + String(stealth, DEC) + String(uint32_t(local_ip), DEC) + String(uint32_t(subnet_mask), DEC) + String(uint32_t(gateway), DEC);
+  return String(mode, DEC) + ssid + password + hostname + String(stealth, DEC) + String(channels, DEC);
 }
 
 bool IR_Station::settingsRestoreFromFile(void) {
   String s;
   if (getStringFromFile(SETTINGS_DATA_PATH, s) == false) return false;
   DynamicJsonBuffer jsonBuffer;
-  JsonObject& data = jsonBuffer.parseObject(s);
-  mode = (int)data["mode"];
-  ssid = (const char*)data["ssid"];
-  password = (const char*)data["password"];
-  hostname = (const char*)data["hostname"];
-  stealth = (bool)data["stealth"];
-  local_ip = IPAddress((uint32_t)data["local_ip"]);
-  subnet_mask = IPAddress((uint32_t)data["subnet_mask"]);
-  gateway = IPAddress((uint32_t)data["gateway"]);
-  uint8_t crc = (uint8_t)data["crc"];
+  JsonObject& root = jsonBuffer.parseObject(s);
+  mode = (int)root["mode"];
+  ssid = (const char*)root["ssid"];
+  password = (const char*)root["password"];
+  hostname = (const char*)root["hostname"];
+  stealth = (bool)root["stealth"];
+  channels = (int)root["channels"];
+
+  uint8_t crc = (uint8_t)root["crc"];
   String serial = settingsCrcSerial();
   if (crc != crc8((uint8_t*)serial.c_str(), serial.length(), CRC8INIT)) {
     println_dbg("CRC8 difference");
@@ -213,9 +233,7 @@ bool IR_Station::settingsBackupToFile(void) {
   root["password"] = password;
   root["hostname"] = hostname;
   root["stealth"] = stealth;
-  root["local_ip"] = uint32_t(local_ip);
-  root["local_ip"] = uint32_t(subnet_mask);
-  root["local_ip"] = uint32_t(gateway);
+  root["channels"] = channels;
   String serial = settingsCrcSerial();
   root["crc"] = crc8((uint8_t*)serial.c_str(), serial.length(), CRC8INIT);
   String str = "";

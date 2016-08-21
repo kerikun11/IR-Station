@@ -9,6 +9,8 @@
 #define IR_STATION_MODE_STA   1
 #define IR_STATION_MODE_AP    2
 
+#define IR_CH_SIZE_MAX        100
+
 class IR_Station {
   public:
     uint8_t mode;
@@ -16,17 +18,18 @@ class IR_Station {
     String password;
     String hostname;
     bool stealth;
-    IPAddress local_ip;
-    IPAddress gateway;
-    IPAddress subnet_mask;
 
-    String chName[IR_CH_SIZE];
+    int channels;
+    String chName[IR_CH_SIZE_MAX];
 
     void begin(void);
     void reset();
     void setMode(uint8_t newMode);
 
     void setupButtonInterrupt();
+
+    bool increaseChannel(int num);
+    bool decreaseChannel(int num);
 
     bool clearSignal(int ch);
     bool clearSignals();

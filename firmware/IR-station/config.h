@@ -15,7 +15,7 @@
 
 /* Software */
 // for Remocon
-#define IR_CH_SIZE              (25)
+#define NUM_OF_CH_DEFAULT       (25)
 
 // SPIFFS saving path
 #define IR_DATA_PATH(i)         ("/general/IR_data/" + String(i + 1, DEC) + ".json")
