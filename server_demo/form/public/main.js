@@ -47,18 +47,8 @@ function form(){
 					clearInterval(timerID);
 					timerID = null;
 					$('#info-status').html(
-						'Connection Successful.'
-						+'<br/>'+
-							'Please make a note of these URL.'
-						+'<br/>'+
-							'Screenshot is also good!'
-						+'<br/>'+
-							'For Apple device: http://'+hostname+'.local/'
-						+'<br/>'+
-							'For all device: http://'+res+'/'
+						'Connection Successful.<br/>URL: <a href="http://'+res+'/" target="_blank">http://'+res+'/</a>'
 					);
-					$('#info button[name="reload"]').hide();
-					$('#info button[name="reboot"]').show();
 				}
 			}).fail(function(){
 				$('#info-status').text('Connection Failed. Please Reload.');
@@ -80,9 +70,6 @@ function setAP(){
 		});
 	}
 }
-$('#info button[name="reboot"]').click(function(){
-	$.get('/reboot');
-});
 
 $('#form button').click(form);
 $('#form input').keypress(function(e){

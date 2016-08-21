@@ -2,6 +2,7 @@
 
 #include <ESP8266WebServer.h>
 #include <ESP8266HTTPUpdateServer.h>
+#include <ESP8266SSDP.h>
 #include <ESP8266mDNS.h>
 #include <DNSServer.h>
 #include <FS.h>
@@ -84,16 +85,13 @@ void setupFormServer(void) {
       station.subnet_mask = WiFi.subnetMask();
       station.gateway = WiFi.gatewayIP();
       indicator.set(0, 0, 1023);
+      delay(6000);
+      ESP.reset();
     } else {
       println_dbg("Not connected yet.");
       server.send(200, "text/plain", "false");
       println_dbg("End");
     }
-  });
-  server.on("/reboot", []() {
-    server.send(200);
-    delay(100);
-    ESP.reset();
   });
   server.on("/set-ap-mode", []() {
     dispRequest();
@@ -284,11 +282,28 @@ void setupServer(void) {
     server.send(200, "text/html", res);
     println_dbg("End");
   });
+  server.on("/description.xml", HTTP_GET, []() {
+    dispRequest();
+    SSDP.schema(server.client());
+  });
 
   server.serveStatic("/", SPIFFS, "/general/", "public");
 
   // Start TCP (HTTP) server
   server.begin();
   println_dbg("IR Station Server Listening");
+
+  println_dbg("Starting SSDP...");
+  SSDP.setSchemaURL("/description.xml");
+  SSDP.setHTTPPort(80);
+  SSDP.setName(station.hostname);
+  SSDP.setSerialNumber(String(ESP.getChipId() , HEX));
+  SSDP.setURL("/index.htm");
+  SSDP.setModelName("IR-Station");
+  SSDP.setModelNumber("20160821");
+  SSDP.setModelURL("https://github.com/kerikun11/IR-station");
+  SSDP.setManufacturer("KERI's Lab");
+  SSDP.setManufacturerURL("http://kerikeri.top");
+  SSDP.begin();
 }
 
