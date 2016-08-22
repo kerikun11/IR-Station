@@ -5,11 +5,13 @@
 		<title>IR Station</title>
 		<style type="text/css">
 			body {
+				box-sizing:border-box;
 				background-color:#BBDDFF;
 				margin:auto;
 				max-width:1000px;
 			}
 			#send button {
+				box-sizing:border-box;
 				font-size:1.5em;
 				line-height:4em;
 				overflow:hidden;
@@ -23,8 +25,8 @@
 			.container{
 				float:left;
 				width:auto;
-				margin: 15px;
 				min-width:16em;
+				margin: 15px;
 			}
 			.container>div{
 				margin-left:15px;
@@ -44,11 +46,11 @@
 		<h1 style="text-align:center">IR Station</h1>
 
 		<div id="main" style="display:none">
-			<div id="send" class="container btn-group" style="text-align:center;margin:15px;">
+			<div id="send" class="btn-group" style="text-align:center;">
 				<!-- js adds buttons x25-->
 			</div>
 
-			<div id="settings" class="container" style="margin-left:45px;">
+			<div id="settings" class="container">
 				<h2>Settings</h2>
 				<div id="manage" class="form-horizontal">
 					<div class="form-group" id="form-action">
@@ -61,6 +63,8 @@
 								<option value="download">Download a Signal</option>
 								<option value="clear">Clear a Signal</option>
 								<option value="clear-all">Clear All Signals</option>
+								<option value="increment-channels">Add Channels</option>
+								<option value="decrement-channels">Remove Channels</option>
 								<option value="disconnect-wifi">Change WiFi</option>
 							</select>
 						</div>
@@ -85,9 +89,15 @@
 							<input id="input-name" type="text" name="name">
 						</div>
 					</div>
+					<div class="form-group" id="form-number" style="display:none">
+						<label class="control-label col-sm-2">How many</label>
+						<div class="col-sm-4">
+							<input id="input-number" type="number" name="number">
+						</div>
+					</div>
 					<div class="form-group" id="form-submit">
-						<label style="color:red;"></label>
-						<div class="col-sm-offset-2 col-sm-4">
+						<label class="control-label col-sm-2" style="color:red;"></label>
+						<div class="col-sm-2">
 							<button>Submit</button>
 						</div>
 					</div>
@@ -111,10 +121,10 @@
 			</div>
 		</div>
 
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 		<!--
-		<script src="/jquery-2.2.3.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 		-->
+		<script src="/jquery-2.2.3.min.js"></script>
 		<script src="/main.js"></script>
 	</body>
 </html>

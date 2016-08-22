@@ -30,34 +30,31 @@ $(document).on('click','#send button',function(){
 /* manage signals */
 $('#manage select[name="action"]').change(function(){
 	var action = $(this).val();
-	if(action == "recode"){
+	if(action == "recode" || action == "rename"){
 		$('#form-ch').show();
 		$('#form-name').show();
 		$('#form-file').hide();
-	}else if(action == "rename"){
-		$('#form-ch').show();
-		$('#form-name').show();
-		$('#form-file').hide();
+		$('#form-number').hide();
 	}else if(action == "upload"){
 		$('#form-ch').show();
 		$('#form-name').show();
 		$('#form-file').show();
-	}else if(action == "download"){
+		$('#form-number').hide();
+	}else if(action == "download" || action == "clear"){
 		$('#form-ch').show();
 		$('#form-name').hide();
 		$('#form-file').hide();
-	}else if(action == "clear"){
-		$('#form-ch').show();
-		$('#form-name').hide();
-		$('#form-file').hide();
-	}else if(action == "clear-all"){
+		$('#form-number').hide();
+	}else if(action == "clear-all" || action == "disconnect-wifi"){
 		$('#form-ch').hide();
 		$('#form-name').hide();
 		$('#form-file').hide();
-	}else if(action == "disconnect-wifi"){
+		$('#form-number').hide();
+	}else if(action == "increment-channels" || action == "decrement-channels"){
 		$('#form-ch').hide();
 		$('#form-name').hide();
 		$('#form-file').hide();
+		$('#form-number').show();
 	}
 });
 function manage(){
@@ -143,7 +140,6 @@ function manage(){
 			loadChName();
 		});
 	}else if(action == "clear-all"){
-		updateStatus("Cleaning...");
 		if(confirm('Are you sure to delete all signals?')){
 			updateStatus("Cleaning...");
 			$.get('/clear-all').done(function(res){
@@ -151,6 +147,24 @@ function manage(){
 				updateStatus(res);
 			});
 		}
+	}else if(action == "increment-channels"){
+		updateStatus("Requesting...");
+		$.get('/increment-channels',{
+			number: $('#input-number').val()
+		}).done(function(res){
+			loadChName();
+			updateStatus(res);
+			$('#input-number').val("");
+		});
+	}else if(action == "decrement-channels"){
+		updateStatus("Requesting...");
+		$.get('/decrement-channels',{
+			number: $('#input-number').val()
+		}).done(function(res){
+			loadChName();
+			updateStatus(res);
+			$('#input-number').val("");
+		});
 	}else if(action == "disconnect-wifi"){
 		if(confirm('Are you sure to disconnect this WiFi?')){
 			$.get('/disconnect-wifi');
