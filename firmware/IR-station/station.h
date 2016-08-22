@@ -36,7 +36,7 @@ class IR_Station {
     bool uploadSignal(int ch, String name, String data);
     bool renameSignal(int ch, String name);
     bool irSendSignal(int ch);
-    bool irRecodeSignal(int ch, String name, uint32_t timeout_ms = 3000);
+    bool irRecodeSignal(int ch, String name, uint32_t timeout_ms = 5000);
 
   private:
     String settingsCrcSerial(void);
