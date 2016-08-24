@@ -214,16 +214,6 @@ Access-Control-Allow-Origin: *
 |:----------|:------|:------|:----------|
 |status		|200	|text/plain	|"false" or local IP address|
 
-#### GET /reboot
-
-|Parameter	|Type	|Remarks	|
-|:----------|:------|:----------|
-|none		|		|			|
-
-|Response	|Code	|Type	|Remarks	|
-|:----------|:------|:------|:----------|
-|only code	|200	|		|			|
-
 #### GET /test
 
 for developers
@@ -343,6 +333,26 @@ n is channel number
 |Parameter	|Type	|Remarks	|
 |:----------|:------|:----------|
 |none		|		|			|
+
+|Response	|Code	|Type	|Remarks	|
+|:----------|:------|:------|:----------|
+|status		|200	|text/plain	|			|
+
+#### GET /increment-channels
+
+|Parameter	|Type	|Remarks	|
+|:----------|:------|:----------|
+|nuber		|number	|			|
+
+|Response	|Code	|Type	|Remarks	|
+|:----------|:------|:------|:----------|
+|status		|200	|text/plain	|			|
+
+#### GET /decrement-channels
+
+|Parameter	|Type	|Remarks	|
+|:----------|:------|:----------|
+|nuber		|number	|			|
 
 |Response	|Code	|Type	|Remarks	|
 |:----------|:------|:------|:----------|
