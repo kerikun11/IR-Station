@@ -3,8 +3,6 @@
 Infrared Remote Controller with ESP8266 WiFi-module  
 You can control your home appliances with your smartphone or laptop.
 
-[TOC]
-
 ## Main parts
 
   * ESP-WROOM-02 (ESP8266 WiFi Module)
@@ -103,10 +101,10 @@ Please Add the Libraries below to your Arduino IDE
 |ESP8266 WiFi Module		|ESP-WROOM-02	| 1 		|							|
 |IR receiver				|OSRB38C9AA		| 1 		|Power: 3.3V				|
 |IR LED						|OSI5FU3A11C	| 2 or 4 	|anything maybe OK			|
-|Voltage Regulator			|TAR5SB33		| 1 		|output: 3.3V 200mA or more	|
+|Voltage Regulator			|NJU7223-33		| 1 		|output: 3.3V 500mA	|
 |Nch MOS-FET				|IRLML6344		| 1 		|							|
 |Resistor for IR LED		|4.7 ohms, 1W	| 1 or 2 	|							|
-|Pull-up/down Resistor		|10k ohms 		| 3 		|							|
+|Pull-up/down Resistor		|10k ohms 		| 5 		|							|
 |Indicator LED				|LATBT66B		| 1 		|							|
 |Resistor for LED			|100~220 ohms	| 3 		|							|
 |Resistor for IR receiver	|220 ohms		| 1 		|							|
@@ -129,9 +127,17 @@ Please Add the Libraries below to your Arduino IDE
 
 ![sketch](sketch.png)
 
-### Sample
+### Breadboard Sample
 
 ![sample](sample.jpg)
+
+### 3D shape
+
+![3D](3d.png)
+
+### PCB pattern sample
+
+![PCB](pcb.png)
 
 ## IR data JSON format
 
