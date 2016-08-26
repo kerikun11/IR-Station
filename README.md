@@ -14,11 +14,11 @@ You can control your home appliances with your smartphone or laptop.
 
 ### The Device's Appearance
 
-![body](body.jpg)
+![body](images/body.jpg)
 
 ### Display Sample
 
-![display](display.png)
+![display](images/display.png)
 
 ## How to Use
 
@@ -115,7 +115,7 @@ Please Add the Libraries below to your Arduino IDE
 |Poly Switch				|MICROSMD035F-02| 1			|up to 350mA				|
 |USB Conncector				|USB-Micro-B	| 1			|Power Only					|
 
-![Components](components.jpg)
+![Components](images/components.jpg)
 
 #### Requires
 
@@ -125,19 +125,19 @@ Please Add the Libraries below to your Arduino IDE
 
 ### Circuit Diagram
 
-![sketch](sketch.png)
+![sketch](images/sketch.png)
 
 ### Breadboard Sample
 
-![sample](sample.jpg)
+![sample](images/sample.jpg)
 
 ### 3D shape
 
-![3D](3d.png)
+![3D](images/3d.png)
 
 ### PCB pattern sample
 
-![PCB](pcb.png)
+![PCB](images/pcb.png)
 
 ## IR data JSON format
 
