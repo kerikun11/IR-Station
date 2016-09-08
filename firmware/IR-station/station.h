@@ -17,6 +17,9 @@ class IR_Station {
     String ssid;
     String password;
     String hostname;
+    IPAddress ipaddress;
+    IPAddress gateway;
+    IPAddress netmask;
     bool stealth;
 
     int channels;
@@ -30,6 +33,7 @@ class IR_Station {
 
     bool increaseChannel(int num);
     bool decreaseChannel(int num);
+    bool changeIPSetting(String ipaddress_s, String gateway_s, String netmask_s);
 
     bool clearSignal(int ch);
     bool clearSignals();

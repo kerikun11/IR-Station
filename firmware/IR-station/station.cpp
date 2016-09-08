@@ -38,6 +38,7 @@ void IR_Station::begin(void) {
       restoreChName();
       WiFi.mode(WIFI_STA);
       connectWifi(ssid, password, stealth);
+      WiFi.config(ipaddress, gateway, netmask);
       setupOTA();
       setupServer();
       indicator.green(0);
@@ -68,6 +69,9 @@ void IR_Station::reset() {
   hostname = HOSTNAME_DEFAULT;
   stealth = false;
   channels = NUM_OF_CH_DEFAULT;
+  ipaddress = 0U;
+  netmask = 0U;
+  gateway = 0U;
   setMode(IR_STATION_MODE_NULL);
   ESP.reset();
 }
@@ -112,6 +116,20 @@ bool IR_Station::decreaseChannel(int num) {
     station.settingsBackupToFile();
     return true;
   }
+}
+
+bool IR_Station::changeIPSetting(String ipaddress_s, String gateway_s, String netmask_s) {
+  if(ipaddress.fromString(ipaddress_s) == true){
+    gateway.fromString(gateway_s);
+    netmask.fromString(netmask_s);
+  }else{
+    ipaddress = 0U;
+    gateway = 0U;
+    netmask = 0U;
+  }
+  WiFi.config(ipaddress, gateway, netmask);
+  settingsBackupToFile();
+  return true;
 }
 
 bool IR_Station::irSendSignal(int ch) {
@@ -200,7 +218,7 @@ void IR_Station::restoreChName(void) {
 }
 
 String IR_Station::settingsCrcSerial(void) {
-  return String(mode, DEC) + ssid + password + hostname + String(stealth, DEC) + String(channels, DEC);
+  return String(mode, DEC) + ssid + password + hostname + String(stealth, DEC) + String(channels, DEC) + ipaddress + netmask + gateway;
 }
 
 bool IR_Station::settingsRestoreFromFile(void) {
@@ -214,6 +232,9 @@ bool IR_Station::settingsRestoreFromFile(void) {
   hostname = (const char*)root["hostname"];
   stealth = (bool)root["stealth"];
   channels = (int)root["channels"];
+  ipaddress = (const uint32_t)root["ipaddress"];
+  netmask = (const uint32_t)root["netmask"];
+  gateway = (const uint32_t)root["gateway"];
 
   uint8_t crc = (uint8_t)root["crc"];
   String serial = settingsCrcSerial();
@@ -234,6 +255,9 @@ bool IR_Station::settingsBackupToFile(void) {
   root["hostname"] = hostname;
   root["stealth"] = stealth;
   root["channels"] = channels;
+  root["ipaddress"] = (const uint32_t)ipaddress;
+  root["netmask"] = (const uint32_t)netmask;
+  root["gateway"] = (const uint32_t)gateway;
   String serial = settingsCrcSerial();
   root["crc"] = crc8((uint8_t*)serial.c_str(), serial.length(), CRC8INIT);
   String str = "";
