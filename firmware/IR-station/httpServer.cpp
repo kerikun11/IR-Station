@@ -292,25 +292,13 @@ void setupServer(void) {
   });
   server.on("/change-ip", []() {
     dispRequest();
-    IPAddress ip;
-    IPAddress netmask;
-    IPAddress gateway;
 
-    ip.fromString(server.arg("ipaddress"));
-    netmask.fromString(server.arg("netmask"));
-    gateway.fromString(server.arg("gateway"));
+    station.changeIPSetting(server.arg("ipaddress"), server.arg("gateway"), server.arg("netmask"));
 
-    println_dbg((String)ip);
-    println_dbg((String)netmask);
-    println_dbg((String)gateway);
-
-    WiFi.config(ip, gateway, netmask);
-    
-    String res = "Change ip addres to ";
+    String res = "Change ip address to ";
     res += (String)WiFi.localIP()[0] + "." + WiFi.localIP()[1] + "." + WiFi.localIP()[2] + "." + WiFi.localIP()[3];
     server.send(200, "text/plain", res);
 
-    println_dbg("res");
     println_dbg(res);
 
     print_dbg("IP address: ");
