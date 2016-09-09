@@ -290,6 +290,22 @@ void setupServer(void) {
     delay(1000);
     station.reset();  // automatically rebooted
   });
+  server.on("/change-ip", []() {
+    dispRequest();
+
+    station.changeIPSetting(server.arg("ipaddress"), server.arg("gateway"), server.arg("netmask"));
+
+    String res = "Change ip address to ";
+    res += (String)WiFi.localIP()[0] + "." + WiFi.localIP()[1] + "." + WiFi.localIP()[2] + "." + WiFi.localIP()[3];
+    server.send(200, "text/plain", res);
+
+    println_dbg(res);
+
+    print_dbg("IP address: ");
+    println_dbg(WiFi.localIP());
+    println_dbg("Changed IP");
+    println_dbg("End");
+  });
   server.onNotFound([]() {
     dispRequest();
     println_dbg("Redirect");

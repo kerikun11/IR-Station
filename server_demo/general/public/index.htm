@@ -66,6 +66,7 @@
 								<option value="increment-channels">Add Channels</option>
 								<option value="decrement-channels">Remove Channels</option>
 								<option value="disconnect-wifi">Change WiFi</option>
+								<option value="change-ip">Change IP</option>
 							</select>
 						</div>
 					</div>
@@ -95,7 +96,25 @@
 							<input id="input-number" type="number" name="number">
 						</div>
 					</div>
-					<div class="form-group" id="form-submit">
+					<div class="form-group" id="form-ipaddress" style="display:none">
+						<label class="control-label col-sm-2">IP address(empty for using DHCP)</label>
+						<div class="col-sm-4">
+							<input id="input-ipaddress" type="text" name="ipAddress">
+						</div>
+					</div>
+					<div class="form-group" id="form-netmask" style="display:none">
+						<label class="control-label col-sm-2">Subnet Mask</label>
+						<div class="col-sm-4">
+							<input id="input-netmask" type="text" name="netmask">
+						</div>
+					</div>
+					<div class="form-group" id="form-gateway" style="display:none">
+						<label class="control-label col-sm-2">Default Gateway</label>
+						<div class="col-sm-4">
+							<input id="input-gateway" type="text" name="gateway">
+						</div>
+					</div>
+					<div class="form-group" id="form-s">
 						<label class="control-label col-sm-2" style="color:red;"></label>
 						<div class="col-sm-2">
 							<button>Submit</button>
