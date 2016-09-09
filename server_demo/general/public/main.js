@@ -35,26 +35,50 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-name').show();
 		$('#form-file').hide();
 		$('#form-number').hide();
+		$('#form-ipaddress').hide();
+		$('#form-netmask').hide();
+		$('#form-gateway').hide();
 	}else if(action == "upload"){
 		$('#form-ch').show();
 		$('#form-name').show();
 		$('#form-file').show();
 		$('#form-number').hide();
+		$('#form-ipaddress').hide();
+		$('#form-netmask').hide();
+		$('#form-gateway').hide();
 	}else if(action == "download" || action == "clear"){
 		$('#form-ch').show();
 		$('#form-name').hide();
 		$('#form-file').hide();
 		$('#form-number').hide();
+		$('#form-ipaddress').hide();
+		$('#form-netmask').hide();
+		$('#form-gateway').hide();
 	}else if(action == "clear-all" || action == "disconnect-wifi"){
 		$('#form-ch').hide();
 		$('#form-name').hide();
 		$('#form-file').hide();
 		$('#form-number').hide();
+		$('#form-ipaddress').hide();
+		$('#form-netmask').hide();
+		$('#form-gateway').hide();
 	}else if(action == "increment-channels" || action == "decrement-channels"){
 		$('#form-ch').hide();
 		$('#form-name').hide();
 		$('#form-file').hide();
 		$('#form-number').show();
+		$('#form-ipaddress').hide();
+		$('#form-netmask').hide();
+		$('#form-gateway').hide();
+	}else if(action == "change-ip")
+	{
+		$('#form-ch').hide();
+		$('#form-name').hide();
+		$('#form-file').hide();
+		$('#form-number').hide();
+		$('#form-ipaddress').show();
+		$('#form-netmask').show();
+		$('#form-gateway').show();
 	}
 });
 function manage(){
@@ -170,7 +194,21 @@ function manage(){
 			$.get('/disconnect-wifi');
 			$('#main').hide();
 		}
+	}else if(action == "change-ip"){
+		if(confirm('Are you sure to change ip address?')){
+ 			$.get('/change-ip',{
+				ipaddress: $('#input-ipaddress').val(),
+				netmask: $('#input-netmask').val(),
+				gateway: $('#input-gateway').val()
+			}).done(function(res){
+				$('#input-ipaddress').val("");
+				$('#input-netmask').val("");
+				$('#input-gateway').val("");
+				updateStatus(res);
+			});
+		}
 	}
+
 	$('#form-submit label').text("")
 }
 $('#manage button').click(manage);
