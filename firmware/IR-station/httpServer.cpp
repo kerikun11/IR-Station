@@ -188,14 +188,14 @@ void setupServer(void) {
     server.send(200, "text/plain", res);
     println_dbg("End");
   });
-  server.on("/recode", []() {
+  server.on("/record", []() {
     dispRequest();
     String status;
     uint8_t ch = server.arg("ch").toInt();
     ch -= 1; // display: 1 ch ~ channels ch but data: 0 ch ~ (IR_CH_NAME - 1) ch so 1 decriment
     if (0 <= ch  && ch < station.channels) {
       String name = server.arg("name");
-      if (station.irRecodeSignal(ch, name)) {
+      if (station.irRecordSignal(ch, name)) {
         status = "Recoding Successful: ch " + String(ch + 1);
       } else {
         status = "No Signal Recieved";

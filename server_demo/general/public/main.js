@@ -30,7 +30,7 @@ $(document).on('click','#send button',function(){
 /* manage signals */
 $('#manage select[name="action"]').change(function(){
 	var action = $(this).val();
-	if(action == "recode" || action == "rename"){
+	if(action == "record" || action == "rename"){
 		$('#form-ch').show();
 		$('#form-name').show();
 		$('#form-file').hide();
@@ -85,12 +85,12 @@ function manage(){
 	var ch = $('#input-ch').val();
 	var name = $('#input-name').val();
 	var action = $('#input-action').val();
-	if(action == "recode"){
+	if(action == "record"){
 		if($('#manage select[name="ch"]').val() == -1){
 			$('#form-submit label').text("Select a channel")
 			return;
 		}
-		$.get('/recode',{
+		$.get('/record',{
 			ch: ch,
 			name: name
 		}).done(function(res){

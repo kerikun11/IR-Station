@@ -170,7 +170,7 @@ bool IR_Station::renameSignal(int ch, String name) {
   return writeStringToFile(IR_DATA_PATH(ch), data);
 }
 
-bool IR_Station::irRecodeSignal(int ch, String name, uint32_t timeout_ms) {
+bool IR_Station::irRecordSignal(int ch, String name, uint32_t timeout_ms) {
   indicator.set(0, 1023, 0);
   ir.resume();
   int timeStamp = millis();

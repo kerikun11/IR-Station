@@ -37,7 +37,7 @@ You can control your home appliances with your smartphone or laptop.
 ### Store Signals
 
   1. Access http:/192.168.xx.xx (one example) in a browser.   1. Look at the form of the bottom of the screen.
-  1. Select "Recode a new Signal" action.
+  1. Select "record a new Signal" action.
   1. Select a channel you want to assign a new signal.
   1. Enter a name of the signal.
   1. When you click the "Submit" button, the green LED of your IR-Station will light up.
@@ -278,7 +278,7 @@ Access-Control-Allow-Origin: *
 |:----------|:------|:------|:----------|
 |status		|200	|text/plain	|			|
 
-#### GET /recode
+#### GET /record
 
 |Parameter	|Type	|Remarks	|
 |:----------|:------|:----------|
