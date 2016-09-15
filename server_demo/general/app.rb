@@ -30,7 +30,7 @@ get "/send" do
 	json "Sent ch"+params[:ch]+" ("+name[params[:ch].to_i-1]+")"
 end
 
-get "/recode" do
+get "/record" do
 	sleep(1)
 	name[params[:ch].to_i-1]=params[:name]
 	json "Recode a signal ch"+params[:ch]+" as "+name[params[:ch].to_i-1]
