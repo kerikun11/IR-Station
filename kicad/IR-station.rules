@@ -1,5 +1,5 @@
 
-(rules PCB ESP-IRKit-02
+(rules PCB IR-station
   (snap_angle 
     fortyfive_degree
   )
@@ -11,7 +11,7 @@
     (via_costs 50)
     (plane_via_costs 5)
     (start_ripup_costs 100)
-    (start_pass_no 1110)
+    (start_pass_no 2376)
     (layer_rule F.Cu
       (active on)
       (preferred_direction horizontal)
@@ -40,17 +40,41 @@
     )
     (attach off)
   )
+  (padstack "Via[0-1]_600:400_um"
+    (shape
+      (circle F.Cu 600.0 0.0 0.0)
+    )
+    (shape
+      (circle B.Cu 600.0 0.0 0.0)
+    )
+    (attach off)
+  )
   (via 
     "Via[0-1]_500:300_um" "Via[0-1]_500:300_um" default
   )
   (via 
+    "Via[0-1]_600:400_um" "Via[0-1]_600:400_um" default
+  )
+  (via 
     "Via[0-1]_500:300_um-kicad_default" "Via[0-1]_500:300_um" "kicad_default"
+  )
+  (via 
+    "Via[0-1]_600:400_um-kicad_default" "Via[0-1]_600:400_um" "kicad_default"
+  )
+  (via 
+    "Via[0-1]_500:300_um-Power" "Via[0-1]_500:300_um" Power
+  )
+  (via 
+    "Via[0-1]_600:400_um-Power" "Via[0-1]_600:400_um" Power
   )
   (via_rule
     default "Via[0-1]_500:300_um"
   )
   (via_rule
     "kicad_default" "Via[0-1]_500:300_um-kicad_default"
+  )
+  (via_rule
+    Power "Via[0-1]_600:400_um-Power"
   )
   (class default
     (clearance_class default)
@@ -63,14 +87,24 @@
     )
   )
   (class "kicad_default"
-    +3V3 GND "Net-(C2-Pad1)" +5V "Net-(C4-Pad1)" "Net-(F1-Pad2)" "Net-(LED1-Pad1)" "Net-(LED1-Pad2)"
-    "Net-(LED2-Pad1)" "Net-(LED2-Pad2)" "Net-(LED3-Pad1)" GPIO2 ADC GPIO4 "IR_OUT" GPIO16
-    RESET BUTTON "LED_R" "LED_G" "LED_B" RXD TXD "IR_IN"
-    "Net-(LED3-Pad2)" "Net-(LED4-Pad1)" "Net-(LED1-Pad3)"
+    GND "Net-(LED1-Pad1)" "Net-(LED1-Pad2)" "Net-(LED2-Pad1)" "Net-(LED2-Pad2)" "Net-(LED3-Pad1)" "IR_OUT" RESET
+    BUTTON "LED_R" "LED_G" "LED_B" RXD TXD "IR_IN" SDA
+    SCL ADC "Net-(C2-Pad1)" GPIO16 "Net-(LED1-Pad3)" "Net-(LED3-Pad2)" "Net-(LED4-Pad1)" "Net-(P2-Pad2)"
     (clearance_class "kicad_default")
     (via_rule kicad_default)
     (rule
       (width 300.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class Power
+    +3V3 +5V /vbus
+    (clearance_class Power)
+    (via_rule Power)
+    (rule
+      (width 500.0)
     )
     (circuit 
       (use_layer F.Cu B.Cu)

@@ -1,4 +1,4 @@
-update=2016/06/16 23:58:27
+update=2016/09/16 21:16:53
 version=1
 last_client=kicad
 [pcbnew]
@@ -58,5 +58,4 @@ LibName26=opto
 LibName27=atmel
 LibName28=contrib
 LibName29=valves
-LibName30=C:/Users/kerikun11/Dropbox/KiCad/My Components/ESP8266
-LibName31=C:/Users/kerikun11/Dropbox/KiCad/My Components/My Components
+LibName30=IR-station
