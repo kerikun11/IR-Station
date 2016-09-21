@@ -50,10 +50,10 @@ You can control your home appliances with your smartphone or laptop.
 
 ### Meanings of LED Indicator
 
-|Color	|Status	|
-|:----------|:-----------|
-|Red	|Error	|
-|Green	|Booting, Sending Signal or Receiving Signal	|
+|Color	|Status		|
+|:------|:----------|
+|Red	|Error		|
+|Green	|Processing	|
 |Blue	|Listening	|
 
 ## How to Make
@@ -62,7 +62,6 @@ You can control your home appliances with your smartphone or laptop.
 
 Please Add the Libraries below to your Arduino IDE
 
-  * Arduino TimeLib (https://github.com/PaulStoffregen/Time/blob/master/TimeLib.h)
   * Arduino Json (https://github.com/bblanchon/ArduinoJson)
 
 ### Steps
@@ -165,233 +164,34 @@ Please Add the Libraries below to your Arduino IDE
 
 ### Setup Form
 
-#### GET /
-
-|Parameter	|Type	|Remarks	|
-|:----------|:------|:----------|
-|none		|		|			|
-
-|Response	|Code	|Type	|Remarks	|
-|:----------|:------|:------|:----------|
-|Setup Page	|200	|text/html	|			|
-
-#### GET /wifi-list
-
-|Parameter	|Type	|Remarks	|
-|:----------|:------|:----------|
-|none		|		|			|
-
-|Response	|Code	|Type	|Remarks	|
-|:----------|:------|:------|:----------|
-|a list of WiFi SSIDs which exist	|200	|list of string	|takes a little time	|
-
-Response Sample
-
-~~~http
-HTTP/1.1 200 OK
-Content-Type: text/plain
-Content-Length: ???
-Connection: close
-Access-Control-Allow-Origin: *
-
-["SSID1","SSID2","SSID3",...,"SSIDn"]
-~~~
-
-#### GET /confirm
-
-|Parameter	|Type	|Remarks	|
-|:----------|:------|:----------|
-|ssid		|text/plain	|			|
-|password	|text/plain	|			|
-|hostname	|text/plain	|			|
-|stealth	|text/plain	|"true" or "false"	|
-
-|Response	|Code	|Type	|Remarks	|
-|:----------|:------|:------|:----------|
-|only code	|200	|		|			|
-
-#### GET /isConnected
-
-|Parameter	|Type	|Remarks	|
-|:----------|:------|:----------|
-|none		|		|			|
-
-|Response	|Code	|Type	|Remarks	|
-|:----------|:------|:------|:----------|
-|status		|200	|text/plain	|"false" or local IP address|
-
-#### GET /test
-
-for developers
-
-|Parameter	|Type	|Remarks	|
-|:----------|:------|:----------|
-|ssid		|text/plain	|			|
-|password	|text/plain	|			|
-
-|Response	|Code	|Type	|Remarks	|
-|:----------|:------|:------|:----------|
-|status		|200	|text/plain	|"successful" or "failed"|
-
+|Path				|Method	|Parameter(s)	|Return	|Remarks	|
+|:----------|:------|:--------------|:------|:----------|
+|/					|GET	|				|index.html	|setup form page	|
+|/wifi/list			|GET	|				|a list of (string)	|a list of existing WiFi SSID 	|
+|/wifi/confirm		|POST	|				|IP Address or "false"		|confirm if WiFi connection is established and reboot the device	|
+|/mode/station		|POST	|?ssid=(string)&password=(string)&stealth=(bool)&hostname=(string)	|message	|set the device as Station Mode	|
+|/mode/accesspoint	|POST	|?hostname=(string)	|message	|set the device as AP Mode	|
 
 ### Main Page
 
-#### GET /
+|Path		|Method	|Parameter(s)	|Return	|Remarks	|
+|:----------|:------|:--------------|:------|:----------|
+|/info				|GET	|				|json	|a json includes the device information	|
+|/signals/list		|GET	|	|a list of names of signals	|	|
+|/signals/send		|POST	|ch number	|result json	|	|
+|/signals/record	|POST	|?ch=(int)&name=(string)	|result json	|	|
+|/signals/rename	|POST	|?ch=(int)&name=(string)	|result json	|	|
+|/signals/upload	|POST	|?ch=(int)&irJson=(json)	|result json	|	|
+|/signals/clear		|POST	|?ch=(int)	|result json	|	|
+|/signals/clear-all	|POST	|	|result json	|	|
+|/wifi/disconnect	|POST	|	|	|	|
+|/wifi/change-ip	|POST	|?ipaddress=(string)&gateway=(string)&netmask=(string)	|result json	|	|
 
-|Parameter	|Type	|Remarks	|
-|:----------|:------|:----------|
-|none		|		|			|
+#### result json
 
-|Response	|Code	|Type	|Remarks	|
-|:----------|:------|:------|:----------|
-|Main Page	|200	|text/html	|			|
-
-#### GET /name-list
-
-|Parameter	|Type	|Remarks	|
-|:----------|:------|:----------|
-|none		|		|			|
-
-|Response	|Code	|Type	|Remarks	|
-|:----------|:------|:------|:----------|
-|a list of channel names |200	|list of string	|	|
-
-Response Sample
-
-~~~http
-HTTP/1.1 200 OK
-Content-Type: text/plain
-Content-Length: ???
-Connection: close
-Access-Control-Allow-Origin: *
-
-["name of ch 1","name of ch 2",...,"name of ch n"]
-~~~
-
-#### GET /send
-
-|Parameter	|Type	|Remarks	|
-|:----------|:------|:----------|
-|ch			|number	|			|
-
-|Response	|Code	|Type	|Remarks	|
-|:----------|:------|:------|:----------|
-|status		|200	|text/plain	|			|
-
-#### GET /record
-
-|Parameter	|Type	|Remarks	|
-|:----------|:------|:----------|
-|ch			|number	|			|
-
-|Response	|Code	|Type	|Remarks	|
-|:----------|:------|:------|:----------|
-|status		|200	|text/plain	|			|
-
-#### GET /rename
-
-|Parameter	|Type	|Remarks	|
-|:----------|:------|:----------|
-|ch			|number	|			|
-|name		|string	|new name	|
-
-|Response	|Code	|Type	|Remarks	|
-|:----------|:------|:------|:----------|
-|status		|200	|text/plain	|			|
-
-#### GET /IR\_data/1.json
-
-1.json, 2.json, ... , n.json  
-n is channel number
-
-|Parameter	|Type	|Remarks	|
-|:----------|:------|:----------|
-|none		|		|			|
-
-|Response	|Code	|Type	|Remarks	|
-|:----------|:------|:------|:----------|
-|irJson		|200	|application/json	|			|
-
-#### GET /upload
-
-|Parameter	|Type	|Remarks	|
-|:----------|:------|:----------|
-|ch			|number	|			|
-|name		|string	|new name	|
-|irJson		|json	|signal data|
-
-|Response	|Code	|Type	|Remarks	|
-|:----------|:------|:------|:----------|
-|status		|200	|text/plain	|			|
-
-#### GET /clear
-
-|Parameter	|Type	|Remarks	|
-|:----------|:------|:----------|
-|ch			|number	|			|
-
-|Response	|Code	|Type	|Remarks	|
-|:----------|:------|:------|:----------|
-|status		|200	|text/plain	|			|
-
-#### GET /clear-all
-
-|Parameter	|Type	|Remarks	|
-|:----------|:------|:----------|
-|none		|		|			|
-
-|Response	|Code	|Type	|Remarks	|
-|:----------|:------|:------|:----------|
-|status		|200	|text/plain	|			|
-
-#### GET /increment-channels
-
-|Parameter	|Type	|Remarks	|
-|:----------|:------|:----------|
-|nuber		|number	|			|
-
-|Response	|Code	|Type	|Remarks	|
-|:----------|:------|:------|:----------|
-|status		|200	|text/plain	|			|
-
-#### GET /decrement-channels
-
-|Parameter	|Type	|Remarks	|
-|:----------|:------|:----------|
-|nuber		|number	|			|
-
-|Response	|Code	|Type	|Remarks	|
-|:----------|:------|:------|:----------|
-|status		|200	|text/plain	|			|
-
-#### GET /disconnect-wifi
-
-|Parameter	|Type	|Remarks	|
-|:----------|:------|:----------|
-|none		|		|			|
-
-|Response	|Code	|Type	|Remarks	|
-|:----------|:------|:------|:----------|
-|status		|200	|text/plain	|			|
-
-#### GET /info
-
-|Parameter	|Type	|Remarks	|
-|:----------|:------|:----------|
-|none		|		|			|
-
-|Response	|Code	|Type	|Remarks	|
-|:----------|:------|:------|:----------|
-|a list of information |200	|list of string	|	|
-
-Response Sample
-
-~~~http
-HTTP/1.1 200 OK
-Content-Type: text/plain
-Content-Length: ???
-Connection: close
-Access-Control-Allow-Origin: *
-
-["status","SSID","Local IP address","mDNS URL"]
+~~~json
+{
+	"code":0 or -1,
+    "message":"message"
+}
 ~~~
