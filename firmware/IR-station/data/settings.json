@@ -1,1 +1,1 @@
-{"mode":0,"ssid":"","password":"","hostname":"ir","stealth":false,"channels":25,"ipaddress":0,"netmask":0,"gateway":0,"crc":0}
+{"mode":0,"hostname":"ir","is_stealth_ssid":false,"ssid":"","password":"","is_static_ip":false,"local_ip":0,"subnetmask":0,"gateway":0,"crc":187}

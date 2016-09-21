@@ -3,7 +3,7 @@ function updateStatus(status){
 	$('#log-area').prepend('<p>'+Date().match(/.+(\d\d:\d\d:\d\d).+/)[1]+': '+status+'</p>');
 }
 function loadChName(){
-	$.getJSON('/layouts/table',{},function(data) {
+	$.getJSON('/signals/list',{},function(data) {
 		$('#send').empty();
 		$('#manage select[name="ch"]').empty();
 		$('#manage select[name="ch"]').append($('<option>').val(-1).text("-select-"));
@@ -40,7 +40,7 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-gateway').hide();
 	}else if(action == "upload"){
 		$('#form-ch').show();
-		$('#form-name').show();
+		$('#form-name').hide();
 		$('#form-file').show();
 		$('#form-number').hide();
 		$('#form-ipaddress').hide();
@@ -59,14 +59,6 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-name').hide();
 		$('#form-file').hide();
 		$('#form-number').hide();
-		$('#form-ipaddress').hide();
-		$('#form-netmask').hide();
-		$('#form-gateway').hide();
-	}else if(action == "increment-channels" || action == "decrement-channels"){
-		$('#form-ch').hide();
-		$('#form-name').hide();
-		$('#form-file').hide();
-		$('#form-number').show();
 		$('#form-ipaddress').hide();
 		$('#form-netmask').hide();
 		$('#form-gateway').hide();
@@ -132,7 +124,7 @@ function manage(){
 				}).done(function(res){
 					$('#input-name').val("");
 					$('#input-file').val("");
-			updateStatus(res["message"]);
+					updateStatus(res["message"]);
 					loadChName();
 				});
 			}
@@ -168,7 +160,7 @@ function manage(){
 			updateStatus("Cleaning...");
 			$.getJSON('/signals/clear-all').done(function(res){
 				loadChName();
-			updateStatus(res["message"]);
+				updateStatus(res["message"]);
 			});
 		}
 	}else if(action == "disconnect-wifi"){
@@ -178,7 +170,8 @@ function manage(){
 		}
 	}else if(action == "change-ip"){
 		if(confirm('Are you sure to change ip address?')){
- 			$.get('/wifi/change-ip',{
+			$('#main').hide();
+			$.get('/wifi/change-ip',{
 				ipaddress: $('#input-ipaddress').val(),
 				netmask: $('#input-netmask').val(),
 				gateway: $('#input-gateway').val()
@@ -186,7 +179,8 @@ function manage(){
 				$('#input-ipaddress').val("");
 				$('#input-netmask').val("");
 				$('#input-gateway').val("");
-			updateStatus(res["message"]);
+				updateStatus(res["message"]);
+				$('#main').show();
 			});
 		}
 	}

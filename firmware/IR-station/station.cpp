@@ -1,3 +1,12 @@
+/**
+  The MIT License (MIT)
+  Copyright (c)  2016  Ryotaro Onuki
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+  The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
 #include "station.h"
 
 #include <ArduinoJson.h>
@@ -19,6 +28,11 @@ void IR_Station::begin(void) {
   //  }), CHANGE);
   println_dbg("attached button interrupt");
 
+  // setup OTA
+#if USE_OTA_UPDATE == true
+  ota.begin(hostname);
+#endif
+
   switch (mode) {
     case IR_STATION_MODE_SETUP:
       println_dbg("Boot Mode: Setup");
@@ -28,20 +42,24 @@ void IR_Station::begin(void) {
       break;
     case IR_STATION_MODE_STATION:
       println_dbg("Boot Mode: Station");
-      //      restoreChName();
+      restoreSignalName();
       WiFi.mode(WIFI_STA);
+      if (is_static_ip) WiFi.config(local_ip, gateway, subnetmask);
       connectWifi(ssid, password, is_stealth_ssid);
-      WiFi.config(local_ip, gateway, subnetmask);
+      if (WiFi.localIP() != local_ip) {
+        is_static_ip = false;
+        settingsBackupToFile();
+      }
       attachStationApi();
       indicator.green(0);
       indicator.blue(1023);
       break;
     case IR_STATION_MODE_AP:
       println_dbg("Boot Mode: AP");
-      //      restoreChName();
+      restoreSignalName();
       WiFi.mode(WIFI_AP);
       setupAP(SOFTAP_SSID, SOFTAP_PASS);
-      //      setupServer();
+      attachStationApi();
       indicator.green(0);
       indicator.blue(1023);
       break;
@@ -50,12 +68,13 @@ void IR_Station::begin(void) {
   if (!MDNS.begin(hostname.c_str())) println_dbg("Error setting up MDNS responder!");
   else println_dbg("mDNS: http://" + hostname + ".local");
 
-#if USE_CAPITAL_PORTAL == true
-  const byte DNS_PORT = 53;
   dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
-#endif
 
   httpUpdater.setup(&server, "/firmware");
+  server.on("/description.xml", HTTP_GET, [this]() {
+    displayRequest();
+    SSDP.schema(server.client());
+  });
 
   server.begin();
 
@@ -86,17 +105,19 @@ void IR_Station::reset() {
   local_ip = 0U;
   subnetmask = 0U;
   gateway = 0U;
+  signalCount = SIGNAL_COUNT_DEFAULT;
   settingsBackupToFile();
   ESP.reset();
 }
 
 void IR_Station::handle() {
   server.handleClient();
-  dnsServer.processNextRequest();
   ir.handle();
+  ota.handle();
   switch (mode) {
     case IR_STATION_MODE_SETUP:
       if ((WiFi.status() == WL_CONNECTED)) indicator.set(0, 0, 1023);
+      dnsServer.processNextRequest();
       break;
     case IR_STATION_MODE_STATION:
       static bool lost = false;
@@ -137,19 +158,7 @@ void IR_Station::buttonIsr() {
   }
 }
 
-void IR_Station::displayRequest() {
-  yield();
-  println_dbg("");
-  println_dbg("New Request");
-  println_dbg("URI: " + server.uri());
-  println_dbg(String("Method: ") + ((server.method() == HTTP_GET) ? "GET" : "POST"));
-  println_dbg("Arguments count: " + String(server.args()));
-  for (uint8_t i = 0; i < server.args(); i++) {
-    println_dbg("\t" + server.argName(i) + " = " + server.arg(i));
-  }
-}
-
-bool IR_Station::changeIPSetting(String local_ip_s, String gateway_s, String subnetmask_s) {
+bool IR_Station::changeIp(String local_ip_s, String gateway_s, String subnetmask_s) {
   if (local_ip.fromString(local_ip_s) == false) {
     return false;
   }
@@ -159,8 +168,20 @@ bool IR_Station::changeIPSetting(String local_ip_s, String gateway_s, String sub
   if (WiFi.localIP() != local_ip) {
     return false;
   }
+  is_static_ip = true;
   settingsBackupToFile();
   return true;
+}
+
+void IR_Station::restoreSignalName(void) {
+  for (int ch = 1; ch <= SIGNAL_COUNT_MAX; ch++) {
+    String json;
+    if (getStringFromFile(IR_DATA_PATH(ch), json)) {
+      DynamicJsonBuffer jsonBuffer;
+      JsonObject& data = jsonBuffer.parseObject(json);
+      signalName[ch] = (const char*)data["name"];
+    }
+  }
 }
 
 bool IR_Station::irSendSignal(int ch) {
@@ -174,32 +195,7 @@ bool IR_Station::irSendSignal(int ch) {
   return false;
 }
 
-bool IR_Station::clearSignals() {
-  //  for (uint8_t ch = 0; ch < channels; ch++) {
-  //    clearSignal(ch);
-  //  }
-  //  println_dbg("Cleared All Signals");
-  return true;
-}
-
-bool IR_Station::clearSignal(int id) {
-  return removeFile(IR_DATA_PATH(id));
-}
-
-bool IR_Station::renameSignal(int ch, String name) {
-  String data;
-  if (!getStringFromFile(IR_DATA_PATH(ch), data)) {
-    return false;
-  }
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& root = jsonBuffer.parseObject(data);
-  root["name"] = name;
-  data = "";
-  root.printTo(data);
-  return writeStringToFile(IR_DATA_PATH(ch), data);
-}
-
-bool IR_Station::irRecordSignal(String name, uint32_t timeout_ms) {
+bool IR_Station::irRecordSignal(int id, String name, uint32_t timeout_ms) {
   indicator.set(0, 1023, 0);
   ir.resume();
   int timeStamp = millis();
@@ -218,17 +214,40 @@ bool IR_Station::irRecordSignal(String name, uint32_t timeout_ms) {
   data = "";
   root.printTo(data);
   indicator.set(0, 0, 1023);
-  //  return writeStringToFile(IR_DATA_PATH(getNewId()), data);
-  return true;
+  return writeStringToFile(IR_DATA_PATH(id), data);
 }
 
-bool IR_Station::uploadSignal(String data) {
-  //  return writeStringToFile(IR_DATA_PATH(getNewId()), data);
-  return true;
+bool IR_Station::clearSignal(int ch) {
+  return removeFile(IR_DATA_PATH(ch));
 }
 
-String IR_Station::settingsCrcSerial() {
-  return String(mode, DEC) + hostname + String(is_stealth_ssid, DEC) + ssid + password + String(is_static_ip, DEC) + local_ip + subnetmask + gateway;
+bool IR_Station::renameSignal(int ch, String name) {
+  String data;
+  if (!getStringFromFile(IR_DATA_PATH(ch), data)) {
+    return false;
+  }
+  DynamicJsonBuffer jsonBuffer;
+  JsonObject& root = jsonBuffer.parseObject(data);
+  root["name"] = name;
+  data = "";
+  root.printTo(data);
+  return writeStringToFile(IR_DATA_PATH(ch), data);
+}
+
+bool IR_Station::uploadSignal(int ch, String data) {
+  return writeStringToFile(IR_DATA_PATH(ch), data);
+}
+
+void IR_Station::displayRequest() {
+  yield();
+  println_dbg("");
+  println_dbg("New Request");
+  println_dbg("URI: " + server.uri());
+  println_dbg(String("Method: ") + ((server.method() == HTTP_GET) ? "GET" : "POST"));
+  println_dbg("Arguments count: " + String(server.args()));
+  for (uint8_t i = 0; i < server.args(); i++) {
+    println_dbg("\t" + server.argName(i) + " = " + server.arg(i));
+  }
 }
 
 String IR_Station::resultJson(int code, String message) {
@@ -242,7 +261,7 @@ String IR_Station::resultJson(int code, String message) {
 }
 
 void IR_Station::attachSetupApi() {
-  server.on("/wifi-list", [this]() {
+  server.on("/wifi/list", [this]() {
     displayRequest();
     int n = WiFi.scanNetworks();
     String res = "[";
@@ -254,22 +273,7 @@ void IR_Station::attachSetupApi() {
     server.send(200, "application/json", res);
     println_dbg("End");
   });
-  server.on("/confirm", [this]() {
-    displayRequest();
-    ssid = server.arg("ssid");
-    password = server.arg("password");
-    is_stealth_ssid = server.arg("stealth") == "true";
-    hostname = server.arg("hostname");
-    if (hostname == "") hostname = HOSTNAME_DEFAULT;
-    println_dbg("Hostname: " + hostname);
-    println_dbg("SSID: " + ssid + " Password: " + password + "Stealth: " + (is_stealth_ssid ? "true" : "false"));
-    indicator.set(0, 1023, 0);
-    server.send(200);
-    WiFi.disconnect();
-    delay(1000);
-    WiFi.begin(ssid.c_str(), password.c_str());
-  });
-  server.on("/isConnected", [this]() {
+  server.on("/wifi/confirm", [this]() {
     displayRequest();
     if (WiFi.status() == WL_CONNECTED) {
       String res = (String)WiFi.localIP()[0] + "." + WiFi.localIP()[1] + "." + WiFi.localIP()[2] + "." + WiFi.localIP()[3];
@@ -285,7 +289,22 @@ void IR_Station::attachSetupApi() {
       println_dbg("End");
     }
   });
-  server.on("/set-ap-mode", [this]() {
+  server.on("/mode/station", [this]() {
+    displayRequest();
+    ssid = server.arg("ssid");
+    password = server.arg("password");
+    is_stealth_ssid = server.arg("stealth") == "true";
+    hostname = server.arg("hostname");
+    if (hostname == "") hostname = HOSTNAME_DEFAULT;
+    println_dbg("Hostname: " + hostname);
+    println_dbg("SSID: " + ssid + " Password: " + password + " Stealth: " + (is_stealth_ssid ? "true" : "false"));
+    indicator.set(0, 1023, 0);
+    server.send(200);
+    WiFi.disconnect();
+    delay(1000);
+    WiFi.begin(ssid.c_str(), password.c_str());
+  });
+  server.on("/mode/accesspoint", [this]() {
     displayRequest();
     server.send(200, "text / plain", "Setting up Access Point Successful");
     hostname = server.arg("hostname");
@@ -294,7 +313,7 @@ void IR_Station::attachSetupApi() {
     settingsBackupToFile();
     ESP.reset();
   });
-  server.on("/test", [this]() {
+  server.on("/dbg", [this]() {
     displayRequest();
     ssid = server.arg("ssid");
     password = server.arg("password");
@@ -325,18 +344,31 @@ void IR_Station::attachStationApi() {
     JsonObject& root = jsonBuffer.createObject();
     root["message"] = "Listening...";
     root["ssid"] = (mode == IR_STATION_MODE_STATION) ? WiFi.SSID() : SOFTAP_SSID;
-    root["ipaddress"] = (mode == IR_STATION_MODE_STATION) ? ((String)WiFi.localIP()[0] + "." + WiFi.localIP()[1] + "." + WiFi.localIP()[2] + "." + WiFi.localIP()[3]).c_str() : ((String)WiFi.softAPIP()[0] + "." + WiFi.softAPIP()[1] + "." + WiFi.softAPIP()[2] + "." + WiFi.softAPIP()[3]).c_str();
+    IPAddress ip = (mode == IR_STATION_MODE_STATION) ? WiFi.localIP() : WiFi.softAPIP();
+    root["ipaddress"] = ip.toString();
     root["hostname"] = hostname;
     String res;
     root.printTo(res);
     server.send(200, "application/json", res);
     println_dbg("End");
   });
+  server.on("/signals/list", [this]() {
+    displayRequest();
+    DynamicJsonBuffer jsonBuffer;
+    JsonArray& data = jsonBuffer.createArray();
+    for (int i = 1; i <= signalCount; i++) {
+      data.add(signalName[i]);
+    }
+    String res;
+    data.printTo(res);
+    server.send(200, "application/json", res);
+    println_dbg("End");
+  });
   server.on("/signals/send", [this]() {
     displayRequest();
-    int id = server.arg("id").toInt();
     String res;
-    if (irSendSignal(id)) {
+    int ch = server.arg("ch").toInt();
+    if (ch > 0 && irSendSignal(ch)) {
       res = resultJson(0, "Sending Successful");
     } else {
       res = resultJson(-1, "No signal was sent");
@@ -347,8 +379,10 @@ void IR_Station::attachStationApi() {
   server.on("/signals/record", [this]() {
     displayRequest();
     String res;
-    if (irRecordSignal(server.arg("name"))) {
+    int ch = server.arg("ch").toInt();
+    if (ch > 0 && irRecordSignal(ch, server.arg("name"))) {
       res = resultJson(0, "Recording Successful");
+      signalName[ch] = server.arg("name");
     } else {
       res = resultJson(-1, "No Signal Recieved");
     }
@@ -358,8 +392,9 @@ void IR_Station::attachStationApi() {
   server.on("/signals/rename", [this]() {
     displayRequest();
     String res;
-    uint8_t id = server.arg("id").toInt();
-    if (renameSignal(id, server.arg("name"))) {
+    int ch = server.arg("ch").toInt();
+    if (ch > 0 && renameSignal(ch, server.arg("name"))) {
+      signalName[ch] = server.arg("name");
       res = resultJson(0, "Rename Successful");
     } else {
       res = resultJson(-1, "Rename Failed");
@@ -370,7 +405,8 @@ void IR_Station::attachStationApi() {
   server.on("/signals/upload", [this]() {
     displayRequest();
     String res;
-    if (uploadSignal(server.arg("irJson"))) {
+    int ch = server.arg("ch").toInt();
+    if (ch > 0 && uploadSignal(ch, server.arg("irJson"))) {
       res = resultJson(0, "Upload Successful");
     } else {
       res = resultJson(-1, "Upload Failed");
@@ -381,8 +417,8 @@ void IR_Station::attachStationApi() {
   server.on("/signals/clear", [this]() {
     displayRequest();
     String res;
-    uint8_t id = server.arg("id").toInt();
-    if (clearSignal(id)) {
+    int ch = server.arg("ch").toInt();
+    if (ch > 0 && clearSignal(ch)) {
       res = resultJson(0, "Cleared a Singal");
     } else {
       res = resultJson(-1, "Failed to clear");
@@ -392,41 +428,40 @@ void IR_Station::attachStationApi() {
   });
   server.on("/signals/clear-all", [this]() {
     displayRequest();
-    clearSignals();
-    server.send(200, "text/plain", "Cleared All Signals");
+    for (int ch = 1; ch <= SIGNAL_COUNT_MAX; ch++) {
+      clearSignal(ch);
+    }
+    server.send(200, "application/json", resultJson(0, "Cleared All Signals"));
     println_dbg("End");
   });
   server.on("/wifi/disconnect", [this]() {
     displayRequest();
     server.send(200);
-    println_dbg("Disconect WiFi");
-    delay(1000);
+    delay(100);
     reset();  // automatically rebooted
   });
   server.on("/wifi/change-ip", [this]() {
     displayRequest();
-    changeIPSetting(server.arg("ipaddress"), server.arg("gateway"), server.arg("netmask"));
-    String res = "Change ip address to ";
-    res += (String)WiFi.localIP()[0] + "." + WiFi.localIP()[1] + "." + WiFi.localIP()[2] + "." + WiFi.localIP()[3];
-    server.send(200, "text/plain", res);
-    println_dbg(res);
-    print_dbg("IP address: ");
-    println_dbg(WiFi.localIP());
-    println_dbg("Changed IP");
+    String res;
+    if (changeIp(server.arg("ipaddress"), server.arg("gateway"), server.arg("netmask"))) {
+      res = resultJson(0, "Changed IP to " + WiFi.localIP().toString());
+    } else {
+      res = resultJson(-1, "Failed to Change IP Address");
+    }
+    server.send(200, "application/json", res);
     println_dbg("End");
-  });
-  server.on("/description.xml", HTTP_GET, [this]() {
-    displayRequest();
-    SSDP.schema(server.client());
   });
   server.onNotFound([this]() {
     displayRequest();
-    println_dbg("Redirect");
-    String res = "<script>location.href = \"http://" + (String)WiFi.softAPIP()[0] + "." + WiFi.softAPIP()[1] + "." + WiFi.softAPIP()[2] + "." + WiFi.softAPIP()[3] + "/\";</script>";
+    String res = "<script>location.href = \"http://" + WiFi.localIP().toString() + "/\";</script>";
     server.send(200, "text/html", res);
     println_dbg("End");
   });
   server.serveStatic("/", SPIFFS, "/main/", "public");
+}
+
+String IR_Station::settingsCrcSerial() {
+  return String(mode, DEC) + hostname + String(is_stealth_ssid, DEC) + ssid + password + String(is_static_ip, DEC) + local_ip + subnetmask + gateway + String(signalCount, DEC);
 }
 
 bool IR_Station::settingsRestoreFromFile() {
@@ -444,6 +479,7 @@ bool IR_Station::settingsRestoreFromFile() {
   local_ip = (const uint32_t)root["local_ip"];
   subnetmask = (const uint32_t)root["subnetmask"];
   gateway = (const uint32_t)root["gateway"];
+  signalCount = (int)root["signalsCount"];
   uint8_t crc = (uint8_t)root["crc"];
   String serial = settingsCrcSerial();
   if (crc != crc8((uint8_t*)serial.c_str(), serial.length(), CRC8INIT)) {
@@ -467,6 +503,7 @@ bool IR_Station::settingsBackupToFile() {
   root["local_ip"] = (const uint32_t)local_ip;
   root["subnetmask"] = (const uint32_t)subnetmask;
   root["gateway"] = (const uint32_t)gateway;
+  root["signalsCount"] = signalCount;
   String serial = settingsCrcSerial();
   root["crc"] = crc8((uint8_t*)serial.c_str(), serial.length(), CRC8INIT);
   String str = "";

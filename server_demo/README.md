@@ -8,13 +8,13 @@ You can test IR-station server in your local development environment.
 
 "general" is a main page of IR-station.
 
-![general](general.png)
+![main](main.png)
 
 ### form
 
 "form" is a page that sets up IR-station.
 
-![form](form.png)
+![setup](setup.png)
 
 ## Reqirements
 

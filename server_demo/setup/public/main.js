@@ -1,7 +1,7 @@
 function getWifiList(){
 	$.ajax({
 		type:"GET",
-		url:"/wifi-list",
+		url:"/wifi/list",
 		dataType:"json",
 		cache:false,
 		timeout:10000
@@ -18,50 +18,48 @@ function getWifiList(){
 		$('#info-status').text('Connection Failed. Please Reload.');
 	});
 }
-function form(){
-	if(confirm("Are you sure to confirm?")){
-		$('#form').hide();
-		$('#ap').hide();
-		$('#info-status').text("Connecting... Please wait...");
-		$.get('/confirm',{
-			ssid: ($('#form [name="ssid"]').val()=="stealth-ssid")?$('#form [name="stealth-ssid"]').val():$('#form [name="ssid"]').val(),
-			stealth: ($('#form [name="ssid"]').val()=="stealth-ssid"),
-			password: $('#form input[name="password"]').val(),
-			hostname: $('#form input[name="hostname"]').val()
+function setStation(){
+	$('#form').hide();
+	$('#ap').hide();
+	$('#info-status').text("Connecting... Please wait...");
+	$.get('/mode/station',{
+		hostname: $('#form input[name="hostname"]').val(),
+		is_stealth_ssid: ($('#form [name="ssid"]').val()=="stealth-ssid"),
+		ssid: ($('#form [name="ssid"]').val()=="stealth-ssid")?$('#form [name="stealth-ssid"]').val():$('#form [name="ssid"]').val(),
+		password: $('#form input[name="password"]').val()
+	}).fail(function(){
+		$('#info-status').text('Connection Failed. Please Reload.');
+	});
+	var cnt = 0;
+	timerID = setInterval(function(){
+		cnt++;
+		if(cnt > 20){
+			$('#form').show();
+			$('#ap').show();
+			$('#info-status').text("Connection failed. Please try again.");
+			clearInterval(timerID);
+			timerID = null;
+		}
+		$.get('/wifi/confirm').done(function(res){
+			var hostname = $('#form input[name="hostname"]').val();
+			if(res!="false"){
+				clearInterval(timerID);
+				timerID = null;
+				$('#info-status').html(
+					'Connection Successful.<br/>URL: <a href="http://'+res+'/" target="_blank">http://'+res+'/</a>'
+				);
+			}
 		}).fail(function(){
 			$('#info-status').text('Connection Failed. Please Reload.');
 		});
-		var cnt = 0;
-		timerID = setInterval(function(){
-			cnt++;
-			if(cnt > 20){
-				$('#form').show();
-				$('#ap').show();
-				$('#info-status').text("Connection failed. Please try again.");
-				clearInterval(timerID);
-				timerID = null;
-			}
-			$.get('/isConnected').done(function(res){
-				var hostname = $('#form input[name="hostname"]').val();
-				if(res!="false"){
-					clearInterval(timerID);
-					timerID = null;
-					$('#info-status').html(
-						'Connection Successful.<br/>URL: <a href="http://'+res+'/" target="_blank">http://'+res+'/</a>'
-					);
-				}
-			}).fail(function(){
-				$('#info-status').text('Connection Failed. Please Reload.');
-			});
-		}, 1000);
-	}
+	}, 1000);
 }
 function setAP(){
 	if(confirm("Can I setup as Access Point Mode?")){
 		$('#form').toggle();
 		$('#ap').toggle();
 		$('#info-status').text("Connecting... Please wait.");
-		$.get('/set-ap-mode',{
+		$.get('/mode/accesspoint',{
 			hostname: $('#ap input[name="hostname"]').val()
 		}).done(function(res){
 			$('#info-status').text(res);
@@ -71,10 +69,10 @@ function setAP(){
 	}
 }
 
-$('#form button').click(form);
+$('#form button').click(setStation);
 $('#form input').keypress(function(e){
 	if(e.which == 13){
-		form();
+		setStation();
 	}
 });
 

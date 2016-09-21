@@ -14,7 +14,7 @@ get '/' do
 	send_file File.join(settings.public_folder,'index.htm')
 end
 
-get '/wifi-list' do
+get '/wifi/list' do
 	sleep(1)
 	json wifiList
 end
@@ -24,16 +24,17 @@ get"/status" do
 	json status
 end
 
-get '/confirm' do
+get '/mode/station' do
+	sleep(1)
 	"OK"
 end
 
-get '/isConnected' do
+get '/wifi/confirm' do
 	"false"
 	"192.168.11.6"
 end
 
-get '/set-ap-mode' do
+get '/mode/accesspoint' do
 	sleep(1)
 	"Access Point Mode"
 end

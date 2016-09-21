@@ -14,7 +14,7 @@ get '/' do
 	send_file File.join(settings.public_folder,'index.htm')
 end
 
-get"/layouts/table" do
+get"/signals/list" do
 	json name[0, ch_size]
 end
 
