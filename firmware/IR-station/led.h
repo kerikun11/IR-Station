@@ -20,7 +20,5 @@ class Indicator {
     int _pin_blue;
 };
 
-extern Indicator indicator;
-
 #endif
 

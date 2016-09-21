@@ -1,6 +1,6 @@
 #include "wifi.h"
 
-#include "config.h"
+#include "config.h" // for print_dbg()
 
 void setupAP(String ssid, String password) {
   wdt_reset();

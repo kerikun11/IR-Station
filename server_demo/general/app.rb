@@ -14,78 +14,80 @@ get '/' do
 	send_file File.join(settings.public_folder,'index.htm')
 end
 
-get"/name-list" do
-	#sleep(1)
+get"/layouts/table" do
 	json name[0, ch_size]
 end
 
 get"/info" do
-	#sleep(1)
-	info = ["Loading Successful","WiFi-2.4GHz","192.168.11.8","http://esp8266.local"]
+	info = {}
+	info["message"] = "Loading Successful"
+	info["ssid"] = "WiFi-2.4GHz"
+	info["ipaddress"]= "192.168.11.6"
+	info["hostname"] = "my-room"
 	json info
 end
 
-get "/send" do
+get "/signals/send" do
 	sleep(0.5)
-	json "Sent ch"+params[:ch]+" ("+name[params[:ch].to_i-1]+")"
+	result = {}
+	result["code"] = 0
+	result["message"] = "Sending Successful"
+	json result
 end
 
-get "/record" do
+get "/signals/record" do
 	sleep(1)
-	name[params[:ch].to_i-1]=params[:name]
-	json "Recode a signal ch"+params[:ch]+" as "+name[params[:ch].to_i-1]
+	result = {}
+	result["code"] = 0
+	result["message"] = "Recording Successful"
+	json result
 end
 
-get "/rename" do
-	#sleep(1)
-	name[params[:ch].to_i-1]=params[:name]
-	json "Rename a signal ch"+params[:ch]+" as "+name[params[:ch].to_i-1]
+get "/signals/rename" do
+	result = {}
+	result["code"] = 0
+	result["message"] = "Renaming Successful"
+	json result
 end
 
-get "/upload" do
-	#sleep(2)
-	name[params[:ch].to_i-1]=params[:name]
-	json "Rename a signal ch"+params[:ch]+" as "+name[params[:ch].to_i-1]
+get "/signals/upload" do
+	result = {}
+	result["code"] = 0
+	result["message"] = "Uploading Successful"
+	json result
 end
 
-get "/clear" do
-	#sleep(2)
-	name[params[:ch].to_i-1]=""
-	json "Cleared a signal ch"+params[:ch]
+get "/signals/clear" do
+	result = {}
+	result["code"] = 0
+	result["message"] = "Cleaning Successful"
+	json result
 end
 
-get "/clear-all" do
+get "/signals/clear-all" do
 	sleep(1)
 	for i in 0...ch_size_max do
 		name[i]=""
 	end
-	json "Cleared"
+	result = {}
+	result["code"] = 0
+	result["message"] = "Cleaning All Successful"
+	json result
 end
 
-get "/increment-channels" do
-	number = params[:number].to_i
-	if ch_size+number>ch_size_max then
-		res = "reached the maximum"
-	else
-		ch_size += number
-		res = "Increment #{params[:number]} channels"
-	end
-	res
-end
-
-get "/decrement-channels" do
-	number = params[:number].to_i
-	if ch_size-number<0 then
-		res = "reached the minimum"
-	else
-		ch_size -= number
-		res = "Decrement #{params[:number]} channels"
-	end
-	res
-end
-
-get "/disconnect-wifi" do
+get "/wifi/disconnect" do
 	sleep(1)
-	json "Disconnected"
+	result = {}
+	result["code"] = 0
+	result["message"] = "Disconnected the WiFi"
+	json result
+end
+
+get "/wifi/change-ip" do
+	sleep(1)
+	result = {}
+	result["code"] = 0
+	result["message"] = "Changed IP"
+	json result
 end
 

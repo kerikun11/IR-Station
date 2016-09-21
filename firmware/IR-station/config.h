@@ -34,11 +34,6 @@
 // OTA update
 #define USE_OTA_UPDATE          true
 
-#if USE_OTA_UPDATE == true
-#define OTA_HOSTNAME            "IR-Station"
-#define OTA_PASSWORD            "1234"
-#endif
-
 // Capital Portal
 #define USE_CAPITAL_PORTAL      true
 

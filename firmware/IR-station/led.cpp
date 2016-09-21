@@ -1,8 +1,6 @@
 #include "led.h"
 
-#include "config.h"
-
-Indicator indicator(PIN_LED_R, PIN_LED_G, PIN_LED_B);
+#include "config.h" // for print_dbg()
 
 void Indicator::set(int val_red, int val_green, int val_blue) {
   analogWrite(_pin_red, val_red);

@@ -2,16 +2,19 @@
 
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
+#include "config.h" // for print_dbg()
 
-void setupOTA() {
+void OTA::begin(String hostname, String password, int port) {
+  yield();
+
   // Port defaults to 8266
-  ArduinoOTA.setPort(8266);
+  ArduinoOTA.setPort(port);
 
   // Hostname defaults to esp8266-[ChipID]
-  ArduinoOTA.setHostname((const char *)OTA_HOSTNAME);
+  ArduinoOTA.setHostname(hostname.c_str());
 
   // No authentication by default
-//  ArduinoOTA.setPassword((const char *)OTA_PASSWORD);
+  //  ArduinoOTA.setPassword(password.c_str());
 
   ArduinoOTA.onStart([]() {
     println_dbg("Start");
@@ -31,10 +34,10 @@ void setupOTA() {
     else if (error == OTA_END_ERROR) println_dbg("End Failed");
   });
   ArduinoOTA.begin();
-  println_dbg("OTA Ready");
+  println_dbg("OTA is Ready");
 }
 
-void OTATask() {
+void OTA::handle() {
   // handle OTA update
   ArduinoOTA.handle();
 }

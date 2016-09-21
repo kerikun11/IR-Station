@@ -3,7 +3,7 @@ function updateStatus(status){
 	$('#log-area').prepend('<p>'+Date().match(/.+(\d\d:\d\d:\d\d).+/)[1]+': '+status+'</p>');
 }
 function loadChName(){
-	$.getJSON('/name-list',{},function(data) {
+	$.getJSON('/layouts/table',{},function(data) {
 		$('#send').empty();
 		$('#manage select[name="ch"]').empty();
 		$('#manage select[name="ch"]').append($('<option>').val(-1).text("-select-"));
@@ -19,10 +19,10 @@ function loadChName(){
 $(document).on('click','#send button',function(){
 	var el = $(this);
 	el.addClass("sending");
-	$.get('/send',{ch: el.val()}).done(
+	$.getJSON('/signals/send',{ch: el.val()}).done(
 		function(res){
 			el.removeClass("sending");
-			updateStatus(res);
+			updateStatus(res["message"]);
 		}
 	);
 });
@@ -90,11 +90,11 @@ function manage(){
 			$('#form-submit label').text("Select a channel")
 			return;
 		}
-		$.get('/record',{
+		$.getJSON('/signals/record',{
 			ch: ch,
 			name: name
 		}).done(function(res){
-			updateStatus(res);
+			updateStatus(res["message"]);
 			loadChName();
 		});
 		$('#input-name').val("");
@@ -103,12 +103,12 @@ function manage(){
 			$('#form-submit label').text("Select a channel")
 			return;
 		}
-		$.get('/rename',{
+		$.getJSON('/signals/rename',{
 			ch: ch,
 			name: name
 		}).done(function(res){
 			$('#input-name').val("");
-			updateStatus(res);
+			updateStatus(res["message"]);
 			loadChName();
 		});
 	}else if(action == "upload"){
@@ -125,14 +125,14 @@ function manage(){
 			var reader = new FileReader();
 			reader.readAsText(file);
 			reader.onload = function(){
-				$.get('/upload',{
+				$.getJSON('/signals/upload',{
 					ch: ch,
 					name: name,
 					irJson: reader.result
 				}).done(function(res){
 					$('#input-name').val("");
 					$('#input-file').val("");
-					updateStatus(res);
+			updateStatus(res["message"]);
 					loadChName();
 				});
 			}
@@ -157,46 +157,28 @@ function manage(){
 			return;
 		}
 		updateStatus("Cleaning...");
-		$.get('/clear',{
+		$.getJSON('/signals/clear',{
 			ch: ch,
 		}).done(function(res){
-			updateStatus(res);
+			updateStatus(res["message"]);
 			loadChName();
 		});
 	}else if(action == "clear-all"){
 		if(confirm('Are you sure to delete all signals?')){
 			updateStatus("Cleaning...");
-			$.get('/clear-all').done(function(res){
+			$.getJSON('/signals/clear-all').done(function(res){
 				loadChName();
-				updateStatus(res);
+			updateStatus(res["message"]);
 			});
 		}
-	}else if(action == "increment-channels"){
-		updateStatus("Requesting...");
-		$.get('/increment-channels',{
-			number: $('#input-number').val()
-		}).done(function(res){
-			loadChName();
-			updateStatus(res);
-			$('#input-number').val("");
-		});
-	}else if(action == "decrement-channels"){
-		updateStatus("Requesting...");
-		$.get('/decrement-channels',{
-			number: $('#input-number').val()
-		}).done(function(res){
-			loadChName();
-			updateStatus(res);
-			$('#input-number').val("");
-		});
 	}else if(action == "disconnect-wifi"){
 		if(confirm('Are you sure to disconnect this WiFi?')){
-			$.get('/disconnect-wifi');
+			$.getJSON('/wifi/disconnect');
 			$('#main').hide();
 		}
 	}else if(action == "change-ip"){
 		if(confirm('Are you sure to change ip address?')){
- 			$.get('/change-ip',{
+ 			$.get('/wifi/change-ip',{
 				ipaddress: $('#input-ipaddress').val(),
 				netmask: $('#input-netmask').val(),
 				gateway: $('#input-gateway').val()
@@ -204,7 +186,7 @@ function manage(){
 				$('#input-ipaddress').val("");
 				$('#input-netmask').val("");
 				$('#input-gateway').val("");
-				updateStatus(res);
+			updateStatus(res["message"]);
 			});
 		}
 	}
@@ -222,10 +204,10 @@ $('#manage input').keypress(function(e){
 function init(){
 	loadChName();
 	$.getJSON('/info',{},function(data) {
-		$('span#info-status').text(data[0]);
-		$('span#info-ssid').text(data[1]);
-		$('span#info-ipaddress').text(data[2]);
-		$('span#info-url').text(data[3]);
+		$('span#info-status').text(data["message"]);
+		$('span#info-ssid').text(data["ssid"]);
+		$('span#info-ipaddress').text(data["ipaddress"]);
+		$('span#info-hostname').text(data["hostname"]);
 		$('#main').show();
 	});
 }

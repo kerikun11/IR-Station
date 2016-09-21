@@ -16,18 +16,12 @@
 #define OTA_OP_H
 
 #include <ESP8266WiFi.h>
-#include "config.h"
 
-#ifndef OTA_HOSTNAME
-#error "Please define OTA_HOSTNAME"
-#endif
-
-#ifndef OTA_PASSWORD
-#error "Please define OTA_PASSWORD"
-#endif
-
-void setupOTA();
-void OTATask();
+class OTA {
+  public:
+    void begin(String hostname, String password = "", int port = 8266);
+    void handle();
+};
 
 #endif
 

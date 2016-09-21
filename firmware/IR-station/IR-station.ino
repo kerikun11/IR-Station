@@ -7,21 +7,26 @@
 */
 
 #include <ESP8266WiFi.h>
+#include <FS.h>
 #include "config.h"
 #include "station.h"
 #include "ota.h"
-#include "httpServer.h"
-#include "led.h"
-#include "wifi.h"
+
+OTA ota;
+IR_Station station(PIN_IR_OUT, PIN_IR_IN, PIN_LED_R, PIN_LED_G, PIN_LED_B, PIN_BUTTON);
 
 void setup() {
   // Prepare Serial debug
-  Serial.begin(115200);
+  Serial.begin(74880);
+  delay(10);
   println_dbg("");
   println_dbg("Hello, I'm ESP-WROOM-02");
 
-  // prepare GPIO
-  pinMode(PIN_BUTTON, INPUT_PULLUP);
+  // prepare SPIFFS
+  SPIFFS.begin();
+
+  // setup OTA
+  ota.begin(HOSTNAME_DEFAULT);
 
   // IR-station setup
   station.begin();
@@ -31,38 +36,7 @@ void setup() {
 }
 
 void loop() {
-  OTATask();
-  serverTask();
-  ir.handle();
-
-  switch (station.mode) {
-    case IR_STATION_MODE_NULL:
-      if ((WiFi.status() == WL_CONNECTED)) {
-        indicator.set(0, 0, 1023);
-      }
-      break;
-    case IR_STATION_MODE_STA:
-      static bool lost = false;
-      if ((WiFi.status() != WL_CONNECTED)) {
-        if (lost == false) {
-          println_dbg("Lost WiFi: " + station.ssid);
-          WiFi.mode(WIFI_AP_STA);
-          delay(1000);
-          setupAP(SOFTAP_SSID, SOFTAP_PASS);
-          indicator.set(1023, 0, 0);
-        }
-        lost = true;
-      } else {
-        if (lost == true) {
-          println_dbg("Found WiFi: " + station.ssid);
-          WiFi.mode(WIFI_STA);
-          indicator.set(0, 0, 1023);
-        }
-        lost = false;
-      }
-      break;
-    case IR_STATION_MODE_AP:
-      break;
-  }
+  ota.handle();
+  station.handle();
 }
 

@@ -1,28 +1,38 @@
-#include "irSignal.h"
+#include "ir.h"
 
 #include <ArduinoJson.h>
-#include "config.h"
+#include "config.h" // for print_dbg()
 
-IR_Signal::IR_Signal(uint8_t tx, uint8_t rx) {
+int IR::txPin, IR::rxPin;
+volatile enum IR_RECEIVER_STATE IR::state;
+volatile uint16_t IR::rawIndex;
+volatile uint16_t IR::rawData[RAWDATA_BUFFER_SIZE];
+volatile uint32_t IR::prev_us;
+String IR::irJson;
+
+void IR::begin(int tx, int rx) {
   txPin = tx;
   rxPin = rx;
   pinMode(tx, OUTPUT);
   pinMode(rx, INPUT);
-}
-
-bool IR_Signal::available() {
-  return state == IR_RECEIVER_AVAILABLE;
-}
-
-String IR_Signal::read() {
-  return irJson;
-}
-
-void IR_Signal::resume() {
+  attachInterrupt(rx, &IR::isr, CHANGE);
   state = IR_RECEIVER_READY;
 }
 
-void IR_Signal::send(String dataJson) {
+bool IR::available() {
+  return state == IR_RECEIVER_AVAILABLE;
+}
+
+String IR::read() {
+  return irJson;
+}
+
+void IR::resume() {
+  state = IR_RECEIVER_READY;
+  auto a = 10;
+}
+
+void IR::send(String dataJson) {
   enum IR_RECEIVER_STATE state_cache = state;
   state = IR_RECEIVER_OFF;
   {
@@ -48,11 +58,13 @@ void IR_Signal::send(String dataJson) {
   println_dbg("Send OK");
 }
 
-void IR_Signal::isr() {
+void IR::isr() {
   uint32_t us = micros();
   uint32_t diff = us - prev_us;
 
   switch (state) {
+    case IR_RECEIVER_OFF:
+      break;
     case IR_RECEIVER_READY:
       state = IR_RECEIVER_RECEIVING;
       rawIndex = 0;
@@ -75,17 +87,21 @@ void IR_Signal::isr() {
       break;
     case IR_RECEIVER_READING:
       break;
+    case IR_RECEIVER_AVAILABLE:
+      break;
   }
 
   prev_us = us;
 }
 
-void IR_Signal::handle() {
+void IR::handle() {
   noInterrupts();
   uint32_t diff = micros() - prev_us;
   interrupts();
 
   switch (state) {
+    case IR_RECEIVER_OFF:
+      break;
     case IR_RECEIVER_READY:
       break;
     case IR_RECEIVER_RECEIVING:
@@ -95,7 +111,7 @@ void IR_Signal::handle() {
       }
       break;
     case IR_RECEIVER_READING:
-      if (rawIndex < 8) {
+      if (rawIndex < REGARD_AS_NOISE_COUNT) {
         println_dbg("noise");
         state = IR_RECEIVER_READY;
         break;
