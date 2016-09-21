@@ -17,7 +17,7 @@ IR_Station station(PIN_IR_OUT, PIN_IR_IN, PIN_LED_R, PIN_LED_G, PIN_LED_B, PIN_B
 
 void setup() {
   // Prepare Serial debug
-  Serial.begin(74880);
+  Serial.begin(115200);
   delay(10);
   println_dbg("");
   println_dbg("Hello, I'm ESP-WROOM-02");

@@ -55,24 +55,8 @@ class IR_Station {
     bool clearSignals();
     bool changeIPSetting(String local_ip_s, String gateway_s, String subnetmask_s);
 
-    void apiSetupWifilist();
-    void apiSetupConfirm();
-    void apiSetupIsconnected();
-    void apiSetupSetapmode();
-    void apiSetupTest();
-    void apiSetupNotfound();
-
-    void apiInfo();
-    void apiSignalsSend();
-    void apiSignalsRecord();
-    void apiSignalsRename();
-    void apiSignalsUpload();
-    void apiSignalsClear();
-    void apiSignalsClearall();
-    void apiWifiDisconnect();
-    void apiWifiChangeip();
-    void apiDiscription();
-    void apiNotfound();
+    void attachSetupApi();
+    void attachStationApi();
 
     bool settingsRestoreFromFile();
     bool settingsBackupToFile();
