@@ -32,6 +32,9 @@ void setup() {
 
   // IR-station setup
   station.begin();
+  attachInterrupt(PIN_BUTTON, []() {
+    station.buttonIsr();
+  }, CHANGE);
 
   // Setup Completed
   println_dbg("Setup Completed");

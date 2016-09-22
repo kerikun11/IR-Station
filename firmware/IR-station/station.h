@@ -35,6 +35,7 @@ class IR_Station {
     void begin();
     void reset();
     void handle();
+    void buttonIsr();
 
   private:
     uint8_t mode;
@@ -59,8 +60,6 @@ class IR_Station {
     ESP8266HTTPUpdateServer httpUpdater;
     DNSServer dnsServer;
     OTA ota;
-
-    void buttonIsr();
 
     void restoreSignalName();
     bool irSendSignal(int ch);

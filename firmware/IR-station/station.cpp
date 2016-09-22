@@ -23,9 +23,6 @@ void IR_Station::begin(void) {
   if (settingsRestoreFromFile() == false) reset();
 
   pinMode(_pin_button, INPUT_PULLUP);
-  //  attachInterrupt(_pin_button, static_cast<void (*)()>([this]() {
-  //    this->buttonIsr();
-  //  }), CHANGE);
   println_dbg("attached button interrupt");
 
   // setup OTA
@@ -51,6 +48,7 @@ void IR_Station::begin(void) {
         settingsBackupToFile();
       }
       attachStationApi();
+      ir.begin(_pin_tx, _pin_rx);
       indicator.green(0);
       indicator.blue(1023);
       break;
@@ -60,6 +58,7 @@ void IR_Station::begin(void) {
       WiFi.mode(WIFI_AP);
       setupAP(SOFTAP_SSID, SOFTAP_PASS);
       attachStationApi();
+      ir.begin(_pin_tx, _pin_rx);
       indicator.green(0);
       indicator.blue(1023);
       break;
@@ -90,8 +89,6 @@ void IR_Station::begin(void) {
   SSDP.setManufacturer("KERI's Lab");
   SSDP.setManufacturerURL("http://kerikeri.top");
   SSDP.begin();
-
-  ir.begin(_pin_tx, _pin_rx);
 }
 
 void IR_Station::reset() {
@@ -281,7 +278,7 @@ void IR_Station::attachSetupApi() {
       mode = IR_STATION_MODE_STATION;
       settingsBackupToFile();
       indicator.set(0, 0, 1023);
-      delay(6000);
+      delay(1000);
       ESP.reset();
     } else {
       println_dbg("Not connected yet.");
