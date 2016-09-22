@@ -176,15 +176,15 @@ Please Add the Libraries below to your Arduino IDE
 
 |Path		|Method	|Parameter(s)	|Return	|Remarks	|
 |:----------|:------|:--------------|:------|:----------|
-|/info				|GET	|				|json	|a json includes the device information	|
-|/signals/list		|GET	|	|a list of names of signals	|	|
-|/signals/send		|POST	|ch number	|result json	|	|
+|/info				|GET	|							|json			|a json includes the device information	|
+|/signals/list		|GET	|							|a list of names of signals	|	|
+|/signals/send		|POST	|?ch=(int)					|result json	|	|
 |/signals/record	|POST	|?ch=(int)&name=(string)	|result json	|	|
 |/signals/rename	|POST	|?ch=(int)&name=(string)	|result json	|	|
 |/signals/upload	|POST	|?ch=(int)&irJson=(json)	|result json	|	|
-|/signals/clear		|POST	|?ch=(int)	|result json	|	|
-|/signals/clear-all	|POST	|	|result json	|	|
-|/wifi/disconnect	|POST	|	|	|	|
+|/signals/clear		|POST	|?ch=(int)	|result json	|				|	|
+|/signals/clear-all	|POST	|							|result json	|	|
+|/wifi/disconnect	|POST	|							|				|	|
 |/wifi/change-ip	|POST	|?ipaddress=(string)&gateway=(string)&netmask=(string)	|result json	|	|
 
 #### result json
