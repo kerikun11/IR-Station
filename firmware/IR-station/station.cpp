@@ -411,6 +411,7 @@ void IR_Station::attachStationApi() {
     String res;
     int ch = server.arg("ch").toInt();
     if (ch > 0 && clearSignal(ch)) {
+      signalName[ch] = "";
       res = resultJson(0, "Cleared a Singal");
     } else {
       res = resultJson(-1, "Failed to clear");
@@ -421,6 +422,7 @@ void IR_Station::attachStationApi() {
   server.on("/signals/clear-all", [this]() {
     displayRequest();
     for (int ch = 1; ch <= SIGNAL_COUNT_MAX; ch++) {
+      signalName[ch] = "";
       clearSignal(ch);
     }
     server.send(200, "application/json", resultJson(0, "Cleared All Signals"));

@@ -98,6 +98,7 @@ function manage(){
 			updateStatus(res["message"]);
 			loadChName();
 		});
+		updateStatus("Recording a new Signal...");
 		$('#input-name').val("");
 	}else if(action == "rename"){
 		if($('#manage select[name="ch"]').val() == -1){
@@ -138,6 +139,7 @@ function manage(){
 				});
 			}
 		}
+		updateStatus("Uploading a new Signal...");
 	}else if(action == "download"){
 		if($('#manage select[name="ch"]').val() == -1){
 			$('#form-submit label').text("Select a channel")
