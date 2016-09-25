@@ -24,7 +24,6 @@ void IR_Station::begin(void) {
 
   println_dbg("attached button interrupt");
 
-  // setup OTA
 #if USE_OTA_UPDATE == true
   ota.begin(hostname);
 #endif
@@ -64,7 +63,9 @@ void IR_Station::begin(void) {
   if (!MDNS.begin(hostname.c_str())) println_dbg("Error setting up MDNS responder!");
   else println_dbg("mDNS: http://" + hostname + ".local");
 
+#if USE_CAPITAL_PORTAL == true
   dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
+#endif
 
   httpUpdater.setup(&server, "/firmware");
   server.on("/description.xml", HTTP_GET, [this]() {
@@ -361,7 +362,7 @@ void IR_Station::attachStationApi() {
     String res;
     int ch = server.arg("ch").toInt();
     if (ch > 0 && irSendSignal(ch)) {
-      res = resultJson(0, "Sending Successful");
+      res = resultJson(0, "Sending Successful: " + signalName[ch]);
     } else {
       res = resultJson(-1, "No signal was sent");
     }
@@ -373,8 +374,8 @@ void IR_Station::attachStationApi() {
     String res;
     int ch = server.arg("ch").toInt();
     if (ch > 0 && irRecordSignal(ch, server.arg("name"))) {
-      res = resultJson(0, "Recording Successful");
       signalName[ch] = server.arg("name");
+      res = resultJson(0, "Recording Successful: " + signalName[ch]);
     } else {
       res = resultJson(-1, "No Signal Recieved");
     }
@@ -387,7 +388,7 @@ void IR_Station::attachStationApi() {
     int ch = server.arg("ch").toInt();
     if (ch > 0 && renameSignal(ch, server.arg("name"))) {
       signalName[ch] = server.arg("name");
-      res = resultJson(0, "Rename Successful");
+      res = resultJson(0, "Rename Successful: " + signalName[ch]);
     } else {
       res = resultJson(-1, "Rename Failed");
     }
@@ -399,7 +400,10 @@ void IR_Station::attachStationApi() {
     String res;
     int ch = server.arg("ch").toInt();
     if (ch > 0 && uploadSignal(ch, server.arg("irJson"))) {
-      res = resultJson(0, "Upload Successful");
+      DynamicJsonBuffer jsonBuffer;
+      JsonObject& data = jsonBuffer.parseObject(server.arg("irJson"));
+      signalName[ch] = (const char*)data["name"];
+      res = resultJson(0, "Upload Successful: " + signalName[ch]);
     } else {
       res = resultJson(-1, "Upload Failed");
     }
@@ -412,7 +416,7 @@ void IR_Station::attachStationApi() {
     int ch = server.arg("ch").toInt();
     if (ch > 0 && clearSignal(ch)) {
       signalName[ch] = "";
-      res = resultJson(0, "Cleared a Singal");
+      res = resultJson(0, "Cleared a Singal " + String(ch, DEC));
     } else {
       res = resultJson(-1, "Failed to clear");
     }
@@ -432,7 +436,7 @@ void IR_Station::attachStationApi() {
     displayRequest();
     signalCount = server.arg("number").toInt();
     settingsBackupToFile();
-    server.send(200, "application/json", resultJson(0, "Updated a number of channels"));
+    server.send(200, "application/json", resultJson(0, "Updated a number of channels to " + String(signalCount, DEC)));
     println_dbg("End");
   });
   server.on("/wifi/disconnect", [this]() {
