@@ -27,15 +27,17 @@
 
 const int DNS_PORT = 53;
 const int HTTP_PORT = 80;
+
 class IR_Station {
   public:
-    IR_Station(int pin_tx, int pin_rx, int pin_red, int pin_green, int pin_blue, int pin_button):
-      _pin_tx(pin_tx), _pin_rx(pin_rx), _pin_button(pin_button) , indicator(pin_red, pin_green, pin_blue), server(HTTP_PORT), httpUpdater(true) {
+    IR_Station(int pin_ir_tx, int pin_ir_rx, int pin_red, int pin_green, int pin_blue):
+      indicator(pin_red, pin_green, pin_blue), server(HTTP_PORT), httpUpdater(true) {
+      ir.begin(pin_ir_tx, pin_ir_rx);
     }
     void begin();
     void reset();
+    void disconnect();
     void handle();
-    void buttonIsr();
 
   private:
     uint8_t mode;
@@ -51,9 +53,6 @@ class IR_Station {
     int signalCount;
     String signalName[SIGNAL_COUNT_MAX + 1];
 
-    int _pin_tx;
-    int _pin_rx;
-    int _pin_button;
     IR ir;
     Indicator indicator;
     ESP8266WebServer server;

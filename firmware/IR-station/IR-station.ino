@@ -18,7 +18,8 @@
 #include "config.h"
 #include "station.h"
 
-IR_Station station(PIN_IR_OUT, PIN_IR_IN, PIN_LED_R, PIN_LED_G, PIN_LED_B, PIN_BUTTON);
+IR_Station station(PIN_IR_OUT, PIN_IR_IN, PIN_LED_R, PIN_LED_G, PIN_LED_B);
+volatile bool reset_flag = false;
 
 void setup() {
   // Prepare Serial debug
@@ -32,9 +33,10 @@ void setup() {
 
   // IR-station setup
   station.begin();
+  pinMode(PIN_BUTTON, INPUT_PULLUP);
   attachInterrupt(PIN_BUTTON, []() {
-    station.buttonIsr();
-  }, CHANGE);
+    reset_flag = true;
+  }, RISING);
 
   // Setup Completed
   println_dbg("Setup Completed");
@@ -42,5 +44,6 @@ void setup() {
 
 void loop() {
   station.handle();
+  if (reset_flag) station.reset();
 }
 

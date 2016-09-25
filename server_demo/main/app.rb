@@ -75,6 +75,14 @@ get "/signals/clear-all" do
 	json result
 end
 
+get "/signals/number" do
+	ch_size = params[:number].to_i
+	result = {}
+	result["code"] = 0
+	result["message"] = "Update Successful"
+	json result
+end
+
 get "/wifi/disconnect" do
 	sleep(1)
 	result = {}

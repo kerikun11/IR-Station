@@ -54,6 +54,14 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-ipaddress').hide();
 		$('#form-netmask').hide();
 		$('#form-gateway').hide();
+	}else if(action == "number"){
+		$('#form-ch').hide();
+		$('#form-name').hide();
+		$('#form-file').hide();
+		$('#form-number').show();
+		$('#form-ipaddress').hide();
+		$('#form-netmask').hide();
+		$('#form-gateway').hide();
 	}else if(action == "clear-all" || action == "disconnect-wifi"){
 		$('#form-ch').hide();
 		$('#form-name').hide();
@@ -76,6 +84,7 @@ $('#manage select[name="action"]').change(function(){
 function manage(){
 	var ch = $('#input-ch').val();
 	var name = $('#input-name').val();
+	var number = $('#input-number').val();
 	var action = $('#input-action').val();
 	if(action == "record"){
 		if($('#manage select[name="ch"]').val() == -1){
@@ -163,6 +172,19 @@ function manage(){
 				updateStatus(res["message"]);
 			});
 		}
+	}else if(action == "number"){
+		if($('#manage select[name="number"]').val() < 0){
+			$('#form-submit label').text("Only Positive Number")
+			return;
+		}
+		updateStatus("Updating...");
+		$.getJSON('/signals/number',{
+			number: number,
+		}).done(function(res){
+			updateStatus(res["message"]);
+			loadChName();
+			$('#input-number').val("");
+		});
 	}else if(action == "disconnect-wifi"){
 		if(confirm('Are you sure to disconnect this WiFi?')){
 			$.getJSON('/wifi/disconnect');

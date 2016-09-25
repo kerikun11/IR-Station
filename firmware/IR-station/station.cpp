@@ -22,7 +22,6 @@ void IR_Station::begin(void) {
 
   if (settingsRestoreFromFile() == false) reset();
 
-  pinMode(_pin_button, INPUT_PULLUP);
   println_dbg("attached button interrupt");
 
   // setup OTA
@@ -48,17 +47,15 @@ void IR_Station::begin(void) {
         settingsBackupToFile();
       }
       attachStationApi();
-      ir.begin(_pin_tx, _pin_rx);
       indicator.green(0);
       indicator.blue(1023);
       break;
     case IR_STATION_MODE_AP:
       println_dbg("Boot Mode: AP");
       restoreSignalName();
-      WiFi.mode(WIFI_AP);
+      WiFi.mode(WIFI_AP_STA);
       setupAP(SOFTAP_SSID, SOFTAP_PASS);
       attachStationApi();
-      ir.begin(_pin_tx, _pin_rx);
       indicator.green(0);
       indicator.blue(1023);
       break;
@@ -107,6 +104,17 @@ void IR_Station::reset() {
   ESP.reset();
 }
 
+void IR_Station::disconnect() {
+  mode = IR_STATION_MODE_SETUP;
+  is_stealth_ssid = false;
+  ssid = "";
+  password = "";
+  is_static_ip = false;
+  signalCount = SIGNAL_COUNT_DEFAULT;
+  settingsBackupToFile();
+  ESP.reset();
+}
+
 void IR_Station::handle() {
   server.handleClient();
   ir.handle();
@@ -137,21 +145,8 @@ void IR_Station::handle() {
       }
       break;
     case IR_STATION_MODE_AP:
+      dnsServer.processNextRequest();
       break;
-  }
-}
-
-void IR_Station::buttonIsr() {
-  static uint32_t prev_ms;
-  if (digitalRead(PIN_BUTTON) == LOW) {
-    prev_ms = millis();
-    println_dbg("the button pressed");
-  } else {
-    println_dbg("the button released");
-    if (millis() - prev_ms > 2000) {
-      println_dbg("the button long pressed");
-      reset();
-    }
   }
 }
 
@@ -431,11 +426,18 @@ void IR_Station::attachStationApi() {
     server.send(200, "application/json", resultJson(0, "Cleared All Signals"));
     println_dbg("End");
   });
+  server.on("/signals/number", [this]() {
+    displayRequest();
+    signalCount = server.arg("number").toInt();
+    settingsBackupToFile();
+    server.send(200, "application/json", resultJson(0, "Updated a number of channels"));
+    println_dbg("End");
+  });
   server.on("/wifi/disconnect", [this]() {
     displayRequest();
     server.send(200);
     delay(100);
-    reset();  // automatically rebooted
+    disconnect();
   });
   server.on("/wifi/change-ip", [this]() {
     displayRequest();
