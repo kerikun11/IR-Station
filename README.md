@@ -95,24 +95,24 @@ Please Add the Libraries below to your Arduino IDE
 
 #### Device Components
 
-|Components					|Details		|Quantity	|Remarks					|
-|:--------------------------|:--------------|:----------|:--------------------------|
-|ESP8266 WiFi Module		|ESP-WROOM-02	| 1 		|							|
-|IR receiver				|OSRB38C9AA		| 1 		|Power: 3.3V				|
-|IR LED						|OSI5FU3A11C	| 2 or 4 	|anything maybe OK			|
-|Voltage Regulator			|NJU7223-33		| 1 		|output: 3.3V 500mA	|
-|Nch MOS-FET				|IRLML6344		| 1 		|							|
-|Resistor for IR LED		|4.7 ohms, 1W	| 1 or 2 	|							|
-|Pull-up/down Resistor		|10k ohms 		| 5 		|							|
-|Indicator LED				|LATBT66B		| 1 		|							|
-|Resistor for LED			|100~220 ohms	| 3 		|							|
-|Resistor for IR receiver	|220 ohms		| 1 		|							|
-|Capacitor for IR receiver	|4.7uF 			| 3 		|							|
-|Power Stabilization Capacitor	|220uF~470uF| 1			|							|
-|Bypass Capacitor			|0.1uF 			| 3 		|							|
-|User Button				|SKRPACE010 	| 1			|							|
-|Poly Switch				|MICROSMD035F-02| 1			|up to 350mA				|
-|USB Conncector				|USB-Micro-B	| 1			|Power Only					|
+|Components						|Details			|Quantity	|Remarks				|
+|:------------------------------|:------------------|:----------|:----------------------|
+|ESP8266 WiFi Module			|ESP-WROOM-02		| 1 		|						|
+|IR receiver					|OSRB38C9AA			| 1 		|Power: 3.3V			|
+|IR LED							|OSI5FU3A11C		| 4		 	|anything maybe OK		|
+|Voltage Regulator				|NJU7223-33			| 1 		|output: 3.3V 500mA		|
+|Nch MOS-FET					|IRLML6344			| 1 		|						|
+|Resistor for IR LED			|4.7 ohms, 1W		| 2		 	|						|
+|Pull-up/down Resistor			|10k ohms 			| 5 		|						|
+|Indicator LED					|OSTBABS4C2B		| 1 		|						|
+|Resistor for LED				|100~220 ohms		| 3 		|						|
+|Resistor for IR receiver		|220 ohms			| 1 		|						|
+|Capacitor for IR receiver		|4.7uF 				| 3 		|						|
+|Power Stabilization Capacitor	|100uF				| 1			|						|
+|Bypass Capacitor				|0.1uF 				| 3 		|						|
+|User Button					|SKRPACE010 		| 1			|						|
+|Poly Switch					|MICROSMD035F-02	| 1			|up to 350mA			|
+|USB Conncector					|USB-Micro-B		| 1			|Power Only				|
 
 ![Components](images/components.jpg)
 
@@ -140,7 +140,7 @@ Please Add the Libraries below to your Arduino IDE
 
 ## IR data JSON format
 
-### format
+### Format
 
 ~~~json
 {
@@ -176,6 +176,7 @@ Please Add the Libraries below to your Arduino IDE
 
 |Path		|Method	|Parameter(s)	|Return	|Remarks	|
 |:----------|:------|:--------------|:------|:----------|
+|/					|GET	|				|index.html	|main page of IR-Station	|
 |/info				|GET	|							|json			|a json includes the device information	|
 |/signals/list		|GET	|							|a list of names of signals	|	|
 |/signals/send		|POST	|?ch=(int)					|result json	|	|

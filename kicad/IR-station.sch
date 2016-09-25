@@ -1203,7 +1203,7 @@ Wire Notes Line
 Wire Notes Line
 	1550 3950 4950 3950
 Text Notes 1600 1300 0    100  ~ 0
-IR-Station ver. 2016-08-25
+IR-Station ver. 2016-09-22
 $Comp
 L AE-FT234X U4
 U 1 1 57DBF6E9
