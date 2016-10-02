@@ -111,7 +111,9 @@ void IR_Station::disconnect() {
   ssid = "";
   password = "";
   is_static_ip = false;
-  signalCount = SIGNAL_COUNT_DEFAULT;
+  local_ip = 0U;
+  subnetmask = 0U;
+  gateway = 0U;
   settingsBackupToFile();
   ESP.reset();
 }
