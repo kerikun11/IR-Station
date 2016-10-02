@@ -124,7 +124,7 @@ void IR_Station::handle() {
   ota.handle();
   switch (mode) {
     case IR_STATION_MODE_SETUP:
-      if ((WiFi.status() == WL_CONNECTED)) indicator.set(0, 0, 1023);
+      if ((WiFi.status() == WL_CONNECTED)) indicator.set(0, 1023, 1023);
       dnsServer.processNextRequest();
       break;
     case IR_STATION_MODE_STATION:
