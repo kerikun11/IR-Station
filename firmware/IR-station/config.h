@@ -10,6 +10,9 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
+/* Version */
+#define IR_STATION_VERSION      "v1.4.1"
+
 /* Hardware Mapping */
 #define PIN_BUTTON              (0)
 #define PIN_IR_IN               (5)
