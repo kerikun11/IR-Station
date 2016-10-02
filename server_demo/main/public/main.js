@@ -269,6 +269,7 @@ function init(){
 		$('span#info-ssid').text(data["ssid"]);
 		$('span#info-ipaddress').text(data["ipaddress"]);
 		$('span#info-hostname').text(data["hostname"]);
+		$('span#info-version').text(data["version"]);
 		$('#main').show();
 	});
 }

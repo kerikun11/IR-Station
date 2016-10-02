@@ -111,7 +111,9 @@ void IR_Station::disconnect() {
   ssid = "";
   password = "";
   is_static_ip = false;
-  signalCount = SIGNAL_COUNT_DEFAULT;
+  local_ip = 0U;
+  subnetmask = 0U;
+  gateway = 0U;
   settingsBackupToFile();
   ESP.reset();
 }
@@ -340,6 +342,7 @@ void IR_Station::attachStationApi() {
     IPAddress ip = (mode == IR_STATION_MODE_STATION) ? WiFi.localIP() : WiFi.softAPIP();
     root["ipaddress"] = ip.toString();
     root["hostname"] = hostname;
+    root["version"] = IR_STATION_VERSION;
     String res;
     root.printTo(res);
     server.send(200, "application/json", res);

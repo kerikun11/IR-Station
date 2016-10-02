@@ -27,6 +27,7 @@ get"/info" do
 	info["ssid"] = "WiFi-2.4GHz"
 	info["ipaddress"]= "192.168.11.6"
 	info["hostname"] = "my-room"
+	info["version"] = "v1.4.1"
 	json info
 end
 
