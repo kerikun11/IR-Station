@@ -5,9 +5,12 @@ require 'sinatra/json'
 ch_size_max = 100
 ch_size = 25
 
-name = []
+schedule_list=[]
+schedule_id=0
+
+name_list = []
 for i in 0...ch_size_max do
-	name[i]="ch name #{i+1}"
+	name_list[i]="CH NAME #{i+1}"
 end
 
 get '/' do
@@ -15,7 +18,7 @@ get '/' do
 end
 
 get"/signals/list" do
-	json name[0, ch_size]
+	json name_list[0, ch_size]
 end
 
 get"/info" do
@@ -37,6 +40,7 @@ end
 
 get "/signals/record" do
 	sleep(1)
+	name_list[params[:ch].to_i-1] = params[:name]
 	result = {}
 	result["code"] = 0
 	result["message"] = "Recording Successful"
@@ -44,6 +48,7 @@ get "/signals/record" do
 end
 
 get "/signals/rename" do
+	name_list[params[:ch].to_i-1] = params[:name]
 	result = {}
 	result["code"] = 0
 	result["message"] = "Renaming Successful"
@@ -58,6 +63,7 @@ get "/signals/upload" do
 end
 
 get "/signals/clear" do
+	name_list[params[:ch].to_i-1] = ""
 	result = {}
 	result["code"] = 0
 	result["message"] = "Cleaning Successful"
@@ -80,6 +86,33 @@ get "/signals/number" do
 	result = {}
 	result["code"] = 0
 	result["message"] = "Update Successful"
+	json result
+end
+
+get "/schedule/list" do
+	json schedule_list
+end
+
+get "/schedule/new" do
+	schedule_list += [
+		"id"=>schedule_id, "ch"=>params[:ch], "name"=>name_list[params[:ch].to_i-1],"time"=>params[:time]
+	]
+	schedule_id+=1
+	result = {}
+	result["code"] = 0
+	result["message"] = "Scheduling Successful"
+	json result
+end
+
+get "/schedule/delete" do
+	schedule_list.each do |sch|
+		if sch["id"]==params[:id].to_i then
+		   schedule_list.delete(sch)
+		end
+	end
+	result = {}
+	result["code"] = 0
+	result["message"] = "Scheduling Successful"
 	json result
 end
 

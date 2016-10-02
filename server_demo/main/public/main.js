@@ -14,6 +14,21 @@ function loadChName(){
 		}
 	});
 }
+function loadSchedule(){
+	$.getJSON('/schedule/list',{},function(data) {
+		$('#schedule-list').empty();
+		for(var i=0;i<data.length;i++){
+			var item = data[i];
+			var name = item["name"]
+			$('#schedule-list').append(
+				$('<li>')
+				.append($('<span>').text((name=="")?("ch "+(i+1)):(name+" at "+item["time"])+" "))
+				.append($('<button>').text('delete').addClass("schedule-delete"))
+				.val(item["id"])
+			);
+		}
+	});
+}
 
 /* send */
 $(document).on('click','#send button',function(){
@@ -35,6 +50,7 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-name').show();
 		$('#form-file').hide();
 		$('#form-number').hide();
+		$('#form-time').hide();
 		$('#form-ipaddress').hide();
 		$('#form-netmask').hide();
 		$('#form-gateway').hide();
@@ -51,6 +67,7 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-name').hide();
 		$('#form-file').hide();
 		$('#form-number').hide();
+		$('#form-time').hide();
 		$('#form-ipaddress').hide();
 		$('#form-netmask').hide();
 		$('#form-gateway').hide();
@@ -59,6 +76,7 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-name').hide();
 		$('#form-file').hide();
 		$('#form-number').show();
+		$('#form-time').hide();
 		$('#form-ipaddress').hide();
 		$('#form-netmask').hide();
 		$('#form-gateway').hide();
@@ -67,6 +85,16 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-name').hide();
 		$('#form-file').hide();
 		$('#form-number').hide();
+		$('#form-time').hide();
+		$('#form-ipaddress').hide();
+		$('#form-netmask').hide();
+		$('#form-gateway').hide();
+	}else if(action == "schedule-new"){
+		$('#form-ch').show();
+		$('#form-name').hide();
+		$('#form-file').hide();
+		$('#form-number').hide();
+		$('#form-time').show();
 		$('#form-ipaddress').hide();
 		$('#form-netmask').hide();
 		$('#form-gateway').hide();
@@ -76,6 +104,7 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-name').hide();
 		$('#form-file').hide();
 		$('#form-number').hide();
+		$('#form-time').hide();
 		$('#form-ipaddress').show();
 		$('#form-netmask').show();
 		$('#form-gateway').show();
@@ -187,6 +216,19 @@ function manage(){
 			loadChName();
 			$('#input-number').val("");
 		});
+	}else if(action == "schedule-new"){
+		if($('#manage select[name="ch"]').val() == -1){
+			$('#form-submit label').text("Select a channel")
+			return;
+		}
+		$.getJSON('/schedule/new',{
+			time: $('#input-time').val(),
+			ch: ch
+		}).done(function(res){
+			updateStatus(res["message"]);
+			loadSchedule();
+			$('#input-time').val("");
+		});
 	}else if(action == "disconnect-wifi"){
 		if(confirm('Are you sure to disconnect this WiFi?')){
 			$.getJSON('/wifi/disconnect');
@@ -221,6 +263,7 @@ $('#manage input').keypress(function(e){
 /* init */
 function init(){
 	loadChName();
+	loadSchedule();
 	$.getJSON('/info',{},function(data) {
 		$('span#info-status').text(data["message"]);
 		$('span#info-ssid').text(data["ssid"]);
@@ -231,3 +274,11 @@ function init(){
 }
 init();
 
+/* schedule delete */
+$(document).on('click','button.schedule-delete',function(){
+	$.get('/schedule/delete',{
+		id: $(this).parent().val()
+	}).done(function(){
+		loadSchedule();
+	});
+});
