@@ -69,10 +69,10 @@
 							</select>
 						</div>
 					</div>
-					<div class="form-group" id="form-ch">
-						<label class="control-label col-sm-2">Channel</label>
+					<div class="form-group" id="form-id" style="display:none">
+						<label class="control-label col-sm-2">Signal</label>
 						<div class="col-sm-4">
-							<select id="input-ch" name="ch">
+							<select id="input-id" name="id">
 								<!-- js adds options -->
 							</select>
 						</div>
@@ -95,20 +95,20 @@
 							<input id="input-number" type="number" name="number">
 						</div>
 					</div>
-					<div class="form-group" id="form-ipaddress" style="display:none">
-						<label class="control-label col-sm-2">IP address(empty for using DHCP)</label>
+					<div class="form-group" id="form-local_ip" style="display:none">
+						<label class="control-label col-sm-2">Static IP Address</label>
 						<div class="col-sm-4">
-							<input id="input-ipaddress" type="text" name="ipAddress">
+							<input id="input-local_ip" type="text" name="ipAddress">
 						</div>
 					</div>
-					<div class="form-group" id="form-netmask" style="display:none">
+					<div class="form-group" id="form-subnetmask" style="display:none">
 						<label class="control-label col-sm-2">Subnet Mask</label>
 						<div class="col-sm-4">
-							<input id="input-netmask" type="text" name="netmask">
+							<input id="input-subnetmask" type="text" name="netmask">
 						</div>
 					</div>
 					<div class="form-group" id="form-gateway" style="display:none">
-						<label class="control-label col-sm-2">Default Gateway</label>
+						<label class="control-label col-sm-2">Gateway IP address</label>
 						<div class="col-sm-4">
 							<input id="input-gateway" type="text" name="gateway">
 						</div>
@@ -126,10 +126,10 @@
 				<h2>Informations</h2>
 				<div>
 					<p>Status: <span id="info-status"></span></p>
-					<p>WiFi SSID: <span id="info-ssid"></span></p>
-					<p>IP Address: <span id="info-ipaddress"></span></p>
-					<p>Hostname: <span id="info-hostname"></span></p>
 					<p>Version: <span id="info-version"></span></p>
+					<p>Hostname: <span id="info-hostname"></span></p>
+					<p>WiFi SSID: <span id="info-ssid"></span></p>
+					<p>IP Address: <span id="info-local_ip"></span></p>
 				</div>
 			</div>
 

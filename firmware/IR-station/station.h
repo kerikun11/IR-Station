@@ -16,6 +16,8 @@
 #include <ESP8266SSDP.h>
 #include <ESP8266mDNS.h>
 #include <DNSServer.h>
+#undef max(a,b)
+#include <vector>
 #include "config.h"
 #include "ir.h"
 #include "led.h"
@@ -24,6 +26,9 @@
 #define IR_STATION_MODE_SETUP   0
 #define IR_STATION_MODE_STATION 1
 #define IR_STATION_MODE_AP      2
+
+#define STATION_JSON_PATH       ("/station.json")
+#define IR_DATA_PATH(id)        ("/main/signals/"+String(id,DEC)+".json")
 
 const int DNS_PORT = 53;
 const int HTTP_PORT = 80;
@@ -40,18 +45,33 @@ class IR_Station {
     void handle();
 
   private:
+    String version;
     uint8_t mode;
+    String hostname;
+
     bool is_stealth_ssid;
     String ssid;
     String password;
-    String hostname;
+
     bool is_static_ip;
     IPAddress local_ip;
     IPAddress gateway;
     IPAddress subnetmask;
 
-    int signalCount;
-    String signalName[SIGNAL_COUNT_MAX + 1];
+    int next_id;
+
+    class Signal {
+      public:
+        int id;
+        String name;
+        String path;
+        bool display;
+        struct {
+          int row;
+          int column;
+        } position;
+    };
+    std::vector<Signal> signals;
 
     IR ir;
     Indicator indicator;
@@ -60,23 +80,13 @@ class IR_Station {
     DNSServer dnsServer;
     OTA ota;
 
-    void restoreSignalName();
-    bool irSendSignal(int ch);
-    bool irRecordSignal(int ch, String name, uint32_t timeout_ms = 5000);
-    bool renameSignal(int ch, String name);
-    bool uploadSignal(int ch, String data);
-    bool clearSignal(int ch);
-
-    bool changeIp(String local_ip_s, String gateway_s, String subnetmask_s);
+    int getNewId();
+    bool restore();
+    bool save();
 
     void displayRequest();
-    String resultJson(int code, String message);
     void attachSetupApi();
     void attachStationApi();
-
-    String settingsCrcSerial();
-    bool settingsRestoreFromFile();
-    bool settingsBackupToFile();
 };
 
 #endif
