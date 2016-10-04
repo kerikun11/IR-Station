@@ -38,7 +38,6 @@ String IR::read() {
 
 void IR::resume() {
   state = IR_RECEIVER_READY;
-  auto a = 10;
 }
 
 void IR::send(String dataJson) {

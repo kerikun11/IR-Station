@@ -27,10 +27,6 @@
 #define SIGNAL_COUNT_DEFAULT    (25)
 #define SIGNAL_COUNT_MAX        (100)
 
-// SPIFFS saving path
-#define IR_DATA_PATH(i)         ("/main/IR_data/" + String(i, DEC) + ".json")
-#define SETTINGS_DATA_PATH      ("/settings.json")
-
 // SSID & Password of ESP8266 Access Point Mode
 #define SOFTAP_SSID             "IR-Station"
 #define SOFTAP_PASS             ""
