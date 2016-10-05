@@ -12,7 +12,7 @@
 #include <FS.h>
 #include "config.h"
 
-bool writeStringToFile(String path, String dataString) {
+bool writeStringToFile(String path, String& dataString) {
   SPIFFS.remove(path);
   File file = SPIFFS.open(path, "w");
   if (!file) {
@@ -32,8 +32,11 @@ bool getStringFromFile(String path, String& dataString) {
     println_dbg("File open Error: " + path);
     return false;
   }
-  file.setTimeout(10);
-  dataString = file.readString();
+  file.setTimeout(1);
+  dataString = "";
+  while (file.available()) {
+    dataString += file.readString();
+  }
   file.close();
   println_dbg("Restore successful: " + path + " data:" + dataString);
   return true;

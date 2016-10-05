@@ -22,7 +22,7 @@ function load(){
 		$('span#info-hostname').text(data["hostname"]);
 		$('span#info-ssid').text(data["ssid"]);
 		var ip = data["local_ip"];
-		$('span#info-local_ip').text(""+((ip>>24)&0xFF)+"."+((ip>>16)&0xFF)+"."+((ip>>8)&0xFF)+"."+(ip&0xFF));
+		$('span#info-local_ip').text(""+((ip>>0)&0xFF)+"."+((ip>>8)&0xFF)+"."+((ip>>16)&0xFF)+"."+((ip>>24)&0xFF));
 		// schedule
 		$('#schedule-list').empty();
 		var schedule = data["schedule"];

@@ -13,7 +13,6 @@
 #include <FS.h>
 #include "file.h"
 #include "wifi.h"
-#include "crc8.h"
 
 void IR_Station::begin(void) {
   yield();
@@ -168,6 +167,46 @@ int IR_Station::getNewId() {
   return next_id++;
 }
 
+bool IR_Station::restore() {
+  yield();
+  String s;
+  if (getStringFromFile(STATION_JSON_PATH, s) == false) return false;
+  DynamicJsonBuffer jsonBuffer;
+  JsonObject& root = jsonBuffer.parseObject(s);
+
+  version = (const char *)root["version"];
+  mode = (int)root["mode"];
+  hostname = (const char*)root["hostname"];
+
+  is_stealth_ssid = (bool)root["is_stealth_ssid"];
+  ssid = (const char*)root["ssid"];
+  password = (const char*)root["password"];
+
+  is_static_ip = (bool)root["is_static_ip"];
+  local_ip = (const uint32_t)root["local_ip"];
+  subnetmask = (const uint32_t)root["subnetmask"];
+  gateway = (const uint32_t)root["gateway"];
+
+  next_id = (int)root["next_id"];
+
+  for (int i = 0; i < root["signals"].size(); i++) {
+    Signal signal;
+    signal.id = (int)root["signals"][i]["id"];
+    signal.name = (const char *)root["signals"][i]["name"];
+    signal.path = (const char *)root["signals"][i]["path"];
+    signal.display = (bool)root["signals"][i]["display"];
+    signal.position.row = (int)root["signals"][i]["position"]["row"];
+    signal.position.column = (int)root["signals"][i]["position"]["column"];
+    signals.push_back(signal);
+  }
+
+  if (version != IR_STATION_VERSION) {
+    println_dbg("version difference");
+    return false;
+  }
+  return true;
+}
+
 bool IR_Station::save() {
   yield();
   DynamicJsonBuffer jsonBuffer;
@@ -262,7 +301,7 @@ void IR_Station::attachSetupApi() {
     indicator.set(0, 1023, 0);
     server.send(200);
     WiFi.disconnect();
-    delay(1000);
+    //    delay(1000);
     WiFi.begin(ssid.c_str(), password.c_str());
   });
   server.on("/mode/accesspoint", [this]() {
@@ -386,7 +425,8 @@ void IR_Station::attachStationApi() {
     signal.position.row = server.arg("row").toInt();
     signal.position.column = server.arg("column").toInt();
 
-    if (!writeStringToFile(signal.path, server.arg("irJson"))) return server.send(500, "text/plain", "Failed to write File");
+    String data = server.arg("irJson");
+    if (!writeStringToFile(signal.path, data)) return server.send(500, "text/plain", "Failed to write File");
     signals.push_back(signal);
     save();
     return server.send(200, "text/plain", "Recording Successful: " + signal.name);
@@ -443,45 +483,5 @@ void IR_Station::attachStationApi() {
     println_dbg("End");
   });
   server.serveStatic("/", SPIFFS, "/main/", "public");
-}
-
-bool IR_Station::restore() {
-  yield();
-  String s;
-  if (getStringFromFile(STATION_JSON_PATH, s) == false) return false;
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& root = jsonBuffer.parseObject(s);
-
-  version = (const char *)root["version"];
-  mode = (int)root["mode"];
-  hostname = (const char*)root["hostname"];
-
-  is_stealth_ssid = (bool)root["is_stealth_ssid"];
-  ssid = (const char*)root["ssid"];
-  password = (const char*)root["password"];
-
-  is_static_ip = (bool)root["is_static_ip"];
-  local_ip = (const uint32_t)root["local_ip"];
-  subnetmask = (const uint32_t)root["subnetmask"];
-  gateway = (const uint32_t)root["gateway"];
-
-  next_id = (int)root["next_id"];
-
-  for (int i = 0; i < root["signals"].size(); i++) {
-    Signal signal;
-    signal.id = (int)root["signals"][i]["id"];
-    signal.name = (const char *)root["signals"][i]["name"];
-    signal.path = (const char *)root["signals"][i]["path"];
-    signal.display = (bool)root["signals"][i]["display"];
-    signal.position.row = (int)root["signals"][i]["position"]["row"];
-    signal.position.column = (int)root["signals"][i]["position"]["column"];
-    signals.push_back(signal);
-  }
-
-  if (version != IR_STATION_VERSION) {
-    println_dbg("version difference");
-    return false;
-  }
-  return true;
 }
 
