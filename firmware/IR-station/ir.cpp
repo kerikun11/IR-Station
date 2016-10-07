@@ -17,7 +17,6 @@ volatile enum IR_RECEIVER_STATE IR::state;
 volatile uint16_t IR::rawIndex;
 volatile uint16_t IR::rawData[RAWDATA_BUFFER_SIZE];
 volatile uint32_t IR::prev_us;
-String IR::irJson;
 
 void IR::begin(int tx, int rx) {
   txPin = tx;
@@ -33,7 +32,14 @@ bool IR::available() {
 }
 
 String IR::read() {
-  return irJson;
+  String data = "";
+  DynamicJsonBuffer jsonBuffer;
+  JsonArray& root = jsonBuffer.createArray();
+  for (int i = 0; i < rawIndex; i++) {
+    root.add(rawData[i]);
+  }
+  root.printTo(data);
+  return data;
 }
 
 void IR::resume() {
@@ -132,15 +138,9 @@ void IR::handle() {
       }
       println_dbg("");
 
-      DynamicJsonBuffer jsonBuffer;
-      JsonArray& root = jsonBuffer.createArray();
-      for (int i = 0; i < rawIndex; i++) {
-        root.add(rawData[i]);
-      }
-      irJson = "";
-      root.printTo(irJson);
-
       state = IR_RECEIVER_AVAILABLE;
+      break;
+    case IR_RECEIVER_AVAILABLE:
       break;
   }
 }
