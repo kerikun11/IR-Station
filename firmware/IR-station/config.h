@@ -29,7 +29,7 @@
 
 // SSID & Password of ESP8266 Access Point Mode
 #define SOFTAP_SSID             "IR-Station"
-#define SOFTAP_PASS             ""
+#define SOFTAP_PASS             "IR-Station"
 
 // WiFi connection Timeout
 #define WIFI_CONNECT_TIMEOUT    (10) // seconds
