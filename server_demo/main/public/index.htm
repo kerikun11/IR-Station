@@ -25,12 +25,15 @@
 			.container{
 				float:left;
 				width:auto;
-				min-width:14em;
-				min-height:14em;
+				min-width:16em;
+				min-height:16em;
 				margin: 10px;
 			}
 			.container>div{
-				margin-left:10px;
+				margin-left:15px;
+			}
+			.container>div>p{
+				margin:0.5em;
 			}
 			.form-group{
 				margin-top:5px;
@@ -90,16 +93,10 @@
 							<input id="input-name" type="text" name="name">
 						</div>
 					</div>
-					<div class="form-group" id="form-number" style="display:none">
-						<label class="control-label col-sm-2">How many</label>
-						<div class="col-sm-4">
-							<input id="input-number" type="number" name="number">
-						</div>
-					</div>
 					<div class="form-group" id="form-time" style="display:none">
 						<label class="control-label col-sm-2">When?</label>
 						<div class="col-sm-4">
-							<input id="input-time" type="time" name="time">
+							<input id="input-time" type="datetime-local" name="time" step="60">
 						</div>
 					</div>
 					<div class="form-group" id="form-local_ip" style="display:none">

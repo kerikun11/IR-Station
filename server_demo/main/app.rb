@@ -70,9 +70,24 @@ post "/signals/rename" do
 end
 
 post "/signals/upload" do
+	signal = {
+		"id"=>station["next_id"],
+		"name"=>params[:name],
+		"path"=>"/main/#{station["next_id"]} #{params[:name]}.json",
+		"display"=>((params[:display]=="true")?true:false),
+			"position"=>{
+			"row"=>params[:row].to_i,
+			"column"=>params[:column].to_i
+		}
+	}
+	station["next_id"] += 1
+	station["signals"].push(signal)
+	"Uploading Successful: #{params[:name]}"
 end
 
 post "/signals/clear" do
+	station["signals"].empty
+	"Cleaned"
 end
 
 post "/signals/clear-all" do
@@ -83,16 +98,15 @@ post "/schedule/new" do
 	schedule = {
 		"schedule_id"=>station["new_schedule_id"],
 		"id"=>params[:id],
-		"name"=>name,
 		"time"=>params[:time]
 	}
 	station["schedule"].push(schedule)
 	station["new_schedule_id"] += 1
-	"Scheduling Successful"
+	"Scheduling Successful: #{name}"
 end
 
 get "/schedule/delete" do
-	schedule = station["schedule"].select{|item| item["schedule_id"]==params[:id].to_i}[0]
+	schedule = station["schedule"].select{|item| item["schedule_id"]==params[:schedule_id].to_i}[0]
 	station["schedule"].delete(schedule)
 	"Scheduling Successful"
 end

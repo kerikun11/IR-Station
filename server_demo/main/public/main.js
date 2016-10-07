@@ -24,13 +24,19 @@ function load(){
 		var ip = data["local_ip"];
 		$('span#info-local_ip').text(""+((ip>>0)&0xFF)+"."+((ip>>8)&0xFF)+"."+((ip>>16)&0xFF)+"."+((ip>>24)&0xFF));
 		// schedule
-		$('#schedule-list').empty();
 		var schedule = data["schedule"];
+		$('#schedule-list').empty();
 		schedule.forEach(function(item){
-			var name = item["name"]
+			var name="";
+			data["signals"].forEach(function(signal){
+				if(signal["id"] == item["id"]){
+					name = signal["name"];
+				}
+			});
+			var time = new Date(Number(item["time"]*1000));
 			$('#schedule-list').append(
 				$('<li>')
-				.append($('<span>').text((name=="")?("ch "+(i+1)):(name+" at "+item["time"])+" "))
+				.append($('<span>').text(name+" at "+time.toLocaleString()+" "))
 				.append($('<button>').text('delete').addClass("schedule-delete"))
 				.val(item["schedule_id"])
 			);
@@ -60,7 +66,6 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-id').hide();
 		$('#form-name').show();
 		$('#form-file').hide();
-		$('#form-number').hide();
 		$('#form-time').hide();
 		$('#form-local_ip').hide();
 		$('#form-subnetmask').hide();
@@ -69,7 +74,6 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-id').show();
 		$('#form-name').show();
 		$('#form-file').hide();
-		$('#form-number').hide();
 		$('#form-time').hide();
 		$('#form-local_ip').hide();
 		$('#form-subnetmask').hide();
@@ -78,7 +82,6 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-id').hide();
 		$('#form-name').show();
 		$('#form-file').show();
-		$('#form-number').hide();
 		$('#form-time').hide();
 		$('#form-local_ip').hide();
 		$('#form-subnetmask').hide();
@@ -87,16 +90,6 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-id').show();
 		$('#form-name').hide();
 		$('#form-file').hide();
-		$('#form-number').hide();
-		$('#form-time').hide();
-		$('#form-local_ip').hide();
-		$('#form-subnetmask').hide();
-		$('#form-gateway').hide();
-	}else if(action == "number"){
-		$('#form-id').hide();
-		$('#form-name').hide();
-		$('#form-file').hide();
-		$('#form-number').show();
 		$('#form-time').hide();
 		$('#form-local_ip').hide();
 		$('#form-subnetmask').hide();
@@ -105,7 +98,6 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-id').hide();
 		$('#form-name').hide();
 		$('#form-file').hide();
-		$('#form-number').hide();
 		$('#form-time').hide();
 		$('#form-local_ip').hide();
 		$('#form-subnetmask').hide();
@@ -114,7 +106,6 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-id').show();
 		$('#form-name').hide();
 		$('#form-file').hide();
-		$('#form-number').hide();
 		$('#form-time').show();
 		$('#form-local_ip').hide();
 		$('#form-subnetmask').hide();
@@ -123,7 +114,6 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-id').hide();
 		$('#form-name').hide();
 		$('#form-file').hide();
-		$('#form-number').hide();
 		$('#form-time').hide();
 		$('#form-local_ip').show();
 		$('#form-subnetmask').show();
@@ -238,8 +228,13 @@ function manage(){
 			return;
 		}
 		var time = $('#input-time').val();
-		if(!time.match(/\d\d:\d\d/)){
+		if(!time.match(/^20\d\d(.\d\d){4}$/)){
 			$('#form-submit label').text("Invalid Time");
+			return;
+		}
+		var time = Math.floor(new Date($('#input-time').val()).getTime()/1000)-9*60*60;
+		if(time < Math.floor(new Date().getTime()/1000)){
+			$('#form-submit label').text("No Past Time");
 			return;
 		}
 		$.post('/schedule/new',{
