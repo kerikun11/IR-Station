@@ -33,6 +33,25 @@
 const int DNS_PORT = 53;
 const int HTTP_PORT = 80;
 
+class Signal {
+  public:
+    int id;
+    String name;
+    String path;
+    bool display;
+    struct {
+      int row;
+      int column;
+    } position;
+};
+
+class Schedule {
+  public:
+    int schedule_id;
+    int id;
+    time_t time;
+};
+
 class IR_Station {
   public:
     IR_Station(int pin_ir_tx, int pin_ir_rx, int pin_red, int pin_green, int pin_blue):
@@ -40,8 +59,7 @@ class IR_Station {
       ir.begin(pin_ir_tx, pin_ir_rx);
     }
     void begin();
-    void reset();
-    void disconnect();
+    void reset(bool clean = true);
     void handle();
 
   private:
@@ -59,19 +77,10 @@ class IR_Station {
     IPAddress subnetmask;
 
     int next_id;
-
-    class Signal {
-      public:
-        int id;
-        String name;
-        String path;
-        bool display;
-        struct {
-          int row;
-          int column;
-        } position;
-    };
     std::vector<Signal> signals;
+
+    int next_schedule_id;
+    std::vector<Schedule> schedules;
 
     IR ir;
     Indicator indicator;
@@ -80,7 +89,10 @@ class IR_Station {
     DNSServer dnsServer;
     OTA ota;
 
+    void handleSchedule();
     int getNewId();
+    int getNewScheduleId();
+    Signal *getSignalById(int id);
     bool restore();
     bool save();
 
