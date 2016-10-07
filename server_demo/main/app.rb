@@ -16,7 +16,7 @@ station = {
 	"next_id"=>5,
 	"signals"=>[],
 	"new_schedule_id"=>0,
-	"schedule"=>[]
+	"schedules"=>[]
 }
 
 for i in 0...5 do
@@ -100,14 +100,14 @@ post "/schedule/new" do
 		"id"=>params[:id],
 		"time"=>params[:time]
 	}
-	station["schedule"].push(schedule)
+	station["schedules"].push(schedule)
 	station["new_schedule_id"] += 1
 	"Scheduling Successful: #{name}"
 end
 
 get "/schedule/delete" do
-	schedule = station["schedule"].select{|item| item["schedule_id"]==params[:schedule_id].to_i}[0]
-	station["schedule"].delete(schedule)
+	schedule = station["schedules"].select{|item| item["schedule_id"]==params[:schedule_id].to_i}[0]
+	station["schedules"].delete(schedule)
 	"Scheduling Successful"
 end
 

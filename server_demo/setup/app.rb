@@ -8,6 +8,26 @@ wifiList = [
 	"hello",
 	"ESP8266",
 	"ESP-WROOM-02",
+	"WiFI-ssid",
+	"ABC",
+	"hello",
+	"ESP8266",
+	"ESP-WROOM-02",
+	"WiFI-ssid",
+	"ABC",
+	"hello",
+	"ESP8266",
+	"ESP-WROOM-02",
+	"WiFI-ssid",
+	"ABC",
+	"hello",
+	"ESP8266",
+	"ESP-WROOM-02",
+	"WiFI-ssid",
+	"ABC",
+	"hello",
+	"ESP8266",
+	"ESP-WROOM-02"
 ]
 
 get '/' do

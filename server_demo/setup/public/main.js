@@ -1,11 +1,5 @@
 function getWifiList(){
-	$.ajax({
-		type:"GET",
-		url:"/wifi/list",
-		dataType:"json",
-		cache:false,
-		timeout:10000
-	}).done(function(data) {
+	$.getJSON('/wifi/list').done(function(data) {
 		$('#wifi-list').empty();
 		$.each(data,function(index,wifi){
 			$('#wifi-list').append($('<option>').val(wifi).text(wifi));

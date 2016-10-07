@@ -24,7 +24,7 @@ function load(){
 		var ip = data["local_ip"];
 		$('span#info-local_ip').text(""+((ip>>0)&0xFF)+"."+((ip>>8)&0xFF)+"."+((ip>>16)&0xFF)+"."+((ip>>24)&0xFF));
 		// schedule
-		var schedule = data["schedule"];
+		var schedule = data["schedules"];
 		$('#schedule-list').empty();
 		schedule.forEach(function(item){
 			var name="";
