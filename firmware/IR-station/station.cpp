@@ -42,8 +42,8 @@ void IR_Station::begin(void) {
         is_static_ip = false;
         save();
       }
-      ntp_begin();
       attachStationApi();
+      ntp_begin();
       indicator.set(0, 0, 1023);
       break;
     case IR_STATION_MODE_AP:
@@ -61,15 +61,18 @@ void IR_Station::begin(void) {
   else println_dbg("mDNS: http://" + hostname + ".local");
 
 #if USE_CAPITAL_PORTAL == true
+  println_dbg("Starting Capital Portal...");
   dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
 #endif
 
+  println_dbg("Starting HTTP Updater...");
   httpUpdater.setup(&server, "/firmware");
   server.on("/description.xml", HTTP_GET, [this]() {
     displayRequest();
     SSDP.schema(server.client());
   });
 
+  println_dbg("Starting HTTP Server...");
   server.begin();
 
   println_dbg("Starting SSDP...");
@@ -102,7 +105,6 @@ void IR_Station::reset(bool clean) {
 
   if (clean) {
     next_id = 1;
-
     for (int i = 0; i < signals.size(); i++) {
       removeFile(signals[i].path);
     }
@@ -122,7 +124,9 @@ void IR_Station::handle() {
   switch (mode) {
     case IR_STATION_MODE_SETUP:
       if ((WiFi.status() == WL_CONNECTED)) indicator.set(0, 1023, 1023);
+#if USE_CAPITAL_PORTAL == true
       dnsServer.processNextRequest();
+#endif
       break;
     case IR_STATION_MODE_STATION:
       handleSchedule();
@@ -146,7 +150,9 @@ void IR_Station::handle() {
       }
       break;
     case IR_STATION_MODE_AP:
+#if USE_CAPITAL_PORTAL == true
       dnsServer.processNextRequest();
+#endif
       break;
   }
 }
@@ -155,6 +161,8 @@ void IR_Station::handleSchedule() {
   static uint32_t prev_time;
   if (now() != prev_time) {
     for (int i = 0; i < schedules.size(); i++) {
+      yield();
+      wdt_reset();
       if (now() > schedules[i].time) {
         Signal *signal = getSignalById(schedules[i].id);
         String json;
@@ -163,6 +171,7 @@ void IR_Station::handleSchedule() {
         ir.send(json);
         indicator.set(0, 0, 1023);
         schedules.erase(schedules.begin() + i);
+        save();
       }
     }
     prev_time = now();
@@ -190,7 +199,7 @@ bool IR_Station::restore() {
   yield();
   String s;
   if (getStringFromFile(STATION_JSON_PATH, s) == false) return false;
-  StaticJsonBuffer<8000> jsonBuffer;
+  DynamicJsonBuffer jsonBuffer;
   JsonObject& root = jsonBuffer.parseObject(s);
   if (!root.success())return false;
 
@@ -224,7 +233,7 @@ bool IR_Station::restore() {
     Schedule schedule;
     schedule.schedule_id = (int)root["schedules"][i]["schedule_id"];
     schedule.id = (int)root["schedules"][i]["id"];
-    schedule.time = (time_t)root["schedules"][i]["time"];
+    schedule.time = (uint32_t)root["schedules"][i]["time"];
   }
 
   if (version != IR_STATION_VERSION) {
@@ -273,7 +282,7 @@ bool IR_Station::save() {
     JsonObject& _schedule = jsonBuffer.createObject();
     _schedule["schedule_id"] = schedules[i].schedule_id;
     _schedule["id"] = schedules[i].id;
-    _schedule["time"] = schedules[i].time;
+    _schedule["time"] = (uint32_t)schedules[i].time;
     _schedules.add(_schedule);
   }
 
