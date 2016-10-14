@@ -5,19 +5,23 @@
 		<title>IR Station</title>
 		<style type="text/css">
 			body {
-				box-sizing:border-box;
 				background-color:#BBDDFF;
 				margin:auto;
-				max-width:1000px;
+				max-width:960px;
 			}
-			#send button {
-				box-sizing:border-box;
+			#send table{
+				width:100%;
+			}
+			#send td{
+				width:190px;
+				height:6em;
+			}
+			#send button{
 				font-size:1.5em;
-				line-height:4em;
+				line-height:3em;
 				overflow:hidden;
-				height:4em;
-				width:19%;
-				margin:0.2%;
+				padding:10px 10px;
+				width:100%;
 			}
 			.sending {
 				background-color:magenta;
@@ -33,7 +37,7 @@
 				margin-left:15px;
 			}
 			.container>div>p{
-				margin:0.5em;
+				margin:0.25em;
 			}
 			.form-group{
 				margin-top:5px;
@@ -47,11 +51,15 @@
 		-->
 	</head>
 	<body>
-		<h1 style="text-align:center">IR Station</h1>
+		<h1 style="text-align:center" onclick="load()">IR Station</h1>
 
 		<div id="main" style="display:none">
 			<div id="send" class="btn-group" style="text-align:center;">
 				<!-- js adds buttons x25-->
+				<table>
+					<tbody>
+					</tbody>
+				</table>
 			</div>
 
 			<div id="settings" class="container">
@@ -61,15 +69,16 @@
 						<label class="control-label col-sm-2">Action</label>
 						<div class="col-sm-4">
 							<select id="input-action" class="form-control" name="action">
-								<option value="record">Record a new Signal</option>
-								<option value="rename">Rename a Signal</option>
-								<option value="upload">Upload a new Signal</option>
-								<option value="download">Download a Signal</option>
-								<option value="clear">Clear a Signal</option>
-								<option value="clear-all">Clear All Signals</option>
-								<option value="schedule-new">Schedule a Signal</option>
-								<option value="change-ip">Change IP</option>
-								<option value="disconnect-wifi">Change WiFi</option>
+								<option value="record">1. Record a new Signal</option>
+								<option value="rename">2. Rename a Signal</option>
+								<option value="move">3. Move a Signal</option>
+								<option value="upload">4. Upload a new Signal</option>
+								<option value="download">5. Download a Signal</option>
+								<option value="clear">6. Clear a Signal</option>
+								<option value="clear-all">7. Clear All Signals</option>
+								<option value="schedule-new">8. Schedule a Signal</option>
+								<option value="change-ip">9. Change IP</option>
+								<option value="disconnect-wifi">10. Change WiFi</option>
 							</select>
 						</div>
 					</div>
@@ -87,6 +96,13 @@
 							<input id="input-file" type="file" name="irJson">
 						</div>
 					</div>
+					<div class="form-group" id="form-position">
+						<label class="control-label col-sm-2">Position [row, column]</label>
+						<div class="col-sm-4">
+							[<input id="input-row" type="number" name="row" style="width:2em;">,
+							<input id="input-column" type="number" name="column" style="width:2em;">]
+						</div>
+					</div>
 					<div class="form-group" id="form-name">
 						<label class="control-label col-sm-2">Name</label>
 						<div class="col-sm-4">
@@ -96,7 +112,7 @@
 					<div class="form-group" id="form-time" style="display:none">
 						<label class="control-label col-sm-2">When?</label>
 						<div class="col-sm-4">
-							<input id="input-time" type="datetime-local" name="time" step="60">
+							<input id="input-time" type="datetime-local" name="time" step="1">
 						</div>
 					</div>
 					<div class="form-group" id="form-local_ip" style="display:none">

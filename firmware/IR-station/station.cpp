@@ -474,6 +474,16 @@ void IR_Station::attachStationApi() {
     save();
     return server.send(200, "text/plain", "Renamed " + prev_name + " to " + signal->name);
   });
+  server.on("/signals/move", [this]() {
+    displayRequest();
+    int id = server.arg("id").toInt();
+    Signal *signal = getSignalById(id);
+    if (signal == NULL) return server.send(400, "text/plain", "No signal assigned");
+    signal->position.row = server.arg("row").toInt();
+    signal->position.column = server.arg("column").toInt();
+    save();
+    return server.send(200, "text/plain", "Moved position: " + signal->name);
+  });
   server.on("/signals/upload", [this]() {
     displayRequest();
     Signal signal;

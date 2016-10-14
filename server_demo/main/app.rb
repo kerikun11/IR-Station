@@ -21,13 +21,13 @@ station = {
 
 for i in 0...5 do
 	station["signals"].push({
-		"id"=>i,
+		"id"=>i+1,
 		"name"=>"NAME #{i}",
 		"path"=>"#{i} NAME#{i}",
 		"display"=>true,
 		"position"=>{
-			"row"=>0,
-			"column"=>i
+			"row"=>i+1,
+			"column"=>i+1
 		}
 	})
 end
@@ -69,6 +69,12 @@ post "/signals/rename" do
 	"Renaming Successful: #{params[:name]}"
 end
 
+post "/signals/move" do
+	station["signals"].select{|item| item["id"]==params[:id].to_i}[0]["position"]["row"]=params[:row]
+	station["signals"].select{|item| item["id"]==params[:id].to_i}[0]["position"]["column"]=params[:column]
+	"Renaming Successful: #{params[:name]}"
+end
+
 post "/signals/upload" do
 	signal = {
 		"id"=>station["next_id"],
@@ -91,6 +97,8 @@ post "/signals/clear" do
 end
 
 post "/signals/clear-all" do
+	station["signals"]=[]
+	"Cleaned"
 end
 
 post "/schedule/new" do

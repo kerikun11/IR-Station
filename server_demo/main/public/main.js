@@ -7,15 +7,31 @@ function load(){
 	$.getJSON('/info',{},function(data) {
 		station = data;
 		// send buttons settings id list
-		$('#send').empty();
+		$('#send tbody').empty();
 		$('#input-id').empty();
 		$('#input-id').append($('<option>').val(-1).text("-select-"));
 		var signals = data["signals"];
+		var row_max = 0;
+		var column_max = 0;
+		data["signals"].forEach(function(signal){
+			var row = signal["position"]["row"];
+			var column = signal["position"]["column"];
+			if(row>row_max)row_max=row;
+			if(column>column_max)column_max=column;
+		});
+		for(var i=1; i<=row_max; i++){
+			$("#send>table>tbody").append($('<tr>').val(i));
+			for(var j=1; j<=column_max; j++){
+				$("#send>table>tbody>tr").eq(i-1).append($('<td>').val(j).text("["+i+", "+j+"]"));
+			}
+		}
 		data["signals"].forEach(function(signal){
 			var id = signal["id"];
 			var name = signal["name"];
-			$('#send').append($('<button>').val(id).text((name=="")?("ch"+(id)):name).addClass("btn btn-default"));
-			$('#input-id').append($('<option>').val(id).text(name));
+			var row = signal["position"]["row"]-0;
+			var column = signal["position"]["column"]-0;
+			$('#send td').eq(column_max*(row-1) + (column-1)).html($("<button>").val(id).text(name).addClass("btn btn-default"));
+			$('#input-id').append($('<option>').val(id).text("["+row+", "+column+"] "+name));
 		});
 		// informations
 		$('span#info-version').text(data["version"]);
@@ -46,24 +62,13 @@ function load(){
 	});
 }
 
-/* send */
-$(document).on('click','#send button',function(){
-	var el = $(this);
-	el.addClass("sending");
-	$.post('/signals/send',{
-		id: el.val()
-	}).done(function(res){
-		el.removeClass("sending");
-		updateStatus(res);
-	});
-});
-
 /* manage signals */
 $('#manage select[name="action"]').change(function(){
 	var action = $(this).val();
 	$('#form-submit label').text("")
 	if(action == "record"){
 		$('#form-id').hide();
+		$('#form-position').show();
 		$('#form-name').show();
 		$('#form-file').hide();
 		$('#form-time').hide();
@@ -72,7 +77,17 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-gateway').hide();
 	}else if(action == "rename"){
 		$('#form-id').show();
+		$('#form-position').hide();
 		$('#form-name').show();
+		$('#form-file').hide();
+		$('#form-time').hide();
+		$('#form-local_ip').hide();
+		$('#form-subnetmask').hide();
+		$('#form-gateway').hide();
+	}else if(action == "move"){
+		$('#form-id').show();
+		$('#form-position').show();
+		$('#form-name').hide();
 		$('#form-file').hide();
 		$('#form-time').hide();
 		$('#form-local_ip').hide();
@@ -80,6 +95,7 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-gateway').hide();
 	}else if(action == "upload"){
 		$('#form-id').hide();
+		$('#form-position').show();
 		$('#form-name').show();
 		$('#form-file').show();
 		$('#form-time').hide();
@@ -88,6 +104,7 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-gateway').hide();
 	}else if(action == "download" || action == "clear"){
 		$('#form-id').show();
+		$('#form-position').hide();
 		$('#form-name').hide();
 		$('#form-file').hide();
 		$('#form-time').hide();
@@ -96,6 +113,7 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-gateway').hide();
 	}else if(action == "clear-all" || action == "disconnect-wifi"){
 		$('#form-id').hide();
+		$('#form-position').hide();
 		$('#form-name').hide();
 		$('#form-file').hide();
 		$('#form-time').hide();
@@ -104,6 +122,7 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-gateway').hide();
 	}else if(action == "schedule-new"){
 		$('#form-id').show();
+		$('#form-position').hide();
 		$('#form-name').hide();
 		$('#form-file').hide();
 		$('#form-time').show();
@@ -112,6 +131,7 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-gateway').hide();
 	}else if(action == "change-ip"){
 		$('#form-id').hide();
+		$('#form-position').hide();
 		$('#form-name').hide();
 		$('#form-file').hide();
 		$('#form-time').hide();
@@ -125,7 +145,17 @@ function manage(){
 	var name = $('#input-name').val();
 	var number = $('#input-number').val();
 	var action = $('#input-action').val();
+	var row = $('#input-row').val()-0;
+	var column = $('#input-column').val()-0;
 	if(action == "record"){
+		if(row<=0){
+			$('#form-submit label').text("row is positive number")
+			return;
+		}
+		if(column > 6 || column<=0){
+			$('#form-submit label').text("column is no more than 5")
+			return;
+		}
 		if(name == ""){
 			$('#form-submit label').text("Please type a name")
 			return;
@@ -133,8 +163,8 @@ function manage(){
 		$.post('/signals/record',{
 			name: name,
 			display: true,
-			row: 0,
-			column: 0
+			row: row,
+			column: column
 		}).done(function(res){
 			$('#input-name').val("");
 			updateStatus(res);
@@ -146,6 +176,14 @@ function manage(){
 			$('#form-submit label').text("Select a signal")
 			return;
 		}
+		if(row<0){
+			$('#form-submit label').text("row is positive number")
+			return;
+		}
+		if(column > 6 || column<0){
+			$('#form-submit label').text("column is no more than 5")
+			return;
+		}
 		if(name == ""){
 			$('#form-submit label').text("Please type a name")
 			return;
@@ -155,6 +193,27 @@ function manage(){
 			name: name
 		}).done(function(res){
 			$('#input-name').val("");
+			updateStatus(res);
+			load();
+		});
+	}else if(action == "move"){
+		if(id == -1){
+			$('#form-submit label').text("Select a signal")
+			return;
+		}
+		if(row<0){
+			$('#form-submit label').text("row is positive number")
+			return;
+		}
+		if(column > 6 || column<0){
+			$('#form-submit label').text("column is no more than 5")
+			return;
+		}
+		$.post('/signals/move',{
+			id: id,
+			row: row,
+			column: column
+		}).done(function(res){
 			updateStatus(res);
 			load();
 		});
@@ -175,8 +234,8 @@ function manage(){
 				$.post('/signals/upload',{
 					name: name,
 					display: true,
-					row: 0,
-					column: 0,
+					row: row,
+					column: column,
 					irJson: reader.result
 				}).done(function(res){
 					$('#input-name').val("");
@@ -228,7 +287,7 @@ function manage(){
 			return;
 		}
 		var time = $('#input-time').val();
-		if(!time.match(/^20\d\d(.\d\d){4}$/)){
+		if(!time.match(/^20\d\d(.\d\d){4}(...)?$/)){
 			$('#form-submit label').text("Invalid Time");
 			return;
 		}
@@ -295,6 +354,26 @@ $('#manage input').keypress(function(e){
 /* init */
 load();
 updateStatus("Welcome!");
+
+/* send */
+$(document).on('click','#send button',function(){
+	var el = $(this);
+	el.addClass("sending");
+	$.post('/signals/send',{
+		id: el.val()
+	}).done(function(res){
+		el.removeClass("sending");
+		updateStatus(res);
+	});
+});
+
+/* position */
+$(document).on('click','#send td',function(){
+	var row = $(this).parent().val();
+	var column = $(this).val();
+	$('#input-row').val(row);
+	$('#input-column').val(column);
+});
 
 /* schedule delete */
 $(document).on('click','button.schedule-delete',function(){
