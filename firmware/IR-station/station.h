@@ -39,10 +39,8 @@ class Signal {
     String name;
     String path;
     bool display;
-    struct {
-      int row;
-      int column;
-    } position;
+    int row;
+    int column;
 };
 
 class Schedule {

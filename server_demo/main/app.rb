@@ -25,10 +25,8 @@ for i in 0...5 do
 		"name"=>"NAME #{i}",
 		"path"=>"#{i} NAME#{i}",
 		"display"=>true,
-		"position"=>{
-			"row"=>i+1,
-			"column"=>i+1
-		}
+		"row"=>i+1,
+		"column"=>i+1
 	})
 end
 
@@ -54,10 +52,8 @@ post "/signals/record" do
 		"name"=>params[:name],
 		"path"=>"/main/#{station["next_id"]} #{params[:name]}.json",
 		"display"=>((params[:display]=="true")?true:false),
-			"position"=>{
 			"row"=>params[:row].to_i,
 			"column"=>params[:column].to_i
-		}
 	}
 	station["next_id"] += 1
 	station["signals"].push(signal)
@@ -70,8 +66,8 @@ post "/signals/rename" do
 end
 
 post "/signals/move" do
-	station["signals"].select{|item| item["id"]==params[:id].to_i}[0]["position"]["row"]=params[:row]
-	station["signals"].select{|item| item["id"]==params[:id].to_i}[0]["position"]["column"]=params[:column]
+	station["signals"].select{|item| item["id"]==params[:id].to_i}[0]["row"]=params[:row]
+	station["signals"].select{|item| item["id"]==params[:id].to_i}[0]["column"]=params[:column]
 	"Renaming Successful: #{params[:name]}"
 end
 
@@ -81,10 +77,8 @@ post "/signals/upload" do
 		"name"=>params[:name],
 		"path"=>"/main/#{station["next_id"]} #{params[:name]}.json",
 		"display"=>((params[:display]=="true")?true:false),
-			"position"=>{
 			"row"=>params[:row].to_i,
 			"column"=>params[:column].to_i
-		}
 	}
 	station["next_id"] += 1
 	station["signals"].push(signal)

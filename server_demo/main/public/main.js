@@ -14,8 +14,8 @@ function load(){
 		var row_max = 0;
 		var column_max = 0;
 		data["signals"].forEach(function(signal){
-			var row = signal["position"]["row"];
-			var column = signal["position"]["column"];
+			var row = signal["row"];
+			var column = signal["column"];
 			if(row>row_max)row_max=row;
 			if(column>column_max)column_max=column;
 		});
@@ -28,8 +28,8 @@ function load(){
 		data["signals"].forEach(function(signal){
 			var id = signal["id"];
 			var name = signal["name"];
-			var row = signal["position"]["row"]-0;
-			var column = signal["position"]["column"]-0;
+			var row = signal["row"]-0;
+			var column = signal["column"]-0;
 			$('#send td').eq(column_max*(row-1) + (column-1)).html($("<button>").val(id).text(name).addClass("btn btn-default"));
 			$('#input-id').append($('<option>').val(id).text("["+row+", "+column+"] "+name));
 		});
@@ -72,72 +72,56 @@ $('#manage select[name="action"]').change(function(){
 		$('#form-name').show();
 		$('#form-file').hide();
 		$('#form-time').hide();
-		$('#form-local_ip').hide();
-		$('#form-subnetmask').hide();
-		$('#form-gateway').hide();
+		$('#form-ipaddress').hide();
 	}else if(action == "rename"){
 		$('#form-id').show();
 		$('#form-position').hide();
 		$('#form-name').show();
 		$('#form-file').hide();
 		$('#form-time').hide();
-		$('#form-local_ip').hide();
-		$('#form-subnetmask').hide();
-		$('#form-gateway').hide();
+		$('#form-ipaddress').hide();
 	}else if(action == "move"){
 		$('#form-id').show();
 		$('#form-position').show();
 		$('#form-name').hide();
 		$('#form-file').hide();
 		$('#form-time').hide();
-		$('#form-local_ip').hide();
-		$('#form-subnetmask').hide();
-		$('#form-gateway').hide();
+		$('#form-ipaddress').hide();
 	}else if(action == "upload"){
 		$('#form-id').hide();
 		$('#form-position').show();
 		$('#form-name').show();
 		$('#form-file').show();
 		$('#form-time').hide();
-		$('#form-local_ip').hide();
-		$('#form-subnetmask').hide();
-		$('#form-gateway').hide();
+		$('#form-ipaddress').hide();
 	}else if(action == "download" || action == "clear"){
 		$('#form-id').show();
 		$('#form-position').hide();
 		$('#form-name').hide();
 		$('#form-file').hide();
 		$('#form-time').hide();
-		$('#form-local_ip').hide();
-		$('#form-subnetmask').hide();
-		$('#form-gateway').hide();
+		$('#form-ipaddress').hide();
 	}else if(action == "clear-all" || action == "disconnect-wifi"){
 		$('#form-id').hide();
 		$('#form-position').hide();
 		$('#form-name').hide();
 		$('#form-file').hide();
 		$('#form-time').hide();
-		$('#form-local_ip').hide();
-		$('#form-subnetmask').hide();
-		$('#form-gateway').hide();
+		$('#form-ipaddress').hide();
 	}else if(action == "schedule-new"){
 		$('#form-id').show();
 		$('#form-position').hide();
 		$('#form-name').hide();
 		$('#form-file').hide();
 		$('#form-time').show();
-		$('#form-local_ip').hide();
-		$('#form-subnetmask').hide();
-		$('#form-gateway').hide();
+		$('#form-ipaddress').hide();
 	}else if(action == "change-ip"){
 		$('#form-id').hide();
 		$('#form-position').hide();
 		$('#form-name').hide();
 		$('#form-file').hide();
 		$('#form-time').hide();
-		$('#form-local_ip').show();
-		$('#form-subnetmask').show();
-		$('#form-gateway').show();
+		$('#form-ipaddress').show();
 	}
 });
 function manage(){

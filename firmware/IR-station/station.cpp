@@ -223,8 +223,8 @@ bool IR_Station::restore() {
     signal.name = (const char *)root["signals"][i]["name"];
     signal.path = (const char *)root["signals"][i]["path"];
     signal.display = (bool)root["signals"][i]["display"];
-    signal.position.row = (int)root["signals"][i]["position"]["row"];
-    signal.position.column = (int)root["signals"][i]["position"]["column"];
+    signal.row = (int)root["signals"][i]["row"];
+    signal.column = (int)root["signals"][i]["column"];
     signals.push_back(signal);
   }
 
@@ -270,10 +270,8 @@ bool IR_Station::save() {
     _signal["name"] = signals[i].name;
     _signal["path"] = signals[i].path;
     _signal["display"] = signals[i].display;
-    JsonObject &_position = _signal.createNestedObject("position");
-    _position["row"] = signals[i].position.row;
-    _position["column"] = signals[i].position.column;
-    _signals.add(_signal);
+    _signal["row"] = signals[i].row;
+    _signal["column"] = signals[i].column;
   }
 
   root["next_schedule_id"] = next_schedule_id;
@@ -455,8 +453,8 @@ void IR_Station::attachStationApi() {
       signal.name = name;
       signal.path = IR_DATA_PATH(signal.id);
       signal.display = (server.arg("display") == "true");
-      signal.position.row = server.arg("row").toInt();
-      signal.position.column = server.arg("column").toInt();
+      signal.row = server.arg("row").toInt();
+      signal.column = server.arg("column").toInt();
 
       if (!writeStringToFile(signal.path, data)) return server.send(500, "text/plain", "Failed to write File");
       signals.push_back(signal);
@@ -479,8 +477,8 @@ void IR_Station::attachStationApi() {
     int id = server.arg("id").toInt();
     Signal *signal = getSignalById(id);
     if (signal == NULL) return server.send(400, "text/plain", "No signal assigned");
-    signal->position.row = server.arg("row").toInt();
-    signal->position.column = server.arg("column").toInt();
+    signal->row = server.arg("row").toInt();
+    signal->column = server.arg("column").toInt();
     save();
     return server.send(200, "text/plain", "Moved position: " + signal->name);
   });
@@ -491,8 +489,8 @@ void IR_Station::attachStationApi() {
     signal.name = server.arg("name");
     signal.path = IR_DATA_PATH(signal.id);
     signal.display = (server.arg("display") == "true");
-    signal.position.row = server.arg("row").toInt();
-    signal.position.column = server.arg("column").toInt();
+    signal.row = server.arg("row").toInt();
+    signal.column = server.arg("column").toInt();
 
     String irJson = server.arg("irJson");
     DynamicJsonBuffer jsonBuffer;
