@@ -13,20 +13,20 @@ station = {
 	"local_ip"=>151759040,
 	"subnetmask"=>0,
 	"gateway"=>0,
-	"next_id"=>5,
+	"next_id"=>6,
 	"signals"=>[],
 	"new_schedule_id"=>0,
 	"schedules"=>[]
 }
 
-for i in 0...5 do
+for i in 1..5 do
 	station["signals"].push({
-		"id"=>i+1,
+		"id"=>i,
 		"name"=>"NAME #{i}",
 		"path"=>"#{i} NAME#{i}",
 		"display"=>true,
-		"row"=>i+1,
-		"column"=>i+1
+		"row"=>i,
+		"column"=>i
 	})
 end
 
@@ -35,17 +35,20 @@ get '/' do
 end
 
 get"/info" do
+	puts params
 	sleep(0.2)
 	json station
 end
 
 post "/signals/send" do
+	puts params
 	sleep(0.2)
 	name  = station["signals"].select{|item| item["id"]==params[:id].to_i}[0]["name"]
 	"Sending Successful: #{name}"
 end
 
 post "/signals/record" do
+	puts params
 	sleep(0.5)
 	signal = {
 		"id"=>station["next_id"],
@@ -61,17 +64,20 @@ post "/signals/record" do
 end
 
 post "/signals/rename" do
+	puts params
 	station["signals"].select{|item| item["id"]==params[:id].to_i}[0]["name"]=params[:name]
 	"Renaming Successful: #{params[:name]}"
 end
 
 post "/signals/move" do
+	puts params
 	station["signals"].select{|item| item["id"]==params[:id].to_i}[0]["row"]=params[:row]
 	station["signals"].select{|item| item["id"]==params[:id].to_i}[0]["column"]=params[:column]
 	"Renaming Successful: #{params[:name]}"
 end
 
 post "/signals/upload" do
+	puts params
 	signal = {
 		"id"=>station["next_id"],
 		"name"=>params[:name],
@@ -86,16 +92,19 @@ post "/signals/upload" do
 end
 
 post "/signals/clear" do
-	station["signals"].empty
+	puts params
+	station["signals"].delete station["signals"].select{|item| item["id"]==params[:id].to_i}[0]
 	"Cleaned"
 end
 
 post "/signals/clear-all" do
+	puts params
 	station["signals"]=[]
 	"Cleaned"
 end
 
 post "/schedule/new" do
+	puts params
 	name  = station["signals"].select{|item| item["id"]==params[:id].to_i}[0]["name"]
 	schedule = {
 		"schedule_id"=>station["new_schedule_id"],
@@ -108,18 +117,21 @@ post "/schedule/new" do
 end
 
 get "/schedule/delete" do
+	puts params
 	schedule = station["schedules"].select{|item| item["schedule_id"]==params[:schedule_id].to_i}[0]
 	station["schedules"].delete(schedule)
 	"Scheduling Successful"
 end
 
 post "/wifi/disconnect" do
+	puts params
 	sleep(1)
 	""
 end
 
 =begin
 post "/wifi/change-ip" do
+	puts params
 	sleep(1)
 	"Changed IP Address"
 end

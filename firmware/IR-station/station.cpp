@@ -272,6 +272,7 @@ bool IR_Station::save() {
     _signal["display"] = signals[i].display;
     _signal["row"] = signals[i].row;
     _signal["column"] = signals[i].column;
+    _signals.add(_signal);
   }
 
   root["next_schedule_id"] = next_schedule_id;
