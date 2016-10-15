@@ -11,7 +11,7 @@
 #define __CONFIG_H__
 
 /* Version */
-#define IR_STATION_VERSION      "v1.4.1"
+#define IR_STATION_VERSION      "v1.5.0"
 
 /* Hardware Mapping */
 #define PIN_BUTTON              (0)
@@ -29,7 +29,7 @@
 
 // SSID & Password of ESP8266 Access Point Mode
 #define SOFTAP_SSID             "IR-Station"
-#define SOFTAP_PASS             ""
+#define SOFTAP_PASS             "IR-Station"
 
 // WiFi connection Timeout
 #define WIFI_CONNECT_TIMEOUT    (10) // seconds
@@ -47,10 +47,12 @@
 #define SERIAL_DEBUG            true
 
 #if SERIAL_DEBUG == true
-#define print_dbg               Serial.print
-#define printf_dbg              Serial.printf
-#define println_dbg             Serial.println
+#define DEBUG_SERIAL_STREAM     Serial
+#define print_dbg               DEBUG_SERIAL_STREAM.print
+#define printf_dbg              DEBUG_SERIAL_STREAM.printf
+#define println_dbg             DEBUG_SERIAL_STREAM.println
 #else
+#define DEBUG_SERIAL_STREAM     NULL
 #define print_dbg               // No Operation
 #define printf_dbg              // No Operation
 #define println_dbg             // No Operation

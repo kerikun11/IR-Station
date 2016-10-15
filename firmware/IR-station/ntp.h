@@ -7,42 +7,16 @@
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef __IR_SIGNAL_H__
-#define __IR_SIGNAL_H__
+#ifndef __NTP_H_
+#define __NTP_H_
 
 #include <ESP8266WiFi.h>
+#include <TimeLib.h>
 
-#define IR_RECEIVE_TIMEOUT_US   200000
-#define RAWDATA_BUFFER_SIZE     800
-#define REGARD_AS_NOISE_COUNT   8
-
-enum IR_RECEIVER_STATE {
-  IR_RECEIVER_OFF,
-  IR_RECEIVER_READY,
-  IR_RECEIVER_RECEIVING,
-  IR_RECEIVER_READING,
-  IR_RECEIVER_AVAILABLE,
-};
-
-class IR {
-  public:
-    static void begin(int tx, int rx);
-    static void handle();
-    static bool available();
-    static String read();
-    static void resume();
-
-    static void send(String dataJson);
-
-  private:
-    static int txPin, rxPin;
-    static volatile enum IR_RECEIVER_STATE state;
-    static volatile uint16_t rawIndex;
-    static volatile uint16_t rawData[RAWDATA_BUFFER_SIZE];
-    static volatile uint32_t prev_us;
-
-    static void isr();
-};
+void ntp_begin();
+time_t localtime(time_t t, int timeZone);
+time_t getNtpTime();
+void sendNTPpacket(IPAddress &address);
 
 #endif
 
