@@ -555,11 +555,11 @@ void IR_Station::attachStationApi() {
   server.on("/wifi/change-ip", [this]() {
     displayRequest();
     IPAddress _local_ip, _subnetmask, _gateway;
-    if (!_local_ip.fromString(server.arg("local_ip")) || !_subnetmask.fromString(server.arg("netmask")) || !_gateway.fromString(server.arg("gateway"))) {
+    if (!_local_ip.fromString(server.arg("local_ip")) || !_subnetmask.fromString(server.arg("subnetmask")) || !_gateway.fromString(server.arg("gateway"))) {
       return server.send(400, "text/palin", "Bad Request!");
     }
     WiFi.config(_local_ip, _gateway, _subnetmask);
-    if (WiFi.localIP() != local_ip) {
+    if (WiFi.localIP() != _local_ip) {
       return server.send(500, "text/palin", "Couldn't change IP Address :(");
     }
     is_static_ip = true;

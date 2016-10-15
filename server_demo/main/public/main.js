@@ -1,4 +1,6 @@
-var station;
+function long2ip(ip){
+  return [ip >>> 0 & 0xFF, ip >>> 8 & 0xFF, ip >>> 16 & 0xFF, ip >>> 24 & 0xFF].join('.')
+}
 function updateStatus(status){
 	$('span#info-status').text(status);
 	$('#log-area').prepend('<p>'+Date().match(/.+(\d\d:\d\d:\d\d).+/)[1]+': '+status+'</p>');
@@ -37,8 +39,13 @@ function load(){
 		$('span#info-version').text(data["version"]);
 		$('span#info-hostname').text(data["hostname"]);
 		$('span#info-ssid').text(data["ssid"]);
-		var ip = data["local_ip"];
-		$('span#info-local_ip').text(""+((ip>>0)&0xFF)+"."+((ip>>8)&0xFF)+"."+((ip>>16)&0xFF)+"."+((ip>>24)&0xFF));
+		var local_ip = data["local_ip"];
+		var subnetmask = data["subnetmask"];
+		var gateway = data["gateway"];
+		$('span#info-local_ip').text(long2ip(local_ip));
+		$('#input-local_ip').val(long2ip(local_ip))
+		$('#input-subnetmask').val(long2ip(subnetmask))
+		$('#input-gateway').val(long2ip(gateway))
 		// schedule
 		var schedule = data["schedules"];
 		$('#schedule-list').empty();
@@ -336,9 +343,6 @@ function manage(){
 					subnetmask: $('#input-subnetmask').val(),
 					gateway: $('#input-gateway').val()
 				}).done(function(res){
-					$('#input-local_ip').val("");
-					$('#input-subnetmask').val("");
-					$('#input-gateway').val("");
 					updateStatus(res);
 					$('#main').show();
 				}).fail(function(){
