@@ -203,7 +203,7 @@ function manage(){
 				return;
 			}
 			if(column > 6 || column<0){
-				$('#form-submit label').text("column is no more than 5")
+				$('#form-submit label').text("column is no more than 6")
 				return;
 			}
 			$.post('/signals/move',{
