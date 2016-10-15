@@ -63,6 +63,7 @@ You can control your home appliances with your smartphone or laptop.
 Please Add the Libraries below to your Arduino IDE
 
   * Arduino Json (https://github.com/bblanchon/ArduinoJson)
+  * Arduino Time Library (https://github.com/PaulStoffregen/Time)
 
 ### Steps
 
@@ -143,50 +144,49 @@ Please Add the Libraries below to your Arduino IDE
 ### Format
 
 ~~~json
-{
-	"data":[uint16_t microseconds_high, uint16_t microseconds_low, uint16_t microseconds_high, uint16_t microseconds_low, ... ],
-	"name":"name of button"
-}
+[
+	uint16_t microseconds_high, uint16_t microseconds_low, uint16_t microseconds_high, uint16_t microseconds_low, ...
+]
 ~~~
 
 ### Sample
 
 ~~~json
-{
-	"data":[
-		3300,1786,363,1305,390,473,364,476,317,548,289,577,288,501,364,474,390,475,290,550,289,1403,290,551,314,1377,290,552,313,502,362,1379,289,1378,289,1378,314,1377,389,1304,364,476,312,552,290,553,312,474,391,1305,362,501,364,474,361,504,289,553,312,477,363,500,364,476,287,578,289,1377,314,551,290,502,363,476,388,474,391,451,313,551,313,553,288,500,363,1304,385,1362,310,475,389,475,364,477,313,552,288,1380,317,50215,3305,3489,314
-	],
-	"name":"TV Power"
-}
+[
+	3300,1786,363,1305,390,473,364,476,317,548,289,577,288,501,364,474,390,475,290,550,289,1403,290,551,314,1377,290,552,313,502,362,1379,289,1378,289,1378,314,1377,389,1304,364,476,312,552,290,553,312,474,391,1305,362,501,364,474,361,504,289,553,312,477,363,500,364,476,287,578,289,1377,314,551,290,502,363,476,388,474,391,451,313,551,313,553,288,500,363,1304,385,1362,310,475,389,475,364,477,313,552,288,1380,317,50215,3305,3489,314
+]
 ~~~
 
-## HTTP API
+## HTTP API v1.5.0
 
 ### Setup Form
 
 |Path				|Method	|Parameter(s)	|Return	|Remarks	|
-|:----------|:------|:--------------|:------|:----------|
+|:------------------|:------|:--------------|:------|:----------|
 |/					|GET	|				|index.html	|setup form page	|
 |/wifi/list			|GET	|				|a list of (string)	|a list of existing WiFi SSID 	|
 |/wifi/confirm		|POST	|				|IP Address or "false"		|confirm if WiFi connection is established and reboot the device	|
-|/mode/station		|POST	|?ssid=(string)&password=(string)&stealth=(bool)&hostname=(string)	|message	|set the device as Station Mode	|
-|/mode/accesspoint	|POST	|?hostname=(string)	|message	|set the device as AP Mode	|
+|/mode/station		|POST	|ssid, password, stealth, hostname	|message	|set the device as Station Mode	|
+|/mode/accesspoint	|POST	|hostname	|message	|set the device as AP Mode	|
+|/dbg				|GET	|ssid, password	|local_ip or "false"	|
 
 ### Main Page
 
-|Path		|Method	|Parameter(s)	|Return	|Remarks	|
-|:----------|:------|:--------------|:------|:----------|
-|/					|GET	|				|index.html	|main page of IR-Station	|
-|/info				|GET	|							|json			|a json includes the device information	|
-|/signals/list		|GET	|							|a list of names of signals	|	|
-|/signals/send		|POST	|?ch=(int)					|result json	|	|
-|/signals/record	|POST	|?ch=(int)&name=(string)	|result json	|	|
-|/signals/rename	|POST	|?ch=(int)&name=(string)	|result json	|	|
-|/signals/upload	|POST	|?ch=(int)&irJson=(json)	|result json	|	|
-|/signals/clear		|POST	|?ch=(int)	|result json	|				|	|
-|/signals/clear-all	|POST	|							|result json	|	|
-|/wifi/disconnect	|POST	|							|				|	|
-|/wifi/change-ip	|POST	|?ipaddress=(string)&gateway=(string)&netmask=(string)	|result json	|	|
+|Path				|Method	|Parameter(s)			|Return		|Remarks	|
+|:------------------|:------|:----------------------|:----------|:----------|
+|/					|GET	|						|index.html	|main page of IR-Station	|
+|/info				|GET	|						|station.json	|a json includes the device information	|
+|/signals/send		|POST	|id						|message	|			|
+|/signals/record	|POST	|row, column, name		|message	|			|
+|/signals/rename	|POST	|id, name				|message	|			|
+|/signals/move		|POST	|id, row, column		|message	|			|
+|/signals/upload	|POST	|irJson, row, column	|message	|			|
+|/signals/clear		|POST	|id						|message	|			|
+|/signals/clear-all	|POST	|						|message	|			|
+|/schedule/new		|POST	|id, time				|message	|			|
+|/schedule/delete	|POST	|schedule_id			|message	|			|
+|/wifi/disconnect	|POST	|						|none		|			|
+|/wifi/change-ip	|POST	|local_ip, subnetmask, gateway	|message|		|
 
 #### result json
 

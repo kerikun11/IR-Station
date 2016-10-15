@@ -2,100 +2,138 @@ require 'sinatra'
 require 'sinatra/reloader'
 require 'sinatra/json'
 
-ch_size_max = 100
-ch_size = 25
+station = {
+	"version"=>"v1.4.1",
+	"mode"=>1,
+	"hostname"=>"demo",
+	"is_stealth_ssid"=>false,
+	"ssid"=>"WiFi-2.4GHz",
+	"password"=>"pw",
+	"is_static_ip"=>false,
+	"local_ip"=>151759040,
+	"subnetmask"=>16777215,
+	"gateway"=>17541312,
+	"next_id"=>6,
+	"signals"=>[],
+	"new_schedule_id"=>0,
+	"schedules"=>[]
+}
 
-name = []
-for i in 0...ch_size_max do
-	name[i]="ch name #{i+1}"
+for i in 1..5 do
+	station["signals"].push({
+		"id"=>i,
+		"name"=>"NAME #{i}",
+		"path"=>"#{i} NAME#{i}",
+		"display"=>true,
+		"row"=>i,
+		"column"=>i
+	})
 end
 
 get '/' do
 	send_file File.join(settings.public_folder,'index.htm')
 end
 
-get"/signals/list" do
-	json name[0, ch_size]
-end
-
 get"/info" do
-	info = {}
-	info["message"] = "Loading Successful"
-	info["ssid"] = "WiFi-2.4GHz"
-	info["ipaddress"]= "192.168.11.6"
-	info["hostname"] = "my-room"
-	json info
+	puts params
+	sleep(0.2)
+	json station
 end
 
-get "/signals/send" do
+post "/signals/send" do
+	puts params
+	sleep(0.2)
+	name  = station["signals"].select{|item| item["id"]==params[:id].to_i}[0]["name"]
+	"Sending Successful: #{name}"
+end
+
+post "/signals/record" do
+	puts params
 	sleep(0.5)
-	result = {}
-	result["code"] = 0
-	result["message"] = "Sending Successful"
-	json result
+	signal = {
+		"id"=>station["next_id"],
+		"name"=>params[:name],
+		"path"=>"/main/#{station["next_id"]} #{params[:name]}.json",
+		"display"=>((params[:display]=="true")?true:false),
+			"row"=>params[:row].to_i,
+			"column"=>params[:column].to_i
+	}
+	station["next_id"] += 1
+	station["signals"].push(signal)
+	"Recording Successful: #{params[:name]}"
 end
 
-get "/signals/record" do
+post "/signals/rename" do
+	puts params
+	station["signals"].select{|item| item["id"]==params[:id].to_i}[0]["name"]=params[:name]
+	"Renaming Successful: #{params[:name]}"
+end
+
+post "/signals/move" do
+	puts params
+	station["signals"].select{|item| item["id"]==params[:id].to_i}[0]["row"]=params[:row]
+	station["signals"].select{|item| item["id"]==params[:id].to_i}[0]["column"]=params[:column]
+	"Renaming Successful: #{params[:name]}"
+end
+
+post "/signals/upload" do
+	puts params
+	signal = {
+		"id"=>station["next_id"],
+		"name"=>params[:name],
+		"path"=>"/main/#{station["next_id"]} #{params[:name]}.json",
+		"display"=>((params[:display]=="true")?true:false),
+			"row"=>params[:row].to_i,
+			"column"=>params[:column].to_i
+	}
+	station["next_id"] += 1
+	station["signals"].push(signal)
+	"Uploading Successful: #{params[:name]}"
+end
+
+post "/signals/clear" do
+	puts params
+	station["signals"].delete station["signals"].select{|item| item["id"]==params[:id].to_i}[0]
+	"Cleaned"
+end
+
+post "/signals/clear-all" do
+	puts params
+	station["signals"]=[]
+	"Cleaned"
+end
+
+post "/schedule/new" do
+	puts params
+	name  = station["signals"].select{|item| item["id"]==params[:id].to_i}[0]["name"]
+	schedule = {
+		"schedule_id"=>station["new_schedule_id"],
+		"id"=>params[:id],
+		"time"=>params[:time]
+	}
+	station["schedules"].push(schedule)
+	station["new_schedule_id"] += 1
+	"Scheduling Successful: #{name}"
+end
+
+get "/schedule/delete" do
+	puts params
+	schedule = station["schedules"].select{|item| item["schedule_id"]==params[:schedule_id].to_i}[0]
+	station["schedules"].delete(schedule)
+	"Scheduling Successful"
+end
+
+post "/wifi/disconnect" do
+	puts params
 	sleep(1)
-	result = {}
-	result["code"] = 0
-	result["message"] = "Recording Successful"
-	json result
+	""
 end
 
-get "/signals/rename" do
-	result = {}
-	result["code"] = 0
-	result["message"] = "Renaming Successful"
-	json result
-end
-
-get "/signals/upload" do
-	result = {}
-	result["code"] = 0
-	result["message"] = "Uploading Successful"
-	json result
-end
-
-get "/signals/clear" do
-	result = {}
-	result["code"] = 0
-	result["message"] = "Cleaning Successful"
-	json result
-end
-
-get "/signals/clear-all" do
+=begin
+post "/wifi/change-ip" do
+	puts params
 	sleep(1)
-	for i in 0...ch_size_max do
-		name[i]=""
-	end
-	result = {}
-	result["code"] = 0
-	result["message"] = "Cleaning All Successful"
-	json result
+	"Changed IP Address"
 end
-
-get "/signals/number" do
-	ch_size = params[:number].to_i
-	result = {}
-	result["code"] = 0
-	result["message"] = "Update Successful"
-	json result
-end
-
-get "/wifi/disconnect" do
-	sleep(1)
-	result = {}
-	result["code"] = 0
-	result["message"] = "Disconnected the WiFi"
-	json result
-end
-
-get "/wifi/change-ip" do
-	sleep(1)
-	result = {}
-	result["code"] = 0
-	result["message"] = "Changed IP"
-	json result
-end
+=end
 

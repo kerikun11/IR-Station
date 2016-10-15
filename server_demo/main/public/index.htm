@@ -5,19 +5,22 @@
 		<title>IR Station</title>
 		<style type="text/css">
 			body {
-				box-sizing:border-box;
 				background-color:#BBDDFF;
 				margin:auto;
-				max-width:1000px;
+				max-width:960px;
 			}
-			#send button {
-				box-sizing:border-box;
+			#send table{
+				width:100%;
+			}
+			#send td{
+				width:190px;
+				height:6em;
+			}
+			#send button{
 				font-size:1.5em;
-				line-height:4em;
 				overflow:hidden;
-				height:4em;
-				width:19%;
-				margin:0.2%;
+				width:100%;
+				height:100%;
 			}
 			.sending {
 				background-color:magenta;
@@ -26,10 +29,14 @@
 				float:left;
 				width:auto;
 				min-width:16em;
-				margin: 15px;
+				min-height:16em;
+				margin: 10px;
 			}
 			.container>div{
 				margin-left:15px;
+			}
+			.container>div>p{
+				margin:0.25em;
 			}
 			.form-group{
 				margin-top:5px;
@@ -43,11 +50,15 @@
 		-->
 	</head>
 	<body>
-		<h1 style="text-align:center">IR Station</h1>
+		<h1 style="text-align:center" onclick="load()">IR Station</h1>
 
 		<div id="main" style="display:none">
 			<div id="send" class="btn-group" style="text-align:center;">
 				<!-- js adds buttons x25-->
+				<table>
+					<tbody>
+					</tbody>
+				</table>
 			</div>
 
 			<div id="settings" class="container">
@@ -57,22 +68,23 @@
 						<label class="control-label col-sm-2">Action</label>
 						<div class="col-sm-4">
 							<select id="input-action" class="form-control" name="action">
-								<option value="record">Recode a new Signal</option>
-								<option value="rename">Rename a Signal</option>
-								<option value="upload">Upload a new Signal</option>
-								<option value="download">Download a Signal</option>
-								<option value="clear">Clear a Signal</option>
-								<option value="clear-all">Clear All Signals</option>
-								<option value="number">Update a number of channels</option>
-								<option value="change-ip">Change IP</option>
-								<option value="disconnect-wifi">Change WiFi</option>
+								<option value="record">1. Record a new Signal</option>
+								<option value="rename">2. Rename a Signal</option>
+								<option value="move">3. Move a Signal</option>
+								<option value="upload">4. Upload a new Signal</option>
+								<option value="download">5. Download a Signal</option>
+								<option value="clear">6. Clear a Signal</option>
+								<option value="clear-all">7. Clear All Signals</option>
+								<option value="schedule-new">8. Schedule a Signal</option>
+								<option value="change-ip">9. Change IP</option>
+								<option value="disconnect-wifi">10. Change WiFi</option>
 							</select>
 						</div>
 					</div>
-					<div class="form-group" id="form-ch">
-						<label class="control-label col-sm-2">Channel</label>
+					<div class="form-group" id="form-id" style="display:none">
+						<label class="control-label col-sm-2">Signal</label>
 						<div class="col-sm-4">
-							<select id="input-ch" name="ch">
+							<select id="input-id" name="id">
 								<!-- js adds options -->
 							</select>
 						</div>
@@ -83,32 +95,35 @@
 							<input id="input-file" type="file" name="irJson">
 						</div>
 					</div>
+					<div class="form-group" id="form-position">
+						<label class="control-label col-sm-2">Position [row, column]</label>
+						<div class="col-sm-4">
+							[<input id="input-row" type="number" name="row" style="width:2em;">,
+							<input id="input-column" type="number" name="column" style="width:2em;">]
+						</div>
+					</div>
 					<div class="form-group" id="form-name">
 						<label class="control-label col-sm-2">Name</label>
 						<div class="col-sm-4">
 							<input id="input-name" type="text" name="name">
 						</div>
 					</div>
-					<div class="form-group" id="form-number" style="display:none">
-						<label class="control-label col-sm-2">How many</label>
+					<div class="form-group" id="form-time" style="display:none">
+						<label class="control-label col-sm-2">When?</label>
 						<div class="col-sm-4">
-							<input id="input-number" type="number" name="number">
+							<input id="input-time" type="datetime-local" name="time" step="1">
 						</div>
 					</div>
 					<div class="form-group" id="form-ipaddress" style="display:none">
-						<label class="control-label col-sm-2">IP address(empty for using DHCP)</label>
+						<label class="control-label col-sm-2">Static IP Address</label>
 						<div class="col-sm-4">
-							<input id="input-ipaddress" type="text" name="ipAddress">
+							<input id="input-local_ip" type="text" name="local_ip">
 						</div>
-					</div>
-					<div class="form-group" id="form-netmask" style="display:none">
 						<label class="control-label col-sm-2">Subnet Mask</label>
 						<div class="col-sm-4">
-							<input id="input-netmask" type="text" name="netmask">
+							<input id="input-subnetmask" type="text" name="subnetmask">
 						</div>
-					</div>
-					<div class="form-group" id="form-gateway" style="display:none">
-						<label class="control-label col-sm-2">Default Gateway</label>
+						<label class="control-label col-sm-2">Gateway IP address</label>
 						<div class="col-sm-4">
 							<input id="input-gateway" type="text" name="gateway">
 						</div>
@@ -123,13 +138,20 @@
 			</div>
 
 			<div id="info" class="container">
-				<h2>Informations</h2>
+				<h2>Information</h2>
 				<div>
 					<p>Status: <span id="info-status"></span></p>
-					<p>WiFi SSID: <span id="info-ssid"></span></p>
-					<p>IP Address: <span id="info-ipaddress"></span></p>
+					<p>Version: <span id="info-version"></span></p>
 					<p>Hostname: <span id="info-hostname"></span></p>
+					<p>WiFi SSID: <span id="info-ssid"></span></p>
+					<p>IP Address: <span id="info-local_ip"></span></p>
 				</div>
+			</div>
+
+			<div id="schedule" class="container">
+				<h2>Schedule</h2>
+				<ul id="schedule-list">
+				</ul>
 			</div>
 
 			<div id="log" class="container">
