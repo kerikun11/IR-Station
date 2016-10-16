@@ -1,9 +1,9 @@
 function long2ip(ip){
-  return [ip >>> 0 & 0xFF, ip >>> 8 & 0xFF, ip >>> 16 & 0xFF, ip >>> 24 & 0xFF].join('.')
+	return [ip >>> 0 & 0xFF, ip >>> 8 & 0xFF, ip >>> 16 & 0xFF, ip >>> 24 & 0xFF].join('.')
 }
 function updateStatus(status){
 	$('span#info-status').text(status);
-	$('#log-area').prepend('<p>'+Date().match(/.+(\d\d:\d\d:\d\d).+/)[1]+': '+status+'</p>');
+	$('#log-area').prepend($('<p>').text(Date().match(/.+(\d\d:\d\d:\d\d).+/)[1]+': '+status));
 }
 function load(){
 	$.getJSON('/info',{},function(data) {
@@ -32,7 +32,7 @@ function load(){
 			var name = signal["name"];
 			var row = signal["row"]-0;
 			var column = signal["column"]-0;
-			$('#send td').eq(column_max*(row-1) + (column-1)).html($("<button>").val(id).text(name).addClass("btn btn-default"));
+			$('#send td').eq(column_max*(row-1)+(column-1)).html($("<button>").val(id).text(name).addClass("btn btn-default"));
 			$('#input-id').append($('<option>').val(id).text("["+row+", "+column+"] "+name));
 		});
 		// informations
@@ -73,6 +73,7 @@ function load(){
 $('#manage select[name="action"]').change(function(){
 	var action = $(this).val();
 	$('#form-submit label').text("")
+	$('#input-time').val((new Date((new Date()).getTime()+9*60*60*1000)).toISOString().substring(0,17)+"00");
 	switch(action){
 		case "record":
 			$('#form-id').hide();
@@ -150,18 +151,9 @@ function manage(){
 	var column = $('#input-column').val()-0;
 	switch(action){
 		case "record":
-			if(row<=0){
-				$('#form-submit label').text("row is positive number")
-				return;
-			}
-			if(column > 6 || column<=0){
-				$('#form-submit label').text("column is no more than 5")
-				return;
-			}
-			if(name == ""){
-				$('#form-submit label').text("Please type a name")
-				return;
-			}
+			if(row>25 || row<0)return $('#form-submit label').text("row is no more than 25");
+			if(column>10 || column<0)return $('#form-submit label').text("column is no more than 10");
+			if(name == "")return $('#form-submit label').text("Please type a name");
 			$.post('/signals/record',{
 				name: name,
 				display: true,
@@ -175,22 +167,8 @@ function manage(){
 			updateStatus("Recording a new Signal...");
 			break;
 		case "rename":
-			if(id == -1){
-				$('#form-submit label').text("Select a signal")
-				return;
-			}
-			if(row<0){
-				$('#form-submit label').text("row is positive number")
-				return;
-			}
-			if(column > 6 || column<0){
-				$('#form-submit label').text("column is no more than 5")
-				return;
-			}
-			if(name == ""){
-				$('#form-submit label').text("Please type a name")
-				return;
-			}
+			if(id == -1)return $('#form-submit label').text("Select a signal");
+			if(name == "")return $('#form-submit label').text("Please type a name");
 			$.post('/signals/rename',{
 				id: id,
 				name: name
@@ -201,18 +179,9 @@ function manage(){
 			});
 			break;
 		case "move":
-			if(id == -1){
-				$('#form-submit label').text("Select a signal")
-				return;
-			}
-			if(row<0){
-				$('#form-submit label').text("row is positive number")
-				return;
-			}
-			if(column > 6 || column<0){
-				$('#form-submit label').text("column is no more than 6")
-				return;
-			}
+			if(id == -1)return $('#form-submit label').text("Select a signal");
+			if(row>25 || row<0)return $('#form-submit label').text("row is no more than 25");
+			if(column>10 || column<0)return $('#form-submit label').text("column is no more than 10");
 			$.post('/signals/move',{
 				id: id,
 				row: row,
@@ -223,40 +192,32 @@ function manage(){
 			});
 			break;
 		case "upload":
-			if(name == ""){
-				$('#form-submit label').text("Please type a name")
-				return;
-			}
+			if(row>25 || row<0)return $('#form-submit label').text("row is no more than 25");
+			if(column>10 || column<0)return $('#form-submit label').text("column is no more than 10");
+			if(name == "")return $('#form-submit label').text("Please type a name");
 			var uploadFile = document.getElementById('input-file');
 			var file = uploadFile.files[0];
-			if(!file){
-				$('#form-submit label').text("Select a file")
-				return;
-			}else{
-				var reader = new FileReader();
-				reader.readAsText(file);
-				reader.onload = function(){
-					$.post('/signals/upload',{
-						name: name,
-						display: true,
-						row: row,
-						column: column,
-						irJson: reader.result
-					}).done(function(res){
-						$('#input-name').val("");
-						$('#input-file').val("");
-						updateStatus(res);
-						load();
-					});
-				}
+			if(!file)return $('#form-submit label').text("Select a file");
+			var reader = new FileReader();
+			reader.readAsText(file);
+			reader.onload = function(){
+				$.post('/signals/upload',{
+					name: name,
+					display: true,
+					row: row,
+					column: column,
+					irJson: reader.result
+				}).done(function(res){
+					$('#input-name').val("");
+					$('#input-file').val("");
+					updateStatus(res);
+					load();
+				});
 			}
 			updateStatus("Uploading a new Signal...");
 			break;
 		case "download":
-			if(id == -1){
-				$('#form-submit label').text("Select a signal")
-				return;
-			}
+			if(id == -1)return $('#form-submit label').text("Select a signal");
 			var a = document.createElement('a');
 			name = station["signals"].filter(function(value){
 				return (value["id"]==id);
@@ -269,10 +230,7 @@ function manage(){
 			$('#input-id').attr('selected',false);
 			break;
 		case "clear":
-			if(id == -1){
-				$('#form-submit label').text("Select a signal")
-				return;
-			}
+			if(id == -1)return $('#form-submit label').text("Select a signal");
 			updateStatus("Cleaning...");
 			$.post('/signals/clear',{
 				id: id,
@@ -291,20 +249,11 @@ function manage(){
 			}
 			break;
 		case "schedule-new":
-			if(id == -1){
-				$('#form-submit label').text("Select a signal")
-				return;
-			}
+			if(id == -1)return $('#form-submit label').text("Select a signal");
 			var time = $('#input-time').val();
-			if(!time.match(/^20\d\d(.\d\d){4}(...)?$/)){
-				$('#form-submit label').text("Invalid Time");
-				return;
-			}
+			if(!time.match(/^20\d\d(.\d\d){4}(...)?$/))return $('#form-submit label').text("Invalid Time");
 			var time = Math.floor(new Date($('#input-time').val()).getTime()/1000)-9*60*60;
-			if(time < Math.floor(new Date().getTime()/1000)){
-				$('#form-submit label').text("No Past Time");
-				return;
-			}
+			if(time < Math.floor(new Date().getTime()/1000))return $('#form-submit label').text("No Past Time");
 			$.post('/schedule/new',{
 				id: id,
 				time: time
@@ -315,43 +264,31 @@ function manage(){
 			});
 			break;
 		case "disconnect-wifi":
-			if(confirm('Are you sure to disconnect this WiFi?')){
-				$.post('/wifi/disconnect');
-				$('#main').hide();
-			}
+			if(!confirm('Are you sure to disconnect this WiFi?'))return;
+			$.post('/wifi/disconnect');
+			$('#main').hide();
 			break;
 		case "change-ip":
 			var local_ip = $('#input-local_ip').val();
 			var subnetmask = $('#input-subnetmask').val();
 			var gateway = $('#input-gateway').val();
-			if(!local_ip.match(/^\d{1,3}(\.\d{1,3}){3}$/)){
-				$('#form-submit label').text("Invalid IP address");
-				return;
-			}
-			if(!subnetmask.match(/^\d{1,3}(\.\d{1,3}){3}$/)){
-				$('#form-submit label').text("Invalid Subnet Mask");
-				return;
-			}
-			if(!gateway.match(/^\d{1,3}(\.\d{1,3}){3}$/)){
-				$('#form-submit label').text("Invalid Gateway IP");
-				return;
-			}
-			if(confirm('Are you sure to change ip address?')){
-				$('#main').hide();
-				$.post('/wifi/change-ip',{
-					local_ip: $('#input-local_ip').val(),
-					subnetmask: $('#input-subnetmask').val(),
-					gateway: $('#input-gateway').val()
-				}).done(function(res){
-					updateStatus(res);
-					$('#main').show();
-				}).fail(function(){
-					location.href = "http://"+$('#input-local_ip').val();
-				})
-			}
+			if(!local_ip.match(/^\d{1,3}(\.\d{1,3}){3}$/))return $('#form-submit label').text("Invalid IP address");
+			if(!subnetmask.match(/^\d{1,3}(\.\d{1,3}){3}$/))return $('#form-submit label').text("Invalid Subnet Mask");
+			if(!gateway.match(/^\d{1,3}(\.\d{1,3}){3}$/))return $('#form-submit label').text("Invalid Gateway IP");
+			if(!confirm('Are you sure to change ip address?')) return;
+			$('#main').hide();
+			$.post('/wifi/change-ip',{
+				local_ip: $('#input-local_ip').val(),
+				subnetmask: $('#input-subnetmask').val(),
+				gateway: $('#input-gateway').val()
+			}).done(function(res){
+				updateStatus(res);
+				$('#main').show();
+			}).fail(function(){
+				location.href = "http://"+$('#input-local_ip').val();
+			})
 			break;
 	}
-	$('#form-submit label').text("")
 }
 $('#manage button').click(manage);
 $('#manage input').keypress(function(e){
