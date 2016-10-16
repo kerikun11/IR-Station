@@ -3,7 +3,7 @@ require 'sinatra/reloader'
 require 'sinatra/json'
 
 station = {
-	"version"=>"v1.4.1",
+	"version"=>"v1.5.0",
 	"mode"=>1,
 	"hostname"=>"demo",
 	"is_stealth_ssid"=>false,

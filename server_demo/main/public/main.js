@@ -6,7 +6,7 @@ function updateStatus(status){
 	$('#log-area').prepend('<p>'+Date().match(/.+(\d\d:\d\d:\d\d).+/)[1]+': '+status+'</p>');
 }
 function load(){
-	$.getJSON('/info',{},function(data) {
+	$.getJSON('info',{},function(data) {
 		station = data;
 		// send buttons settings id list
 		$('#send tbody').empty();
