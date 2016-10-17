@@ -289,6 +289,7 @@ function manage(){
 			})
 			break;
 	}
+	$('#form-submit label').text("")
 }
 $('#manage button').click(manage);
 $('#manage input').keypress(function(e){
