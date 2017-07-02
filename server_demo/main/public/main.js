@@ -252,8 +252,8 @@ function manage(){
 			if(id == -1)return $('#form-submit label').text("Select a signal");
 			var time = $('#input-time').val();
 			if(!time.match(/^20\d\d(.\d\d){4}(...)?$/))return $('#form-submit label').text("Invalid Time");
-			var time = Math.floor(new Date($('#input-time').val()).getTime()/1000)-9*60*60;
-			if(time < Math.floor(new Date().getTime()/1000))return $('#form-submit label').text("No Past Time");
+			var time = Math.floor(new Date($('#input-time').val()).getTime()/1000);
+			if(time < Math.floor(new Date().getTime()/1000))return $('#form-submit label').text("No Past Time!");
 			$.post('/schedule/new',{
 				id: id,
 				time: time
