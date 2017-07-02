@@ -2,35 +2,35 @@ require 'sinatra'
 require 'sinatra/reloader'
 require 'sinatra/json'
 
-station = {
-	"version"=>"v1.4.1",
-	"mode"=>1,
-	"hostname"=>"demo",
-	"is_stealth_ssid"=>false,
-	"ssid"=>"WiFi-2.4GHz",
-	"password"=>"pw",
-	"is_static_ip"=>false,
-	"local_ip"=>151759040,
-	"subnetmask"=>16777215,
-	"gateway"=>17541312,
-	"next_id"=>6,
-	"signals"=>[],
-	"new_schedule_id"=>0,
-	"schedules"=>[]
-}
-
-for i in 1..5 do
-	station["signals"].push({
-		"id"=>i,
-		"name"=>"NAME #{i}",
-		"path"=>"#{i} NAME#{i}",
-		"display"=>true,
-		"row"=>i,
-		"column"=>i
-	})
-end
+station={}
 
 get '/' do
+	station = {
+		"version"=>"v1.5.0",
+		"mode"=>1,
+		"hostname"=>"demo",
+		"is_stealth_ssid"=>false,
+		"ssid"=>"WiFi-2.4GHz",
+		"password"=>"pw",
+		"is_static_ip"=>false,
+		"local_ip"=>151759040,
+		"subnetmask"=>16777215,
+		"gateway"=>17541312,
+		"next_id"=>6,
+		"signals"=>[],
+		"new_schedule_id"=>0,
+		"schedules"=>[]
+	}
+	for i in 1..5 do
+		station["signals"].push({
+			"id"=>i,
+			"name"=>"NAME #{i}",
+			"path"=>"#{i} NAME#{i}",
+			"display"=>true,
+			"row"=>i,
+			"column"=>i
+		})
+	end
 	send_file File.join(settings.public_folder,'index.htm')
 end
 
