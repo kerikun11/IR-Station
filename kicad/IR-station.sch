@@ -1,4 +1,5 @@
 EESchema Schematic File Version 2
+LIBS:IR-station-rescue
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -267,7 +268,7 @@ F 3 "" H 4550 4900 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L LED LED2
+L LED-RESCUE-IR-station LED2
 U 1 1 57669630
 P 9000 2900
 F 0 "LED2" H 9000 3000 50  0000 C CNN
@@ -322,7 +323,7 @@ F 3 "" H 9300 4300 50  0000 L CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L LED LED4
+L LED-RESCUE-IR-station LED4
 U 1 1 5766A81B
 P 9000 3400
 F 0 "LED4" H 9000 3500 50  0000 C CNN
@@ -333,7 +334,7 @@ F 3 "" H 9000 3400 50  0000 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L LED LED5
+L LED-RESCUE-IR-station LED5
 U 1 1 5766A87E
 P 9400 3400
 F 0 "LED5" H 9400 3500 50  0000 C CNN
@@ -344,7 +345,7 @@ F 3 "" H 9400 3400 50  0000 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L LED LED3
+L LED-RESCUE-IR-station LED3
 U 1 1 5766A8D8
 P 9400 2900
 F 0 "LED3" H 9400 3000 50  0000 C CNN

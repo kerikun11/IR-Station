@@ -1,10 +1,10 @@
-(module ESP-WROOM-02 (layer F.Cu) (tedit 570C4D50)
+(module ESP-WROOM-02 (layer F.Cu) (tedit 58EED60E)
   (descr "Module, ESP-8266, ESP-13-WROOM-02, 18 pad, SMD")
   (tags "Module ESP-8266 ESP8266")
-  (fp_text reference REF** (at -3 -5) (layer F.SilkS)
+  (fp_text reference U1 (at -1.11 -1.81) (layer F.SilkS)
     (effects (font (size 1 1) (thickness 0.15)))
   )
-  (fp_text value ESP-WROOM-02 (at 9 0) (layer F.Fab)
+  (fp_text value ESP-WROOM-02-2 (at 9 0) (layer F.SilkS)
     (effects (font (size 1 1) (thickness 0.15)))
   )
   (fp_line (start 0 -7) (end 0 13) (layer F.SilkS) (width 0.15))
@@ -38,7 +38,7 @@
   (pad 16 smd oval (at 18 3) (size 2 0.9) (layers F.Cu F.Paste F.Mask))
   (pad 17 smd oval (at 18 1.5) (size 2 0.9) (layers F.Cu F.Paste F.Mask))
   (pad 18 smd oval (at 18 0) (size 2 0.9) (layers F.Cu F.Paste F.Mask))
-  (model ${ESPLIB}/ESP8266.3dshapes/ESP-13-wroom-02.wrl
+  (model ${KISYS3DMOD}/ESP8266.3dshapes/ESP-13-wroom-02.wrl
     (at (xyz 0 0 0))
     (scale (xyz 0.3937 0.3937 0.3937))
     (rotate (xyz 0 0 0))

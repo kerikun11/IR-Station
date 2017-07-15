@@ -48,6 +48,21 @@ You can control your home appliances with your smartphone or laptop.
   1. Access your IR-Station in a browser.
   1. Click a button which assigned a signal you want to send.
 
+### Available Functions
+
+  * Record a new Signal
+  * Rename a Signal
+  * Move a Signal
+  * Upload a Signal
+  * Download a Signal
+  * Clear a Signal
+  * Clear all Signals
+  * Schedule a Signal
+  * Change IP (Fix IP Address)
+  * Change WiFi (Disconnect WiFi)
+
+![footer](images/footer.png)
+
 ### Meanings of LED Indicator
 
 |Color	|Status		|
@@ -101,7 +116,7 @@ Please Add the Libraries below to your Arduino IDE
 |ESP8266 WiFi Module			|ESP-WROOM-02		| 1 		|						|
 |IR receiver					|OSRB38C9AA			| 1 		|Power: 3.3V			|
 |IR LED							|OSI5FU3A11C		| 4		 	|anything maybe OK		|
-|Voltage Regulator				|NJU7223-33			| 1 		|output: 3.3V 500mA		|
+|Voltage Regulator				|NJM2884U1-33			| 1 		|output: 3.3V 500mA		|
 |Nch MOS-FET					|IRLML6344			| 1 		|						|
 |Resistor for IR LED			|4.7 ohms, 1W		| 2		 	|						|
 |Pull-up/down Resistor			|10k ohms 			| 5 		|						|
@@ -112,8 +127,8 @@ Please Add the Libraries below to your Arduino IDE
 |Power Stabilization Capacitor	|100uF				| 1			|						|
 |Bypass Capacitor				|0.1uF 				| 3 		|						|
 |User Button					|SKRPACE010 		| 1			|						|
-|Poly Switch					|MICROSMD035F-02	| 1			|up to 350mA			|
-|USB Conncector					|USB-Micro-B		| 1			|Power Only				|
+|Poly Switch					|FEMTOSMDC035F-02	| 1			|up to 350mA			|
+|USB Conncector					|USB-Micro-B(MRUSB-2B-D14NI-S306)		| 1			|Power Only				|
 
 ![Components](images/components.jpg)
 
