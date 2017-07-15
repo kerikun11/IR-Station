@@ -71,6 +71,8 @@ You can control your home appliances with your smartphone or laptop.
 |Green	|Processing	|
 |Blue	|Listening	|
 
+![Indicator](images/indicator.jpg)
+
 ## How to Make
 
 ### Required Library
@@ -102,8 +104,8 @@ Please Add the Libraries below to your Arduino IDE
 | :---- | :---------------------- |
 | Board | ESPino (ESP-12 Module) |
 | Flash Mode | QIO |
-| CPU Frequency | 80MHz |
-| Flash Size | 4M\(3M SPIFFS\) |
+| CPU Frequency | 160MHz |
+| Flash Size | 4M\(1M SPIFFS\) |
 | Reset Method | ck |
 | Upload Speed | 115200 |
 
@@ -111,26 +113,25 @@ Please Add the Libraries below to your Arduino IDE
 
 #### Device Components
 
-|Components						|Details			|Quantity	|Remarks				|
-|:------------------------------|:------------------|:----------|:----------------------|
-|ESP8266 WiFi Module			|ESP-WROOM-02		| 1 		|						|
-|IR receiver					|OSRB38C9AA			| 1 		|Power: 3.3V			|
-|IR LED							|OSI5FU3A11C		| 4		 	|anything maybe OK		|
-|Voltage Regulator				|NJM2884U1-33			| 1 		|output: 3.3V 500mA		|
-|Nch MOS-FET					|IRLML6344			| 1 		|						|
-|Resistor for IR LED			|4.7 ohms, 1W		| 2		 	|						|
-|Pull-up/down Resistor			|10k ohms 			| 5 		|						|
-|Indicator LED					|OSTBABS4C2B		| 1 		|						|
-|Resistor for LED				|100~220 ohms		| 3 		|						|
-|Resistor for IR receiver		|220 ohms			| 1 		|						|
-|Capacitor for IR receiver		|4.7uF 				| 3 		|						|
-|Power Stabilization Capacitor	|100uF				| 1			|						|
-|Bypass Capacitor				|0.1uF 				| 3 		|						|
-|User Button					|SKRPACE010 		| 1			|						|
-|Poly Switch					|FEMTOSMDC035F-02	| 1			|up to 350mA			|
-|USB Conncector					|USB-Micro-B(MRUSB-2B-D14NI-S306)		| 1			|Power Only				|
-
-![Components](images/components.jpg)
+|Components				|Details			|Qty	|Remarks				|
+|:----------------------|:------------------|:------|:----------------------|
+|ESP8266 WiFi Module	|ESP-WROOM-02		| 1 	|MCU					|
+|IR receiver			|OSRB38C9AA			| 1 	|Power: 3.3V			|
+|IR LED					|OSI5FU3A11C		| 4	 	|940nm, 100mA, 3mm		|
+|Voltage Regulator		|NJM2884U1-33		| 1 	|3.3V 500mA				|
+|Nch MOS-FET			|IRLML6344			| 1 	|to drive IR LED		|
+|Resistor				|4.7 ohms, 1W (5025)| 2	 	|for IR LED				|
+|Pull-up/down Resistor	|10k ohms 			| 5 	|						|
+|Indicator LED			|OSTBABS4C2B		| 1 	|RGB LED				|
+|Resistor				|100~220 ohms (1608)| 3 	|for Indicator LED		|
+|Resistor				|220 ohms (1608)	| 1 	|for IR receiver		|
+|Capacitor				|4.7uF (1608)		| 1 	|for IR receiver		|
+|Capacitor				|1uF (1608)			| 1 	|for Regulator Output	|
+|Capacitor				|0.1uF (1608)		| 1 	|for Regulator Input	|
+|Capacitor				|100uF (3216)		| 1		|Power Stabilization Capacitor|
+|User Button			|SKRPACE010 		| 1		|User Button			|
+|Poly Switch			|FEMTOSMDC035F-02	| 1		|up to 350mA			|
+|USB Conncector			|MRUSB-2B-D14NI-S306| 1		|USB-Micro-B, Power Only|
 
 #### Requires
 
@@ -154,6 +155,12 @@ Please Add the Libraries below to your Arduino IDE
 
 ![PCB](images/pcb.png)
 
+### Board Sample
+
+![Board-Top](images/board-top.jpg)
+![Board-Bottom](images/board-bottom.jpg)
+![Board](images/board.jpg)
+
 ## IR data JSON format
 
 ### Format
@@ -172,7 +179,7 @@ Please Add the Libraries below to your Arduino IDE
 ]
 ~~~
 
-## HTTP API v1.5.0
+## HTTP API v1.5.1
 
 ### Setup Form
 
@@ -201,13 +208,4 @@ Please Add the Libraries below to your Arduino IDE
 |/schedule/new		|POST	|id, time				|message	|			|
 |/schedule/delete	|POST	|schedule_id			|message	|			|
 |/wifi/disconnect	|POST	|						|none		|			|
-|/wifi/change-ip	|POST	|local_ip, subnetmask, gateway	|message|		|
-
-#### result json
-
-~~~json
-{
-	"code":0 or -1,
-    "message":"message"
-}
-~~~
+|/wifi/change-ip	|POST	|local_ip, subnetmask, gateway	|message|automatically redirect to a new IP Address		|
