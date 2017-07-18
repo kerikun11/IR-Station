@@ -28,6 +28,6 @@ see [How to Use IR-Station](how-to-use.md)
 
 see [How to Make IR-Station](how-to-make.md)
 
-## How to Use
+## API References
 
 see [API References of IR-Station](api-references.md)
