@@ -69,7 +69,7 @@ Please Add the Libraries below to your Arduino IDE.
   1. Connect your IR-Station and PC with a UART-to-USB conversion module.
   1. Select correct serial COM port and upload program to the device. When upload program, GPIO0 and GPIO2 must be pulled-up, and GPIO15 must be pulled-down. It's necessary to reset the devie immediately before upload. It's a little difficult.
   1. The uploading takes about 30 seconds.
-  1. Upload the SPIFFS data: menu -> tool -> ESP8266 Sketch Data Upload. (See https://github.com/esp8266/Arduino/blob/master/doc/filesystem.md)
+  1. Upload the SPIFFS data: menu -> tool -> ESP8266 Sketch Data Upload. (See https://github.com/esp8266/Arduino/blob/master/doc/filesystem.rst#uploading-files-to-file-system)
   1. Process termination.
 
 ## Appendix
