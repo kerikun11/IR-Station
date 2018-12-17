@@ -44,8 +44,8 @@ You can control your home appliances with your smartphone or laptop.
 IR-Station is based on Arduino Environment.  
 Please Add the Libraries below to your Arduino IDE.
 
-  * Arduino Json (https://github.com/bblanchon/ArduinoJson)
-  * Arduino Time Library (https://github.com/PaulStoffregen/Time)
+  * Arduino Json (https://github.com/bblanchon/ArduinoJson) v5.13.4
+  * Arduino Time Library (https://github.com/PaulStoffregen/Time) v1.5.0
 
 ### Arduino Board Settings
 
@@ -60,17 +60,15 @@ Please Add the Libraries below to your Arduino IDE.
 
 ### Steps
 
-  1. Install Arduino IDE and the driver of your UART-to-USB converter.
-  1. Open IR-station firmware in the Arduino IDE.
-  1. Open the preferences of Arduino IDE and fill in this URL: http://arduino.esp8266.com/stable/package_esp8266com_index.json to "Additional Boards Manager URLs".
-  1. Add "Generic ESP8266 Module" in the Arduino IDE Board Manager.
+  1. Install [Arduino IDE](https://www.arduino.cc/) on your PC.
+  1. Install ESP8266 Environment on the Arduino IDE. (see https://github.com/esp8266/Arduino)
   1. Add the required libraries to your Arduino IDE in the Arduino IDE Library Manager or zip files.
-  1. Select "Generic ESP8266 Module" and configure each item of board settings properly. See Arduino Board Settings below.
-  1. Connect your IR-Station and PC with a UART-to-USB conversion module.
-  1. Select correct serial COM port and upload program to the device. When upload program, GPIO0 and GPIO2 must be pulled-up, and GPIO15 must be pulled-down. It's necessary to reset the devie immediately before upload. It's a little difficult.
+  1. Select "Generic ESP8266 Module" and configure each item of board settings properly. See Arduino Board Settings above.
+  1. Connect your IR-Station and your PC with a UART-to-USB conversion module.
+  1. Select correct serial COM port and upload program to the device. When upload program, GPIO0 and GPIO2 must be pulled-up, and GPIO15 must be pulled-down.
   1. The uploading takes about 30 seconds.
   1. Upload the SPIFFS data: menu -> tool -> ESP8266 Sketch Data Upload. (See https://github.com/esp8266/Arduino/blob/master/doc/filesystem.rst#uploading-files-to-file-system)
-  1. Process termination.
+  1. Process termination. Just boot the device.
 
 ## Appendix
 
