@@ -15,9 +15,7 @@
 #include <Time.h>
 
 // NTP Servers:
-IPAddress timeServer(132, 163, 4, 101); // time-a.timefreq.bldrdoc.gov
-// IPAddress timeServer(132, 163, 4, 102); // time-b.timefreq.bldrdoc.gov
-// IPAddress timeServer(132, 163, 4, 103); // time-c.timefreq.bldrdoc.gov
+IPAddress timeServer(210, 173, 160, 57); // ntp.jst.mfeed.ad.jp
 
 WiFiUDP Udp;
 unsigned int localPort = 8888;  // local port to listen for UDP packets
