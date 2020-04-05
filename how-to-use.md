@@ -3,9 +3,6 @@
 Infrared Remote Controller with ESP8266 WiFi-module  
 You can control your home appliances with your smartphone or laptop.
 
-### Display Sample
-
-
 ## How to Use IR-Station
 
 ### Setup the Device
@@ -56,10 +53,10 @@ You can control your home appliances with your smartphone or laptop.
 
 ### Meanings of LED Indicator
 
-|Color	|Status		|
-|:------|:----------|
-|Red	|Error		|
-|Green	|Processing	|
-|Blue	|Listening	|
+| Color | Status     |
+| :---- | :--------- |
+| Red   | Error      |
+| Green | Processing |
+| Blue  | Listening  |
 
 ![Indicator](images/indicator.jpg)

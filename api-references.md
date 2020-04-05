@@ -27,29 +27,29 @@ array of microseconds (type: uint16_t)
 
 ### Setup Form
 
-|Path				|Method	|Parameter(s)	|Return	|Remarks	|
-|:------------------|:------|:--------------|:------|:----------|
-|/					|GET	|				|index.html	|setup form page	|
-|/wifi/list			|GET	|				|a list of (string)	|a list of existing WiFi SSID 	|
-|/wifi/confirm		|POST	|				|IP Address or "false"		|confirm if WiFi connection is established and reboot the device	|
-|/mode/station		|POST	|ssid, password, stealth, hostname	|message	|set the device as Station Mode	|
-|/mode/accesspoint	|POST	|hostname	|message	|set the device as AP Mode	|
-|/dbg				|GET	|ssid, password	|local_ip or "false"	|
+| Path              | Method | Parameter(s)                      | Return                | Remarks                                                         |
+| :---------------- | :----- | :-------------------------------- | :-------------------- | :-------------------------------------------------------------- |
+| /                 | GET    |                                   | index.html            | setup form page                                                 |
+| /wifi/list        | GET    |                                   | a list of (string)    | a list of existing WiFi SSID                                    |
+| /wifi/confirm     | POST   |                                   | IP Address or "false" | confirm if WiFi connection is established and reboot the device |
+| /mode/station     | POST   | ssid, password, stealth, hostname | message               | set the device as Station Mode                                  |
+| /mode/accesspoint | POST   | hostname                          | message               | set the device as AP Mode                                       |
+| /dbg              | GET    | ssid, password                    | local_ip or "false"   |
 
 ### Main Page
 
-|Path				|Method	|Parameter(s)			|Return		|Remarks	|
-|:------------------|:------|:----------------------|:----------|:----------|
-|/					|GET	|						|index.html	|main page of IR-Station	|
-|/info				|GET	|						|station.json	|a json includes the device information	|
-|/signals/send		|POST	|id						|message	|			|
-|/signals/record	|POST	|row, column, name		|message	|			|
-|/signals/rename	|POST	|id, name				|message	|			|
-|/signals/move		|POST	|id, row, column		|message	|			|
-|/signals/upload	|POST	|irJson, row, column	|message	|			|
-|/signals/clear		|POST	|id						|message	|			|
-|/signals/clear-all	|POST	|						|message	|			|
-|/schedule/new		|POST	|id, time				|message	|			|
-|/schedule/delete	|POST	|schedule_id			|message	|			|
-|/wifi/disconnect	|POST	|						|none		|			|
-|/wifi/change-ip	|POST	|local_ip, subnetmask, gateway	|message|automatically redirect to a new IP Address		|
+| Path               | Method | Parameter(s)                  | Return       | Remarks                                    |
+| :----------------- | :----- | :---------------------------- | :----------- | :----------------------------------------- |
+| /                  | GET    |                               | index.html   | main page of IR-Station                    |
+| /info              | GET    |                               | station.json | a json includes the device information     |
+| /signals/send      | POST   | id                            | message      |                                            |
+| /signals/record    | POST   | row, column, name             | message      |                                            |
+| /signals/rename    | POST   | id, name                      | message      |                                            |
+| /signals/move      | POST   | id, row, column               | message      |                                            |
+| /signals/upload    | POST   | irJson, row, column           | message      |                                            |
+| /signals/clear     | POST   | id                            | message      |                                            |
+| /signals/clear-all | POST   |                               | message      |                                            |
+| /schedule/new      | POST   | id, time                      | message      |                                            |
+| /schedule/delete   | POST   | schedule_id                   | message      |                                            |
+| /wifi/disconnect   | POST   |                               | none         |                                            |
+| /wifi/change-ip    | POST   | local_ip, subnetmask, gateway | message      | automatically redirect to a new IP Address |

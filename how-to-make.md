@@ -9,31 +9,30 @@ You can control your home appliances with your smartphone or laptop.
 
 #### Device Components
 
-|Components				|Details			|Qty	|Remarks				|
-|:----------------------|:------------------|:------|:----------------------|
-|ESP8266 WiFi Module	|ESP-WROOM-02		| 1 	|MCU					|
-|IR receiver			|OSRB38C9AA			| 1 	|Power: 3.3V			|
-|IR LED					|OSI5FU3A11C		| 4	 	|940nm, 100mA, 3mm		|
-|Voltage Regulator		|NJM2884U1-33		| 1 	|3.3V 500mA				|
-|Nch MOS-FET			|IRLML6344			| 1 	|to drive IR LED		|
-|Resistor				|4.7 ohms, 1W (5025)| 2	 	|for IR LED				|
-|Pull-up/down Resistor	|10k ohms 			| 5 	|						|
-|Indicator LED			|OSTBABS4C2B		| 1 	|RGB LED				|
-|Resistor				|100~220 ohms (1608)| 3 	|for Indicator LED		|
-|Resistor				|220 ohms (1608)	| 1 	|for IR receiver		|
-|Capacitor				|4.7uF (1608)		| 1 	|for IR receiver		|
-|Capacitor				|1uF (1608)			| 1 	|for Regulator Output	|
-|Capacitor				|0.1uF (1608)		| 1 	|for Regulator Input	|
-|Capacitor				|100uF (3216)		| 1		|Power Stabilization Capacitor|
-|User Button			|SKRPACE010 		| 1		|User Button			|
-|Poly Switch			|FEMTOSMDC035F-02	| 1		|up to 350mA			|
-|USB Conncector			|MRUSB-2B-D14NI-S306| 1		|USB-Micro-B, Power Only|
+| Components            | Details             | Qty  | Remarks                       |
+| :-------------------- | :------------------ | :--- | :---------------------------- |
+| ESP8266 WiFi Module   | ESP-WROOM-02        | 1    | MCU                           |
+| IR receiver           | OSRB38C9AA          | 1    | Power: 3.3V                   |
+| IR LED                | OSI5FU3A11C         | 4    | 940nm, 100mA, 3mm             |
+| Voltage Regulator     | NJM2884U1-33        | 1    | 3.3V 500mA                    |
+| Nch MOS-FET           | IRLML6344           | 1    | to drive IR LED               |
+| Resistor              | 4.7 ohms, 1W (5025) | 2    | for IR LED                    |
+| Pull-up/down Resistor | 10k ohms            | 5    |                               |
+| Indicator LED         | OSTBABS4C2B         | 1    | RGB LED                       |
+| Resistor              | 100~220 ohms (1608) | 3    | for Indicator LED             |
+| Resistor              | 220 ohms (1608)     | 1    | for IR receiver               |
+| Capacitor             | 4.7uF (1608)        | 1    | for IR receiver               |
+| Capacitor             | 0.1uF (1608)        | 2    | for Regulator Input/Output    |
+| Capacitor             | 100uF (3216)        | 1    | Power Stabilization Capacitor |
+| User Button           | SKRPACE010          | 1    | User Button                   |
+| Poly Switch           | FEMTOSMDC035F-02    | 1    | up to 350mA                   |
+| USB Conncector        | MRUSB-2B-D14NI-S306 | 1    | USB-Micro-B, Power Only       |
 
 #### Requires
 
-| Requires |Details|Quantity|
-|:------|:-------|:--------|
-| Serial-to-USB conversion Module | such as FT232  | 1 |
+| Requires                        | Details       | Quantity |
+| :------------------------------ | :------------ | :------- |
+| Serial-to-USB conversion Module | such as FT232 | 1        |
 
 ### Circuit Diagram
 
@@ -44,19 +43,19 @@ You can control your home appliances with your smartphone or laptop.
 IR-Station is based on Arduino Environment.  
 Please Add the Libraries below to your Arduino IDE.
 
-  * Arduino Json (https://github.com/bblanchon/ArduinoJson) v5.13.4
-  * Arduino Time Library (https://github.com/PaulStoffregen/Time) v1.5.0
+- Arduino Json (https://github.com/bblanchon/ArduinoJson) v5.13.4
+- Arduino Time Library (https://github.com/PaulStoffregen/Time) v1.5.0
 
 ### Arduino Board Settings
 
-| item | select |
-| :---- | :---------------------- |
-| Board | ESPino (ESP-12 Module) |
-| Flash Mode | QIO |
-| CPU Frequency | 160MHz |
-| Flash Size | 4M\(1M SPIFFS\) |
-| Reset Method | ck |
-| Upload Speed | 115200 |
+| item          | select                 |
+| :------------ | :--------------------- |
+| Board         | ESPino (ESP-12 Module) |
+| Flash Mode    | QIO                    |
+| CPU Frequency | 160MHz                 |
+| Flash Size    | 4M (1M SPIFFS)         |
+| Reset Method  | ck                     |
+| Upload Speed  | 115200                 |
 
 ### Steps
 
