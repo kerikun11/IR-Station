@@ -18,12 +18,17 @@
 #include "config.h"
 #include "station.h"
 
-IR_Station station(PIN_IR_OUT, PIN_IR_IN, PIN_LED_R, PIN_LED_G, PIN_LED_B);
+IR_Station *station;
 volatile bool reset_flag = false;
+
+void ICACHE_RAM_ATTR rst_isr();
+void rst_isr() {
+  reset_flag = true;
+}
 
 void setup() {
   // Prepare Serial debug
-  Serial.begin(115200);
+  Serial.begin(74880);
   delay(10);
   println_dbg("");
   println_dbg("Hello, I'm ESP-WROOM-02");
@@ -32,18 +37,21 @@ void setup() {
   SPIFFS.begin();
 
   // IR-station setup
-  station.begin();
+  station = new IR_Station(PIN_IR_OUT, PIN_IR_IN, PIN_LED_R, PIN_LED_G, PIN_LED_B);
+  station->begin();
+  //pinMode(PIN_BUTTON, INPUT_PULLUP);
+  //attachInterrupt(PIN_BUTTON, (void ICACHE_RAM_ATTR (*)()) ([]() {
+  //  reset_flag = true;
+  //}), RISING);
   pinMode(PIN_BUTTON, INPUT_PULLUP);
-  attachInterrupt(PIN_BUTTON, []() {
-    reset_flag = true;
-  }, RISING);
+  attachInterrupt(PIN_BUTTON, rst_isr,  RISING);
 
   // Setup Completed
   println_dbg("Setup Completed");
 }
 
 void loop() {
-  station.handle();
-  if (reset_flag) station.reset();
+  station->handle();
+  if (reset_flag) station->reset();
 }
 
