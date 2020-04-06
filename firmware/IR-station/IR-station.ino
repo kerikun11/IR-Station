@@ -21,13 +21,12 @@
 IR_Station *station;
 volatile bool reset_flag = false;
 
-void ICACHE_RAM_ATTR rst_isr();
-void rst_isr() {
+void ICACHE_RAM_ATTR rst_isr() {
   reset_flag = true;
 }
 
 void setup() {
-  // Prepare Serial debug
+  // prepare serial debug
   Serial.begin(74880);
   delay(10);
   println_dbg("");
@@ -39,10 +38,8 @@ void setup() {
   // IR-station setup
   station = new IR_Station(PIN_IR_OUT, PIN_IR_IN, PIN_LED_R, PIN_LED_G, PIN_LED_B);
   station->begin();
-  //pinMode(PIN_BUTTON, INPUT_PULLUP);
-  //attachInterrupt(PIN_BUTTON, (void ICACHE_RAM_ATTR (*)()) ([]() {
-  //  reset_flag = true;
-  //}), RISING);
+
+  // hardware button reset setup
   pinMode(PIN_BUTTON, INPUT_PULLUP);
   attachInterrupt(PIN_BUTTON, rst_isr,  RISING);
 
