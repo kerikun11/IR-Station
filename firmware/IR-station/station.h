@@ -33,21 +33,19 @@
 const int DNS_PORT = 53;
 const int HTTP_PORT = 80;
 
-class Signal {
-  public:
-    int id;
-    String name;
-    String path;
-    bool display;
-    int row;
-    int column;
+struct Signal {
+  int id;
+  String name;
+  String path;
+  bool display;
+  int row;
+  int column;
 };
 
-class Schedule {
-  public:
-    int schedule_id;
-    int id;
-    time_t time;
+struct Schedule {
+  int schedule_id;
+  int id;
+  time_t time;
 };
 
 class IR_Station {
