@@ -41,7 +41,7 @@ class IR {
     static volatile uint16_t rawData[RAWDATA_BUFFER_SIZE];
     static volatile uint32_t prev_us;
 
-    static void isr();
+    static void ICACHE_RAM_ATTR isr();
 };
 
 #endif
