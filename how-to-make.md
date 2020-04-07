@@ -27,6 +27,7 @@ You can control your home appliances with your smartphone or laptop.
 | User Button           | SKRPACE010          | 1    | User Button                   |
 | Poly Switch           | FEMTOSMDC035F-02    | 1    | up to 350mA                   |
 | USB Conncector        | MRUSB-2B-D14NI-S306 | 1    | USB-Micro-B, Power Only       |
+| Case                  | TW5-2-5 or TWF5-2-5 | 1    | drilling is required          |
 
 #### Requires
 
@@ -47,6 +48,8 @@ Please Add the Libraries below to your Arduino IDE.
 - Arduino Time Library (https://github.com/PaulStoffregen/Time) v1.5.0
 
 ### Arduino Board Settings
+
+- Board Set: [ESP8266 core for Arduino](https://github.com/esp8266/Arduino) v2.6.3
 
 | item          | select                 |
 | :------------ | :--------------------- |
