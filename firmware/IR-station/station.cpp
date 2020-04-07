@@ -237,8 +237,7 @@ bool IR_Station::restore() {
   }
 
   if (version != IR_STATION_VERSION) {
-    println_dbg("version difference");
-    return false;
+    println_dbg("version does not match!");
   }
   println_dbg("Restored IR-Station Settings");
   return true;
@@ -577,4 +576,3 @@ void IR_Station::attachStationApi() {
   });
   server.serveStatic("/", SPIFFS, "/main/", "public");
 }
-
