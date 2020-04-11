@@ -7,13 +7,16 @@
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include "config.h" // for print_dbg()
 #include "ota.h"
 
+#if USE_OTA_UPDATE == true
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
-#include "config.h" // for print_dbg()
+#endif
 
 void OTA::begin(String hostname, String password, int port) {
+#if USE_OTA_UPDATE == true
   yield();
 
   // Port defaults to 8266
@@ -44,9 +47,12 @@ void OTA::begin(String hostname, String password, int port) {
   });
   ArduinoOTA.begin();
   println_dbg("OTA is Ready");
+#endif
 }
 
 void OTA::handle() {
+#if USE_OTA_UPDATE == true
   // handle OTA update
   ArduinoOTA.handle();
+#endif
 }
