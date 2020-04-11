@@ -14,7 +14,7 @@
 
 class OTA {
   public:
-    void begin(String hostname, String password = "", int port = 8266);
+    void begin(String hostname = HOSTNAME_DEFAULT, String password = "", int port = 8266);
     void handle();
 };
 
