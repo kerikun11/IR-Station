@@ -21,7 +21,11 @@
 #include "config.h"
 #include "ir.h"
 #include "led.h"
-#include "ota.h"
+
+#if USE_ALEXA == true
+#include <fauxmoESP.h>
+#endif
+
 
 #define IR_STATION_MODE_SETUP   0
 #define IR_STATION_MODE_STATION 1
@@ -51,10 +55,18 @@ struct Schedule {
 class IR_Station {
   public:
     IR_Station(int pin_ir_tx, int pin_ir_rx, int pin_red, int pin_green, int pin_blue):
-      indicator(pin_red, pin_green, pin_blue), server(HTTP_PORT), httpUpdater(true) {
+      indicator(pin_red, pin_green, pin_blue), server(HTTP_PORT), httpUpdater(true)
+#if USE_ALEXA == true
+      , fauxmo()
+#endif
+    {
       ir.begin(pin_ir_tx, pin_ir_rx);
     }
     void begin();
+    //void startWebUI();
+    void stopWebUI();
+    void startAlexa();
+    void stopAlexa();
     void reset(bool clean = true);
     void handle();
 
@@ -83,7 +95,11 @@ class IR_Station {
     ESP8266WebServer server;
     ESP8266HTTPUpdateServer httpUpdater;
     DNSServer dnsServer;
-    OTA ota;
+
+#if USE_ALEXA == true
+    fauxmoESP fauxmo;
+    bool alexa_mode = false;
+#endif
 
     void handleSchedule();
     int getNewId();

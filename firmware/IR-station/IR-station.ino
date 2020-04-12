@@ -15,15 +15,21 @@
 
 #include <ESP8266WiFi.h>
 #include <FS.h>
+
 #include "config.h"
 #include "station.h"
+#include "ota.h"
 
 IR_Station *station;
-volatile bool reset_flag = false;
+volatile bool btn_fall = false;
+uint32_t btn_time = 0;
 
-void ICACHE_RAM_ATTR rst_isr() {
-  reset_flag = true;
+void ICACHE_RAM_ATTR trap_change() {
+  btn_fall = (digitalRead(PIN_BUTTON)==LOW);
 }
+
+OTA ota;
+bool alexa = false;
 
 void setup() {
   // prepare serial debug
@@ -41,7 +47,9 @@ void setup() {
 
   // hardware button reset setup
   pinMode(PIN_BUTTON, INPUT_PULLUP);
-  attachInterrupt(PIN_BUTTON, rst_isr,  RISING);
+  attachInterrupt(PIN_BUTTON, trap_change,  CHANGE);
+
+  ota.begin();
 
   // Setup Completed
   println_dbg("Setup Completed");
@@ -49,5 +57,30 @@ void setup() {
 
 void loop() {
   station->handle();
-  if (reset_flag) station->reset();
+
+  if (btn_fall) {
+    if (btn_time == 0)
+      btn_time = millis();
+    else {
+      if (millis() - btn_time > 3000)
+        station->reset();
+    }
+  } else {
+    if (btn_time != 0) {
+      if (millis() - btn_time < 500)
+        if (alexa) {
+          Serial.println("Enable WebUI");
+          station->stopAlexa();
+          station->begin();
+        } else {
+          Serial.println("Enable Alexa");
+          station->stopWebUI();
+          station->startAlexa();
+        }
+        alexa = !alexa;
+      btn_time = 0;
+    }
+  }
+
+  ota.handle();
 }
