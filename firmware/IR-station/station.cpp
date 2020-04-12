@@ -22,10 +22,6 @@ void IR_Station::begin(void) {
 
   if (restore() == false) reset();
 
-#if USE_OTA_UPDATE == true
-  ota.begin(hostname);
-#endif
-
   switch (mode) {
     case IR_STATION_MODE_SETUP:
       println_dbg("Boot Mode: Setup");
@@ -87,6 +83,34 @@ void IR_Station::begin(void) {
   SSDP.setManufacturer("KERI's Lab");
   SSDP.setManufacturerURL("http://kerikeri.top");
   SSDP.begin();
+
+#if USE_ALEXA == true
+  fauxmo.addDevice("led");
+  fauxmo.setPort(80); // required for gen3 devices
+  fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value) {
+            Serial.printf("[MAIN] Device #%d (%s) state: %s value: %d\n", device_id, device_name, state ? "ON" : "OFF", value);
+                });
+#endif
+}
+
+void IR_Station::stopWebUI() {
+  //httpUpdater.stop();
+  server.stop(); // close?
+  SSDP.end();
+}
+
+void IR_Station::startAlexa() {
+#if USE_ALEXA == true
+  alexa_mode = true;
+  fauxmo.enable(true);
+#endif
+}
+
+void IR_Station::stopAlexa() {
+#if USE_ALEXA == true
+  alexa_mode = false;
+  fauxmo.enable(false);
+#endif
 }
 
 void IR_Station::reset(bool clean) {
@@ -120,7 +144,6 @@ void IR_Station::reset(bool clean) {
 void IR_Station::handle() {
   server.handleClient();
   ir.handle();
-  ota.handle();
   switch (mode) {
     case IR_STATION_MODE_SETUP:
       if ((WiFi.status() == WL_CONNECTED)) indicator.set(0, 1023, 1023);
@@ -155,6 +178,10 @@ void IR_Station::handle() {
 #endif
       break;
   }
+#if USE_ALEXA == true
+  if (alexa_mode)
+    fauxmo.handle();
+#endif
 }
 
 void IR_Station::handleSchedule() {
@@ -315,7 +342,7 @@ void IR_Station::displayRequest() {
   print_dbg("Arguments count: ");
   println_dbg(server.args(), DEC);
   for (uint8_t i = 0; i < server.args(); i++) {
-    printf_dbg("\t%d = %d\n", server.argName(i).c_str(), server.arg(i).c_str());
+    printf_dbg("\t%s = %s\n", server.argName(i).c_str(), server.arg(i).c_str());
   }
 }
 

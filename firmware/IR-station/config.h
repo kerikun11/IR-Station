@@ -12,7 +12,6 @@
 
 /* Version */
 #define IR_STATION_VERSION      "v1.5.4"
-
 /* Hardware Mapping */
 #define PIN_BUTTON              (0)
 #define PIN_IR_IN               (5)
@@ -42,6 +41,9 @@
 
 // Capital Portal
 #define USE_CAPITAL_PORTAL      true
+
+// Alexa
+#define USE_ALEXA               true
 
 /* for Debug */
 #define SERIAL_DEBUG            true
