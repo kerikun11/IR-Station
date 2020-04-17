@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+	<head>
+		<meta charset="utf-8"/>
+		<title>IR Station</title>
+    <link rel="stylesheet" href="style.css" />
+		<link rel="shortcut icon" href="/apple-touch-icon.png"/>
+		<!--
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+		-->
+	</head>
+	<body> <h1 style="text-align:center" onclick="load()">IR Station</h1>
+		<div id="main" style="display:none">
+			<div id="send" class="btn-group" style="text-align:center;">
+				<!-- js adds buttons x25-->
+				<table>
+					<tbody>
+					</tbody>
+				</table>
+			</div>
+
+			<div id="settings" class="container">
+				<h2>Settings</h2>
+				<div id="manage" class="form-horizontal">
+					<div class="form-group" id="form-action">
+						<label class="control-label col-sm-2">Action</label>
+						<div class="col-sm-4">
+							<select id="input-action" class="form-control" name="action">
+                <% list = %w[
+                  record           Record_a_new_Signal
+                  rename           Rename_a_Signal
+                  move             Move_a_Signal
+                  upload           Upload_a_new_Signal
+                  download         Download_a_Signal
+                  clear            Clear_a_Signal
+                  clearAll        Clear_All_Signals
+                  scheduleNew     Schedule_a_Signal
+                  alexadd          Add_an_Alexa_device
+                  changeIp        Change_IP
+                  disconnectWifi  Change_WiFi]
+                    .each_slice(2).map{|f,l| [f, l.gsub(/_/, ' ')]} %>
+                <% list.each_with_index.map do |(f,l),i| %>
+                  <option id="<%= f %>" value="<%= f%>"><%= i+1%>. <%= l%></option>
+                <% end %>
+							</select>
+						</div>
+					</div>
+					<div class="form-group list" id="form-id">
+						<label class="control-label col-sm-2">Signal</label>
+						<div class="col-sm-4">
+							<select id="input-id" name="id">
+								<!-- js adds options -->
+							</select>
+						</div>
+					</div>
+					<div class="form-group list" id="form-file">
+						<label class="control-label col-sm-2">Json</label>
+						<div class="col-sm-4">
+							<input id="input-file" type="file" name="irJson">
+						</div>
+					</div>
+					<div class="form-group list" id="form-position">
+						<label class="control-label col-sm-2">Position [row, column]</label>
+						<div class="col-sm-4">
+							[<input id="input-row" type="number" name="row" style="width:2em;">,
+							<input id="input-column" type="number" name="column" style="width:2em;">]
+						</div>
+					</div>
+					<div class="form-group list" id="form-name">
+						<label class="control-label col-sm-2">Name</label>
+						<div class="col-sm-4">
+							<input id="input-name" type="text" name="name">
+						</div>
+					</div>
+					<div class="form-group list" id="form-time">
+						<label class="control-label col-sm-2">When?</label>
+						<div class="col-sm-4">
+              <input id="input-time" type="datetime-local" name="time" step="1">
+						</div>
+          </div>
+          <div class="form-group list" id="form-alexadd">
+						<label class="control-label col-sm-2">When?</label>
+						<div class="col-sm-4">
+							<input id="input-time" type="datetime-local" name="time" step="1">
+              <input type="date" id="start" name="trip-start" value="2018-07-22">
+              <input type="time" id="appt" name="appt" step="1">
+						</div>
+					</div>
+					<div class="form-group list" id="form-ipaddress">
+						<label class="control-label col-sm-2">Static IP Address</label>
+						<div class="col-sm-4">
+							<input id="input-local_ip" type="text" name="local_ip">
+						</div>
+						<label class="control-label col-sm-2">Subnet Mask</label>
+						<div class="col-sm-4">
+							<input id="input-subnetmask" type="text" name="subnetmask">
+						</div>
+						<label class="control-label col-sm-2">Gateway IP address</label>
+						<div class="col-sm-4">
+							<input id="input-gateway" type="text" name="gateway">
+						</div>
+					</div>
+					<div class="form-group" id="form-submit">
+						<label class="control-label col-sm-2" style="color:red;"></label>
+						<div class="col-sm-2">
+							<button>Submit</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div id="info" class="container">
+				<h2>Information</h2>
+				<div>
+					<p>Status: <span id="info-status"></span></p>
+					<p>Version: <span id="info-version"></span></p>
+					<p>Hostname: <span id="info-hostname"></span></p>
+					<p>WiFi SSID: <span id="info-ssid"></span></p>
+					<p>IP Address: <span id="info-local_ip"></span></p>
+				</div>
+			</div>
+
+			<div id="schedule" class="container">
+				<h2>Schedule</h2>
+				<ul id="schedule-list">
+				</ul>
+			</div>
+
+			<div id="log" class="container">
+				<h2>Logs</h2>
+				<div id="log-area">
+				</div>
+			</div>
+
+      <% if defined?(alexa) and alexa %>
+			<div id="alexa" class="container">
+				<h2>Alexa</h2>
+				<div id="alexa-area">
+				</div>
+			</div>
+      <% end %>
+      
+		</div>
+
+		<!--
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+		-->
+		<script src="/jquery-2.2.3.min.js"></script>
+		<script src="/main.js"></script>
+	</body>
+</html>
+
