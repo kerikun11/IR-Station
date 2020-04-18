@@ -94,7 +94,7 @@ select_action.change(function(){
 	});
 function manage(){
 	var action = $('#input-action').val();
-	var id = $('#input-id').val();
+	var id = parseInt($('#input-id').val());
 	var name = $('#input-name').val();
 	var row = $('#input-row').val()-0;
 	var column = $('#input-column').val()-0;
@@ -188,7 +188,7 @@ function manage(){
 				load();
 			});
 			break;
-		case "clear-all":
+		case "clearAll":
 			if(confirm('Are you sure to delete all signals?')){
 				updateStatus("Cleaning...");
 				$.post('/signals/clear-all').done(function(res){
@@ -197,7 +197,7 @@ function manage(){
 				});
 			}
 			break;
-		case "schedule-new":
+		case "scheduleNew":
 			if(id == -1)return $('#form-submit label').text("Select a signal");
 			var time = $('#input-time').val();
 			if(!time.match(/^20\d\d(.\d\d){4}(...)?$/))return $('#form-submit label').text("Invalid Time");
@@ -212,12 +212,36 @@ function manage(){
 				$('#input-time').val("");
 			});
 			break;
-		case "disconnect-wifi":
+    case "alexadd":
+      let devname = $('#input-alxdevname').val();
+      let ON      = parseInt($('#input-alxONsid').val());
+      let OFF     = parseInt($('#input-alxOFFsid').val());
+      let Brt     = parseInt($('#input-alxBrtsid').val());
+      let Drk     = parseInt($('#input-alxDrksid').val());
+
+			if(devname === "") return $('#form-submit label').text("Fill device name");
+			if(ON === -1) return $('#form-submit label').text("Fill ON signal");
+			if(OFF === -1) return $('#form-submit label').text("Fill OFF signal");
+			if(Brt === -1) return $('#form-submit label').text("Fill Brighter signal");
+			if(Drk === -1) return $('#form-submit label').text("Fill Darker signal");
+
+			$.post('/alexa/new',{
+        devname: devname,
+        ON:ON,
+        OFF:OFF,
+        Brt:Brt,
+        Drk:Drk
+			}).done(function(res){
+				updateStatus(res);
+				load();
+			});
+			break;
+		case "disconnectWifi":
 			if(!confirm('Are you sure to disconnect this WiFi?'))return;
 			$.post('/wifi/disconnect');
 			$('#main').hide();
 			break;
-		case "change-ip":
+		case "changeIp":
 			var local_ip = $('#input-local_ip').val();
 			var subnetmask = $('#input-subnetmask').val();
 			var gateway = $('#input-gateway').val();
