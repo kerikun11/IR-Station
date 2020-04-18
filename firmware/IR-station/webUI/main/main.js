@@ -10,8 +10,8 @@ function load(){
 		station = data;
 		// send buttons settings id list
 		$('#send tbody').empty();
-		$('#input-id').empty();
-		$('#input-id').append($('<option>').val(-1).text("-select-"));
+		$('.signal-id').empty();
+		$('.signal-id').append($('<option>').val(-1).text("-select-"));
 		var signals = data["signals"];
 		var row_max = 0;
 		var column_max = 0;
@@ -33,7 +33,7 @@ function load(){
 			var row = signal["row"]-0;
 			var column = signal["column"]-0;
 			$('#send td').eq(column_max*(row-1)+(column-1)).html($("<button>").val(id).text(name).addClass("btn btn-default"));
-			$('#input-id').append($('<option>').val(id).text("["+row+", "+column+"] "+name));
+      $('.signal-id').append($('<option>').val(id).text(`[${row}, ${column}] ${name}`));
 		});
 		// informations
 		$('span#info-version').text(data["version"]);
@@ -70,7 +70,8 @@ function load(){
 }
 
 /* manage signals */
-$('#manage select[name="action"]').change(function(){
+var select_action = $('#manage select[name="action"]');
+select_action.change(function(){
 	var action = $(this).val();
 	$('#form-submit label').text("")
 	$('#input-time').val((new Date((new Date()).getTime()+9*60*60*1000)).toISOString().substring(0,17)+"00");
@@ -249,6 +250,7 @@ $('#manage input').keypress(function(e){
 /* init */
 load();
 updateStatus("Loading Successful :)");
+select_action.change();
 
 /* send */
 $(document).on('click','#send button',function(){
