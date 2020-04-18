@@ -29,15 +29,15 @@
 						<div class="col-sm-4">
 							<select id="input-action" class="form-control" name="action">
                 <% list = %w[
-                  record           Record_a_new_Signal
-                  rename           Rename_a_Signal
-                  move             Move_a_Signal
-                  upload           Upload_a_new_Signal
-                  download         Download_a_Signal
-                  clear            Clear_a_Signal
+                  record          Record_a_new_Signal
+                  rename          Rename_a_Signal
+                  move            Move_a_Signal
+                  upload          Upload_a_new_Signal
+                  download        Download_a_Signal
+                  clear           Clear_a_Signal
                   clearAll        Clear_All_Signals
                   scheduleNew     Schedule_a_Signal
-                  alexadd          Add_an_Alexa_device
+                  alexadd         Add_an_Alexa_device
                   changeIp        Change_IP
                   disconnectWifi  Change_WiFi]
                     .each_slice(2).map{|f,l| [f, l.gsub(/_/, ' ')]} %>
