@@ -301,6 +301,18 @@ bool IR_Station::save() {
     _signals.add(_signal);
   }
 
+#if USE_ALEXA == true
+  JsonObject& jAlexaDevs = root.createNestedObject("alexaDevs");
+  for(auto itr = alexaDevs.begin(); itr != alexaDevs.end(); ++itr) {
+    JsonObject& dev = jsonBuffer.createObject();
+    dev["on"] = itr->second.on;
+    dev["off"] = itr->second.off;
+    dev["brighter"] = itr->second.brighter;
+    dev["darker"] = itr->second.darker;
+    jAlexaDevs[itr->first] = dev;
+  }
+#endif
+
   root["next_schedule_id"] = next_schedule_id;
   JsonArray& _schedules = root.createNestedArray("schedules");
   for (int i = 0; i < schedules.size(); i++) {
@@ -595,6 +607,22 @@ void IR_Station::attachStationApi() {
     save();
     return server.send(200, "text/palin", "Changed IP Address to " + WiFi.localIP().toString());
   });
+#if USE_ALEXA == true
+  server.on("/alexa/new", [this]() {
+    displayRequest();
+
+    String devname = server.arg("devname");
+    Alexa alexa;
+    alexa.on       = server.arg("ON").toInt();
+    alexa.off      = server.arg("OFF").toInt();
+    alexa.brighter = server.arg("Brt").toInt();
+    alexa.darker   = server.arg("Drk").toInt();
+
+    alexaDevs[devname] = alexa;
+    save();
+    return server.send(200, "text/plain", "Alexa new device Successful: " + devname);
+  });
+#endif
   server.onNotFound([this]() {
     displayRequest();
     String res = "<script>location.href = \"http://" + WiFi.localIP().toString() + "/\";</script>";
