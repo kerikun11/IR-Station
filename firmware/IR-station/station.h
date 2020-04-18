@@ -52,6 +52,15 @@ struct Schedule {
   time_t time;
 };
 
+#if USE_ALEXA == true
+struct Alexa {
+  int on;
+  int off;
+  int brighter;
+  int darker;
+};
+#endif
+
 class IR_Station {
   public:
     IR_Station(int pin_ir_tx, int pin_ir_rx, int pin_red, int pin_green, int pin_blue):
@@ -99,6 +108,7 @@ class IR_Station {
 #if USE_ALEXA == true
     fauxmoESP fauxmo;
     bool alexa_mode = false;
+    std::map<String, Alexa> alexaDevs;
 #endif
 
     void handleSchedule();
