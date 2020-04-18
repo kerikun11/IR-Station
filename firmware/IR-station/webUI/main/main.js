@@ -64,6 +64,14 @@ function load(){
 				.val(item["schedule_id"])
 			);
 		});
+    //Alexa
+    let alexaDevs = data.alexaDevs;
+    let id2name = (id) => data["signals"].filter((e)=>e.id==id)[0].name;
+    document.querySelector('#alexa-area').innerHTML = Object.keys(alexaDevs).map((k)=>{
+      let dev = alexaDevs[k];
+      return `  <div>
+    <p>${k}: ON=${id2name(dev.on)}, OFF=${id2name(dev.off)}, Brighter=${id2name(dev.brighter)}, Darker=${id2name(dev.darker)}</p>
+  </div>`}).join("\n");
 	}).done(function(){
 		$('#main').show();
 	});
