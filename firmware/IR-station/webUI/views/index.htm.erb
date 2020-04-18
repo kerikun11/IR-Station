@@ -50,7 +50,7 @@
 					<div class="form-group list" id="form-id">
 						<label class="control-label col-sm-2">Signal</label>
 						<div class="col-sm-4">
-							<select id="input-id" name="id">
+							<select id="input-id" class="signal-id" name="id">
 								<!-- js adds options -->
 							</select>
 						</div>
@@ -81,11 +81,33 @@
 						</div>
           </div>
           <div class="form-group list" id="form-alexadd">
-						<label class="control-label col-sm-2">When?</label>
+						<label class="control-label col-sm-2">Device name</label>
 						<div class="col-sm-4">
-							<input id="input-time" type="datetime-local" name="time" step="1">
-              <input type="date" id="start" name="trip-start" value="2018-07-22">
-              <input type="time" id="appt" name="appt" step="1">
+							<input id="input-alxdevname" type="text" name="time">
+						</div>
+						<label class="control-label col-sm-2">ON signal</label>
+						<div class="col-sm-4">
+							<select id="input-alxONsid" class="signal-id" name="ONsid">
+								<!-- js adds options -->
+							</select>
+						</div>
+            <label class="control-label col-sm-2">OFF signal</label>
+						<div class="col-sm-4">
+							<select id="input-alxOFFsid" class="signal-id" name="OFFsid">
+								<!-- js adds options -->
+							</select>
+						</div>
+            <label class="control-label col-sm-2">Brighter signal</label>
+						<div class="col-sm-4">
+							<select id="input-alxBrtsid" class="signal-id" name="Brtsid">
+								<!-- js adds options -->
+							</select>
+						</div>
+            <label class="control-label col-sm-2">Darker signal</label>
+						<div class="col-sm-4">
+							<select id="input-alxDrksid" class="signal-id" name="Drksid">
+								<!-- js adds options -->
+							</select>
 						</div>
 					</div>
 					<div class="form-group list" id="form-ipaddress">
