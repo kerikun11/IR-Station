@@ -1,0 +1,4 @@
+*.png
+*.ico
+main/jquery*
+main/signals/
