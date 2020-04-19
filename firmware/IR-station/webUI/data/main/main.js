@@ -81,8 +81,12 @@ function load(){
 var select_action = $('#manage select[name="action"]');
 select_action.change(function(){
 	var action = $(this).val();
-	$('#form-submit label').text("")
-	$('#input-time').val((new Date((new Date()).getTime()+9*60*60*1000)).toISOString().substring(0,17)+"00");
+  let now     = new Date();
+  let f = (num)=>num.toString().padStart(2, '0');
+	$('#form-submit label').text("");
+	$('#input-time').val((new Date(now.getTime()+9*60*60*1000)).toISOString().substring(0,17)+"00");
+  $('#input-date').val(`${now.getFullYear()}-${f(now.getMonth()+1)}-${f(now.getDate())}`);
+  document.querySelector('#input-time').value = `${f(now.getHours())}:${f(now.getMinutes())}:${f(now.getSeconds())}`;
   var options = Object.values($('.form-group.list').map((_,el)=>`#${el.id}`));
   var UI = {
     record:  ['#form-position', '#form-name'],
@@ -206,18 +210,20 @@ function manage(){
 			}
 			break;
 		case "scheduleNew":
-			if(id == -1)return $('#form-submit label').text("Select a signal");
-			var time = $('#input-time').val();
-			if(!time.match(/^20\d\d(.\d\d){4}(...)?$/))return $('#form-submit label').text("Invalid Time");
-			var time = Math.floor(new Date($('#input-time').val()).getTime()/1000);
-			if(time < Math.floor(new Date().getTime()/1000))return $('#form-submit label').text("No Past Time!");
+      let l = $('#form-submit label');
+      let datetime = new Date(`${$('#input-date').val()} ${$('#input-time').val()}`);
+
+			if (id == -1)                               return l.text("Select a signal");
+      if (datetime.toString() === "Invalid Date") return l.text(datetime.toString());
+			if (datetime < (new Date()))                return l.text("No Past Time!");
+
 			$.post('/schedule/new',{
 				id: id,
-				time: time
+				time: datetime.getTime()/1000
 			}).done(function(res){
 				updateStatus(res);
 				load();
-				$('#input-time').val("");
+				l.val("");
 			});
 			break;
     case "alexadd":
