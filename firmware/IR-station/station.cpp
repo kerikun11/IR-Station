@@ -93,6 +93,7 @@ void IR_Station::begin(void) {
     Alexa dev = alexaDevs[devname];
     uint8_t id;
 
+    // TODO: 状態が変化したかを先に見てifをつくったほうがいい?
     if (state && dev.state!=state)
       id = dev.on;
     else if (!state && dev.state != state)
