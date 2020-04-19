@@ -87,9 +87,23 @@ void IR_Station::begin(void) {
 #if USE_ALEXA == true
   fauxmo.addDevice("led");
   fauxmo.setPort(80); // required for gen3 devices
-  fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value) {
-            Serial.printf("[MAIN] Device #%d (%s) state: %s value: %d\n", device_id, device_name, state ? "ON" : "OFF", value);
-                });
+  fauxmo.onSetState([this](unsigned char device_id, const char * device_name, bool state, unsigned char value) {
+    printf_dbg("[MAIN] Device #%d (%s) state: %s value: %d\n", device_id, device_name, state ? "ON" : "OFF", value);
+    String devname(device_name);
+    Alexa dev = alexaDevs[devname];
+    uint8_t id;
+    if (state)
+      id = dev.on;
+    else
+      id = dev.off;
+    Signal *signal = getSignalById(id);
+    if (signal == NULL) {println_dbg("sigNULL"); return;}
+    String json;
+    if (!getStringFromFile(signal->path, json)) {println_dbg("nofile"); return;}
+    indicator.set(0, 1023, 0);
+    ir.send(json);
+    indicator.set(0, 0, 1023);
+  });
 #endif
 }
 
@@ -254,6 +268,18 @@ bool IR_Station::restore() {
     signal.column = (int)root["signals"][i]["column"];
     signals.push_back(signal);
   }
+
+#if USE_ALEXA == true
+  if (root.containsKey("alexaDevs")) {
+    JsonObject& jAlexaDevs = root["alexaDevs"];
+    for (auto kv : jAlexaDevs) {
+      Serial.println(kv.key);
+      Serial.println(kv.value.as<char*>());
+      Alexa dev = {.on=kv.value["on"],.off=kv.value["off"],.brighter=kv.value["brighter"],.darker=kv.value["darker"]};
+      alexaDevs[kv.key] = dev;
+    }
+  }
+#endif
 
   next_schedule_id = (int)root["next_schedule_id"];
   for (int i = 0; i < root["schedules"].size(); i++) {
