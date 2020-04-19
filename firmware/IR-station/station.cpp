@@ -92,10 +92,21 @@ void IR_Station::begin(void) {
     String devname(device_name);
     Alexa dev = alexaDevs[devname];
     uint8_t id;
-    if (state)
+
+    if (state && dev.state!=state)
       id = dev.on;
-    else
+    else if (!state && dev.state != state)
       id = dev.off;
+    else {
+      if (value > dev.value || value == UINT8_MAX-1)
+        id = dev.brighter;
+      else
+        id = dev.darker;;
+    }
+    dev.state = state;
+    dev.value = value;
+    alexaDevs[devname] = dev;
+
     Signal *signal = getSignalById(id);
     if (signal == NULL) {println_dbg("sigNULL"); return;}
     String json;

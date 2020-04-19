@@ -58,6 +58,8 @@ struct Alexa {
   int off;
   int brighter;
   int darker;
+  uint8_t value;
+  bool state;
 };
 #endif
 
