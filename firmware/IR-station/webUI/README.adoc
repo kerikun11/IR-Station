@@ -1,0 +1,17 @@
+= webUI
+
+== Summary
+
+The html template is included in `views/`.
+By allowing sinatra to relay access to various APIs provided by IR-Station, UI tests and behavior checks can be performed without writing html to ESP.
+
+`views/` にhtmlテンプレートが入っている。
+IR-Stationの各種APIへのアクセスをsinatraが中継することで、htmlをESPに書き込むことなくUIテスト、挙動チェックができる。
+
+== Usage
+
+[source, bash]
+----
+$ bundle exec ruby ws.rb <ip addr of ir> views/main # run sinatra and template are in views/main. Access e.g. http://localhost:4567/index.htm.erb
+$ bundle exec ruby ws.rb deploy # deploy to ../data/ dir
+----
