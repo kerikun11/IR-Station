@@ -38,6 +38,7 @@
                   clearAll        Clear_All_Signals
                   scheduleNew     Schedule_a_Signal
                   alexadd         Add_an_Alexa_device
+                  alexadel        Delete_an_Alexa_device
                   changeIp        Change_IP
                   disconnectWifi  Change_WiFi]
                     .each_slice(2).map{|f,l| [f, l.gsub(/_/, ' ')]} %>
@@ -81,11 +82,13 @@
               <input type="time" id="input-time" name="time" step="1">
 						</div>
           </div>
-          <div class="form-group list" id="form-alexadd">
+          <div class="form-group list" id="form-alexaname">
 						<label class="control-label col-sm-2">Device name</label>
 						<div class="col-sm-4">
 							<input id="input-alxdevname" type="text" name="time">
 						</div>
+          </div>
+          <div class="form-group list" id="form-alexadd">
 						<label class="control-label col-sm-2">ON signal</label>
 						<div class="col-sm-4">
 							<select id="input-alxONsid" class="signal-id" name="ONsid">

@@ -98,7 +98,8 @@ select_action.change(function(){
 		clearAll: [],
 		disconnectWifi: [],
 		scheduleNew:['#form-id','#form-time'],
-    alexadd:    ['#form-alexadd'],
+    alexadd:    ['#form-alexaname','#form-alexadd'],
+    alexadel:   ['#form-alexaname'],
 		changeIp:   ['#form-ipaddress'] };
 
   options.forEach((el,_)=>$(el).hide());
@@ -226,7 +227,7 @@ function manage(){
 				l.val("");
 			});
 			break;
-    case "alexadd":
+    case "alexadd": {
       let devname = $('#input-alxdevname').val();
       let ON      = parseInt($('#input-alxONsid').val());
       let OFF     = parseInt($('#input-alxOFFsid').val());
@@ -250,7 +251,17 @@ function manage(){
 				load();
 			});
 			break;
-		case "disconnectWifi":
+  } case "alexadel": {
+      devname = $('#input-alxdevname').val();
+			if(devname === "") return $('#form-submit label').text("Fill device name");
+      $.post('/alexa/del',{
+        devname: devname
+			}).done(function(res){
+				updateStatus(res);
+				load();
+			});
+			break;
+  }	case "disconnectWifi":
 			if(!confirm('Are you sure to disconnect this WiFi?'))return;
 			$.post('/wifi/disconnect');
 			$('#main').hide();
