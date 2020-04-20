@@ -85,11 +85,13 @@ void IR_Station::begin(void) {
   SSDP.begin();
 
 #if USE_ALEXA == true
-  fauxmo.addDevice("led");
   fauxmo.setPort(80); // required for gen3 devices
   fauxmo.onSetState([this](unsigned char device_id, const char * device_name, bool state, unsigned char value) {
-    printf_dbg("[MAIN] Device #%d (%s) state: %s value: %d\n", device_id, device_name, state ? "ON" : "OFF", value);
+    printf_dbg("Device #%d (%s) state: %s value: %d\n", device_id, device_name, state ? "ON" : "OFF", value);
+
     String devname(device_name);
+    auto itr = alexaDevs.find(devname);
+    if ( itr == alexaDevs.end()) {println_dbg("no device"); return;}
     Alexa dev = alexaDevs[devname];
     uint8_t id;
 
@@ -115,6 +117,7 @@ void IR_Station::begin(void) {
     indicator.set(0, 1023, 0);
     ir.send(json);
     indicator.set(0, 0, 1023);
+
   });
 #endif
 }
@@ -285,10 +288,10 @@ bool IR_Station::restore() {
   if (root.containsKey("alexaDevs")) {
     JsonObject& jAlexaDevs = root["alexaDevs"];
     for (auto kv : jAlexaDevs) {
-      Serial.println(kv.key);
-      Serial.println(kv.value.as<char*>());
+      println_dbg(kv.key);
       Alexa dev = {.on=kv.value["on"],.off=kv.value["off"],.brighter=kv.value["brighter"],.darker=kv.value["darker"]};
       alexaDevs[kv.key] = dev;
+      fauxmo.addDevice(kv.key);
     }
   }
 #endif
@@ -651,6 +654,12 @@ void IR_Station::attachStationApi() {
 
     String devname = server.arg("devname");
     Alexa alexa;
+
+    auto itr = alexaDevs.find(devname);
+    if ( itr == alexaDevs.end() ) {
+      fauxmo.addDevice(devname.c_str());
+    }
+
     alexa.on       = server.arg("ON").toInt();
     alexa.off      = server.arg("OFF").toInt();
     alexa.brighter = server.arg("Brt").toInt();
@@ -660,6 +669,20 @@ void IR_Station::attachStationApi() {
     save();
     return server.send(200, "text/plain", "Alexa new device Successful: " + devname);
   });
+  server.on("/alexa/del", [this]() {
+    displayRequest();
+
+    String devname = server.arg("devname");
+    auto itr = alexaDevs.find(devname);
+    if ( itr == alexaDevs.end()) return server.send(400, "text/palin", "No such device: "+devname);
+
+    if (!fauxmo.removeDevice(devname.c_str())) return server.send(500, "text/palin", "Couldn't delete "+devname);
+
+    alexaDevs.erase(devname);
+    save();
+    return server.send(200, "text/plain", "Alexa delete device Successful: " + devname);
+  });
+
 #endif
   server.onNotFound([this]() {
     displayRequest();
