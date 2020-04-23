@@ -29,7 +29,6 @@ void ICACHE_RAM_ATTR trap_change() {
 }
 
 OTA ota;
-bool alexa = false;
 
 void setup() {
   // prepare serial debug
@@ -68,16 +67,7 @@ void loop() {
   } else {
     if (btn_time != 0) {
       if (millis() - btn_time < 500)
-        if (alexa) {
-          Serial.println("Enable WebUI");
-          station->stopAlexa();
-          station->begin();
-        } else {
-          Serial.println("Enable Alexa");
-          station->stopWebUI();
-          station->startAlexa();
-        }
-        alexa = !alexa;
+        ESP.reset();
       btn_time = 0;
     }
   }
