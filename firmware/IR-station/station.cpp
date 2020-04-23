@@ -61,12 +61,12 @@ void IR_Station::begin(void) {
   dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
 #endif
 
-  println_dbg("Starting HTTP Updater...");
-  httpUpdater.setup(&server, "/firmware");
-  server.on("/description.xml", HTTP_GET, [this]() {
-    displayRequest();
-    SSDP.schema(server.client());
+  server.on("/description.xml", HTTP_GET, [this](AsyncWebServerRequest *req) {
+    displayRequest(req);
+    //SSDP.schema(server.client());
+    //request->send(200, "text/xml", response);
   });
+
 
   println_dbg("Starting HTTP Server...");
   server.begin();
@@ -85,7 +85,9 @@ void IR_Station::begin(void) {
   SSDP.begin();
 
 #if USE_ALEXA == true
+  fauxmo.createServer(false);
   fauxmo.setPort(80); // required for gen3 devices
+  fauxmo.enable(true);
   fauxmo.onSetState([this](unsigned char device_id, const char * device_name, bool state, unsigned char value) {
     printf_dbg("Device #%d (%s) state: %s value: %d\n", device_id, device_name, state ? "ON" : "OFF", value);
 
@@ -124,7 +126,7 @@ void IR_Station::begin(void) {
 
 void IR_Station::stopWebUI() {
   //httpUpdater.stop();
-  server.stop(); // close?
+  server.end(); // close?
   SSDP.end();
 }
 
@@ -171,7 +173,6 @@ void IR_Station::reset(bool clean) {
 }
 
 void IR_Station::handle() {
-  server.handleClient();
   ir.handle();
   switch (mode) {
     case IR_STATION_MODE_SETUP:
@@ -383,24 +384,22 @@ bool IR_Station::save() {
   return true;
 }
 
-void IR_Station::displayRequest() {
-  yield();
-  println_dbg("");
+void IR_Station::displayRequest(AsyncWebServerRequest *req) {
   println_dbg("New Request");
   print_dbg("URI: ");
-  println_dbg(server.uri());
+  println_dbg(req->url());
   print_dbg("Method: ");
-  println_dbg((server.method() == HTTP_GET) ? "GET" : "POST");
+  println_dbg((req->method() == HTTP_GET) ? "GET" : "POST");
   print_dbg("Arguments count: ");
-  println_dbg(server.args(), DEC);
-  for (uint8_t i = 0; i < server.args(); i++) {
-    printf_dbg("\t%s = %s\n", server.argName(i).c_str(), server.arg(i).c_str());
+  println_dbg(req->args(), DEC);
+  for (uint8_t i = 0; i < req->args(); i++) {
+    printf_dbg("\t%s = %s\n", req->argName(i).c_str(), req->arg(i).c_str());
   }
 }
 
 void IR_Station::attachSetupApi() {
-  server.on("/wifi/list", [this]() {
-    displayRequest();
+  server.on("/wifi/list", [this](AsyncWebServerRequest *req) {
+    displayRequest(req);
     DynamicJsonBuffer jsonBuffer;
     JsonArray& root = jsonBuffer.createArray();
     int n = WiFi.scanNetworks();
@@ -411,14 +410,14 @@ void IR_Station::attachSetupApi() {
     String res;
     root.printTo(res);
     println_dbg(res);
-    server.send(200, "application/json", res);
+    req->send(200, "application/json", res);
     println_dbg("End");
   });
-  server.on("/wifi/confirm", [this]() {
-    displayRequest();
+  server.on("/wifi/confirm", [this](AsyncWebServerRequest *req) {
+    displayRequest(req);
     if (WiFi.status() == WL_CONNECTED) {
       String res = (String)WiFi.localIP()[0] + "." + WiFi.localIP()[1] + "." + WiFi.localIP()[2] + "." + WiFi.localIP()[3];
-      server.send(200, "text/palin", res);
+      req->send(200, "text/palin", res);
       mode = IR_STATION_MODE_STATION;
       local_ip = WiFi.localIP();
       subnetmask = WiFi.subnetMask();
@@ -429,16 +428,16 @@ void IR_Station::attachSetupApi() {
       ESP.reset();
     } else {
       println_dbg("Not connected yet.");
-      server.send(200, "text/plain", "false");
+      req->send(200, "text/plain", "false");
       println_dbg("End");
     }
   });
-  server.on("/mode/station", [this]() {
-    displayRequest();
-    ssid = server.arg("ssid");
-    password = server.arg("password");
-    is_stealth_ssid = server.arg("stealth") == "true";
-    hostname = server.arg("hostname");
+  server.on("/mode/station", [this](AsyncWebServerRequest *req) {
+    displayRequest(req);
+    ssid = req->arg("ssid");
+    password = req->arg("password");
+    is_stealth_ssid = req->arg("stealth") == "true";
+    hostname = req->arg("hostname");
     if (hostname == "") hostname = HOSTNAME_DEFAULT;
     print_dbg("Hostname: ");
     println_dbg(hostname);
@@ -449,68 +448,68 @@ void IR_Station::attachSetupApi() {
     print_dbg("Stealth: ");
     println_dbg(is_stealth_ssid ? "true" : "false");
     indicator.set(0, 1023, 0);
-    server.send(200);
+    req->send(200);
     WiFi.disconnect();
     //    delay(1000);
     WiFi.begin(ssid.c_str(), password.c_str());
   });
-  server.on("/mode/accesspoint", [this]() {
-    displayRequest();
-    server.send(200, "text / plain", "Setting up Access Point Successful");
-    hostname = server.arg("hostname");
+  server.on("/mode/accesspoint", [this](AsyncWebServerRequest *req) {
+    displayRequest(req);
+    req->send(200, "text / plain", "Setting up Access Point Successful");
+    hostname = req->arg("hostname");
     if (hostname == "") hostname = HOSTNAME_DEFAULT;
     mode = IR_STATION_MODE_AP;
     save();
     ESP.reset();
   });
-  server.on("/dbg", [this]() {
-    displayRequest();
-    ssid = server.arg("ssid");
-    password = server.arg("password");
+  server.on("/dbg", [this](AsyncWebServerRequest *req) {
+    displayRequest(req);
+    ssid = req->arg("ssid");
+    password = req->arg("password");
     println_dbg("Target SSID : " + ssid);
     println_dbg("Target Password : " + password);
     indicator.set(0, 1023, 0);
     if (connectWifi(ssid.c_str(), password.c_str())) {
       String res = (String)WiFi.localIP()[0] + "." + WiFi.localIP()[1] + "." + WiFi.localIP()[2] + "." + WiFi.localIP()[3];
-      server.send(200, "text/plain", res);
+      req->send(200, "text/plain", res);
     } else {
-      server.send(200, "text/plain", "Connection Failed");
+      req->send(200, "text/plain", "Connection Failed");
     }
   });
-  server.onNotFound([this]() {
-    displayRequest();
+  server.onNotFound([this](AsyncWebServerRequest *req) {
+    displayRequest(req);
     println_dbg("Redirect");
     String res = "<script>location.href = \"http://" + (String)WiFi.softAPIP()[0] + "." + WiFi.softAPIP()[1] + "." + WiFi.softAPIP()[2] + "." + WiFi.softAPIP()[3] + "/\";</script>";
-    server.send(200, "text/html", res);
+    req->send(200, "text/html", res);
     println_dbg("End");
   });
   server.serveStatic("/", SPIFFS, "/setup/");
 }
 
 void IR_Station::attachStationApi() {
-  server.on("/info", [this]() {
-    displayRequest();
+  server.on("/info", [this](AsyncWebServerRequest *req) {
+    displayRequest(req);
     String res;
     if (getStringFromFile(STATION_JSON_PATH, res)) {
-      return server.send(200, "application/json", res);
+      return req->send(200, "application/json", res);
     } else {
-      return server.send(500, "text/plain", "Failed to open File");
+      return req->send(500, "text/plain", "Failed to open File");
     }
   });
-  server.on("/signals/send", [this]() {
-    displayRequest();
-    int id = server.arg("id").toInt();
+  server.on("/signals/send", [this](AsyncWebServerRequest *req) {
+    displayRequest(req);
+    int id = req->arg("id").toInt();
     Signal *signal = getSignalById(id);
-    if (signal == NULL) return server.send(400, "text/plain", "No signal assigned");
+    if (signal == NULL) return req->send(400, "text/plain", "No signal assigned");
     String json;
-    if (!getStringFromFile(signal->path, json)) return server.send(500, "text/plain", "Failed to open File");
+    if (!getStringFromFile(signal->path, json)) return req->send(500, "text/plain", "Failed to open File");
     indicator.set(0, 1023, 0);
     ir.send(json);
     indicator.set(0, 0, 1023);
-    return server.send(200, "text/plain", "Sending Successful: " + signal->name);
+    return req->send(200, "text/plain", "Sending Successful: " + signal->name);
   });
-  server.on("/signals/record", [this]() {
-    displayRequest();
+  server.on("/signals/record", [this](AsyncWebServerRequest *req) {
+    displayRequest(req);
     String name;
     {
       const uint32_t timeout_ms = 5000;
@@ -522,137 +521,137 @@ void IR_Station::attachStationApi() {
         ir.handle();
         if (millis() - timeStamp > timeout_ms) {
           indicator.set(1023, 0, 0);
-          return server.send(500, "text/plain", "No Signal Recieved");
+          return req->send(500, "text/plain", "No Signal Recieved");
         }
       }
       indicator.set(0, 0, 1023);
       String data = ir.read();
-      name = server.arg("name");
+      name = req->arg("name");
       Signal signal;
       signal.id = getNewId();
       signal.name = name;
       signal.path = IR_DATA_PATH(signal.id);
-      signal.display = (server.arg("display") == "true");
-      signal.row = server.arg("row").toInt();
-      signal.column = server.arg("column").toInt();
+      signal.display = (req->arg("display") == "true");
+      signal.row = req->arg("row").toInt();
+      signal.column = req->arg("column").toInt();
 
-      if (!writeStringToFile(signal.path, data)) return server.send(500, "text/plain", "Failed to write File");
+      if (!writeStringToFile(signal.path, data)) return req->send(500, "text/plain", "Failed to write File");
       signals.push_back(signal);
     }
     save();
-    return server.send(200, "text/plain", "Recording Successful: " + name);
+    return req->send(200, "text/plain", "Recording Successful: " + name);
   });
-  server.on("/signals/rename", [this]() {
-    displayRequest();
-    int id = server.arg("id").toInt();
+  server.on("/signals/rename", [this](AsyncWebServerRequest *req) {
+    displayRequest(req);
+    int id = req->arg("id").toInt();
     Signal *signal = getSignalById(id);
-    if (signal == NULL) return server.send(400, "text/plain", "No signal assigned");
+    if (signal == NULL) return req->send(400, "text/plain", "No signal assigned");
     String prev_name = signal->name;
-    signal->name = server.arg("name");
+    signal->name = req->arg("name");
     save();
-    return server.send(200, "text/plain", "Renamed " + prev_name + " to " + signal->name);
+    return req->send(200, "text/plain", "Renamed " + prev_name + " to " + signal->name);
   });
-  server.on("/signals/move", [this]() {
-    displayRequest();
-    int id = server.arg("id").toInt();
+  server.on("/signals/move", [this](AsyncWebServerRequest *req) {
+    displayRequest(req);
+    int id = req->arg("id").toInt();
     Signal *signal = getSignalById(id);
-    if (signal == NULL) return server.send(400, "text/plain", "No signal assigned");
-    signal->row = server.arg("row").toInt();
-    signal->column = server.arg("column").toInt();
+    if (signal == NULL) return req->send(400, "text/plain", "No signal assigned");
+    signal->row = req->arg("row").toInt();
+    signal->column = req->arg("column").toInt();
     save();
-    return server.send(200, "text/plain", "Moved position: " + signal->name);
+    return req->send(200, "text/plain", "Moved position: " + signal->name);
   });
-  server.on("/signals/upload", [this]() {
-    displayRequest();
+  server.on("/signals/upload", [this](AsyncWebServerRequest *req) {
+    displayRequest(req);
     Signal signal;
     signal.id = getNewId();
-    signal.name = server.arg("name");
+    signal.name = req->arg("name");
     signal.path = IR_DATA_PATH(signal.id);
-    signal.display = (server.arg("display") == "true");
-    signal.row = server.arg("row").toInt();
-    signal.column = server.arg("column").toInt();
+    signal.display = (req->arg("display") == "true");
+    signal.row = req->arg("row").toInt();
+    signal.column = req->arg("column").toInt();
 
-    String irJson = server.arg("irJson");
+    String irJson = req->arg("irJson");
     DynamicJsonBuffer jsonBuffer;
     JsonArray& data = jsonBuffer.parseArray(irJson);
-    if (!data.success()) return server.send(400, "text/plain", "Invalid Singnal Format");
-    if (!writeStringToFile(signal.path, irJson)) return server.send(500, "text/plain", "Failed to write File");
+    if (!data.success()) return req->send(400, "text/plain", "Invalid Singnal Format");
+    if (!writeStringToFile(signal.path, irJson)) return req->send(500, "text/plain", "Failed to write File");
     signals.push_back(signal);
     save();
-    return server.send(200, "text/plain", "Uploading Successful: " + signal.name);
+    return req->send(200, "text/plain", "Uploading Successful: " + signal.name);
   });
-  server.on("/signals/clear", [this]() {
-    displayRequest();
-    int id = server.arg("id").toInt();
+  server.on("/signals/clear", [this](AsyncWebServerRequest *req) {
+    displayRequest(req);
+    int id = req->arg("id").toInt();
     for (int i = 0; i < signals.size(); i++) {
       if (signals[i].id == id) {
-        if (!removeFile(signals[i].path)) return server.send(500, "text/plain", "Failed to Delete File");
+        if (!removeFile(signals[i].path)) return req->send(500, "text/plain", "Failed to Delete File");
         signals.erase(signals.begin() + i);
         save();
-        return server.send(200, "text/plain", "Deleted");
+        return req->send(200, "text/plain", "Deleted");
       }
     }
-    return server.send(400, "text/plain", "No signal assigned");
+    return req->send(400, "text/plain", "No signal assigned");
   });
-  server.on("/signals/clear-all", [this]() {
-    displayRequest();
+  server.on("/signals/clear-all", [this](AsyncWebServerRequest *req) {
+    displayRequest(req);
     for (int i = 0; i < signals.size(); i++) {
       removeFile(signals[i].path);
     }
     signals.resize(0);
     save();
-    return server.send(200, "text/plain", "Cleared All Signals");
+    return req->send(200, "text/plain", "Cleared All Signals");
   });
-  server.on("/schedule/new", [this]() {
-    if (mode == IR_STATION_MODE_AP) return server.send(400, "text/plain", "Schedule is unavailable in AP mode :(");
-    int id = server.arg("id").toInt();
+  server.on("/schedule/new", [this](AsyncWebServerRequest *req) {
+    if (mode == IR_STATION_MODE_AP) return req->send(400, "text/plain", "Schedule is unavailable in AP mode :(");
+    int id = req->arg("id").toInt();
     Schedule schedule;
     schedule.schedule_id = getNewScheduleId();
     schedule.id = id;
-    schedule.time = server.arg("time").toInt();
+    schedule.time = req->arg("time").toInt();
     schedules.push_back(schedule);
     save();
-    return server.send(200, "text/plain", "Added a Schedule");
+    return req->send(200, "text/plain", "Added a Schedule");
   });
-  server.on("/schedule/delete", [this]() {
-    int schedule_id = server.arg("schedule_id").toInt();
+  server.on("/schedule/delete", [this](AsyncWebServerRequest *req) {
+    int schedule_id = req->arg("schedule_id").toInt();
     for (int i = 0; i < signals.size(); i++) {
       if (schedules[i].schedule_id == schedule_id) {
         schedules.erase(schedules.begin() + i);
         save();
-        return server.send(200, "text/plain", "Deleted a Schedule");
+        return req->send(200, "text/plain", "Deleted a Schedule");
       }
     }
-    return server.send(400, "text/plain", "No such a schedule");
+    return req->send(400, "text/plain", "No such a schedule");
   });
-  server.on("/wifi/disconnect", [this]() {
-    displayRequest();
-    server.send(200);
+  server.on("/wifi/disconnect", [this](AsyncWebServerRequest *req) {
+    displayRequest(req);
+    req->send(200);
     delay(100);
     reset(false);
   });
-  server.on("/wifi/change-ip", [this]() {
-    displayRequest();
+  server.on("/wifi/change-ip", [this](AsyncWebServerRequest *req) {
+    displayRequest(req);
     IPAddress _local_ip, _subnetmask, _gateway;
-    if (!_local_ip.fromString(server.arg("local_ip")) || !_subnetmask.fromString(server.arg("subnetmask")) || !_gateway.fromString(server.arg("gateway"))) {
-      return server.send(400, "text/palin", "Bad Request!");
+    if (!_local_ip.fromString(req->arg("local_ip")) || !_subnetmask.fromString(req->arg("subnetmask")) || !_gateway.fromString(req->arg("gateway"))) {
+      return req->send(400, "text/palin", "Bad Request!");
     }
     WiFi.config(_local_ip, _gateway, _subnetmask);
     if (WiFi.localIP() != _local_ip) {
-      return server.send(500, "text/palin", "Couldn't change IP Address :(");
+      return req->send(500, "text/palin", "Couldn't change IP Address :(");
     }
     is_static_ip = true;
     local_ip = _local_ip;
     subnetmask = _subnetmask;
     gateway = _gateway;
     save();
-    return server.send(200, "text/palin", "Changed IP Address to " + WiFi.localIP().toString());
+    return req->send(200, "text/palin", "Changed IP Address to " + WiFi.localIP().toString());
   });
 #if USE_ALEXA == true
-  server.on("/alexa/new", [this]() {
-    displayRequest();
+  server.on("/alexa/new", [this](AsyncWebServerRequest *req) {
+    displayRequest(req);
 
-    String devname = server.arg("devname");
+    String devname = req->arg("devname");
     Alexa alexa;
 
     auto itr = alexaDevs.find(devname);
@@ -660,34 +659,34 @@ void IR_Station::attachStationApi() {
       fauxmo.addDevice(devname.c_str());
     }
 
-    alexa.on       = server.arg("ON").toInt();
-    alexa.off      = server.arg("OFF").toInt();
-    alexa.brighter = server.arg("Brt").toInt();
-    alexa.darker   = server.arg("Drk").toInt();
+    alexa.on       = req->arg("ON").toInt();
+    alexa.off      = req->arg("OFF").toInt();
+    alexa.brighter = req->arg("Brt").toInt();
+    alexa.darker   = req->arg("Drk").toInt();
 
     alexaDevs[devname] = alexa;
     save();
-    return server.send(200, "text/plain", "Alexa new device Successful: " + devname);
+    return req->send(200, "text/plain", "Alexa new device Successful: " + devname);
   });
-  server.on("/alexa/del", [this]() {
-    displayRequest();
+  server.on("/alexa/del", [this](AsyncWebServerRequest *req) {
+    displayRequest(req);
 
-    String devname = server.arg("devname");
+    String devname = req->arg("devname");
     auto itr = alexaDevs.find(devname);
-    if ( itr == alexaDevs.end()) return server.send(400, "text/palin", "No such device: "+devname);
+    if ( itr == alexaDevs.end()) return req->send(400, "text/palin", "No such device: "+devname);
 
-    if (!fauxmo.removeDevice(devname.c_str())) return server.send(500, "text/palin", "Couldn't delete "+devname);
+    if (!fauxmo.removeDevice(devname.c_str())) return req->send(500, "text/palin", "Couldn't delete "+devname);
 
     alexaDevs.erase(devname);
     save();
-    return server.send(200, "text/plain", "Alexa delete device Successful: " + devname);
+    return req->send(200, "text/plain", "Alexa delete device Successful: " + devname);
   });
 
 #endif
-  server.onNotFound([this]() {
-    displayRequest();
+  server.onNotFound([this](AsyncWebServerRequest *req) {
+    displayRequest(req);
     String res = "<script>location.href = \"http://" + WiFi.localIP().toString() + "/\";</script>";
-    server.send(200, "text/html", res);
+    req->send(200, "text/html", res);
     println_dbg("End");
   });
   server.serveStatic("/", SPIFFS, "/main/", "public");

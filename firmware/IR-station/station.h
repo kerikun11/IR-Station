@@ -11,8 +11,7 @@
 #define __STATION_H__
 
 #include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
-#include <ESP8266HTTPUpdateServer.h>
+#include <ESPAsyncWebServer.h>
 #include <ESP8266SSDP.h>
 #include <ESP8266mDNS.h>
 #include <DNSServer.h>
@@ -66,7 +65,7 @@ struct Alexa {
 class IR_Station {
   public:
     IR_Station(int pin_ir_tx, int pin_ir_rx, int pin_red, int pin_green, int pin_blue):
-      indicator(pin_red, pin_green, pin_blue), server(HTTP_PORT), httpUpdater(true)
+      indicator(pin_red, pin_green, pin_blue), server(HTTP_PORT)
 #if USE_ALEXA == true
       , fauxmo()
 #endif
@@ -103,8 +102,7 @@ class IR_Station {
 
     IR ir;
     Indicator indicator;
-    ESP8266WebServer server;
-    ESP8266HTTPUpdateServer httpUpdater;
+    AsyncWebServer server;
     DNSServer dnsServer;
 
 #if USE_ALEXA == true
@@ -120,7 +118,7 @@ class IR_Station {
     bool restore();
     bool save();
 
-    void displayRequest();
+    void displayRequest(AsyncWebServerRequest *req);
     void attachSetupApi();
     void attachStationApi();
 };
