@@ -61,17 +61,17 @@ void IR_Station::begin(void) {
   dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
 #endif
 
-  server.on("/description.xml", HTTP_GET, [this](AsyncWebServerRequest *req) {
+  /*server.on("/description.xml", HTTP_GET, [this](AsyncWebServerRequest *req) {
     displayRequest(req);
     //SSDP.schema(server.client());
     //request->send(200, "text/xml", response);
-  });
+  });*/
 
 
   println_dbg("Starting HTTP Server...");
   server.begin();
 
-  println_dbg("Starting SSDP...");
+  /*println_dbg("Starting SSDP...");
   SSDP.setSchemaURL("description.xml");
   SSDP.setHTTPPort(80);
   SSDP.setName(hostname);
@@ -82,7 +82,7 @@ void IR_Station::begin(void) {
   SSDP.setModelURL("https://github.com/kerikun11/IR-station");
   SSDP.setManufacturer("KERI's Lab");
   SSDP.setManufacturerURL("http://kerikeri.top");
-  SSDP.begin();
+  SSDP.begin();*/
 
 #if USE_ALEXA == true
   fauxmo.createServer(false);
@@ -125,12 +125,11 @@ void IR_Station::begin(void) {
 }
 
 void IR_Station::stopWebUI() {
-  //httpUpdater.stop();
   server.end(); // close?
   SSDP.end();
 }
 
-void IR_Station::startAlexa() {
+/*void IR_Station::startAlexa() {
 #if USE_ALEXA == true
   alexa_mode = true;
   fauxmo.enable(true);
@@ -142,7 +141,7 @@ void IR_Station::stopAlexa() {
   alexa_mode = false;
   fauxmo.enable(false);
 #endif
-}
+}*/
 
 void IR_Station::reset(bool clean) {
   version = IR_STATION_VERSION;
@@ -174,6 +173,16 @@ void IR_Station::reset(bool clean) {
 
 void IR_Station::handle() {
   ir.handle();
+
+#if USE_ALEXA == true
+  fauxmo.handle();
+#endif
+
+  if (run_save) {
+    run_save = false;
+    save();
+  }
+
   switch (mode) {
     case IR_STATION_MODE_SETUP:
       if ((WiFi.status() == WL_CONNECTED)) indicator.set(0, 1023, 1023);
@@ -208,10 +217,6 @@ void IR_Station::handle() {
 #endif
       break;
   }
-#if USE_ALEXA == true
-  if (alexa_mode)
-    fauxmo.handle();
-#endif
 }
 
 void IR_Station::handleSchedule() {
@@ -310,6 +315,11 @@ bool IR_Station::restore() {
   }
   println_dbg("Restored IR-Station Settings");
   return true;
+}
+
+
+void IR_Station::safe_save() {
+  run_save = true;
 }
 
 bool IR_Station::save() {
@@ -422,7 +432,7 @@ void IR_Station::attachSetupApi() {
       local_ip = WiFi.localIP();
       subnetmask = WiFi.subnetMask();
       gateway = WiFi.gatewayIP();
-      save();
+      safe_save();
       indicator.set(0, 0, 1023);
       delay(1000);
       ESP.reset();
@@ -459,7 +469,7 @@ void IR_Station::attachSetupApi() {
     hostname = req->arg("hostname");
     if (hostname == "") hostname = HOSTNAME_DEFAULT;
     mode = IR_STATION_MODE_AP;
-    save();
+    safe_save();
     ESP.reset();
   });
   server.on("/dbg", [this](AsyncWebServerRequest *req) {
@@ -538,7 +548,7 @@ void IR_Station::attachStationApi() {
       if (!writeStringToFile(signal.path, data)) return req->send(500, "text/plain", "Failed to write File");
       signals.push_back(signal);
     }
-    save();
+    safe_save();
     return req->send(200, "text/plain", "Recording Successful: " + name);
   });
   server.on("/signals/rename", [this](AsyncWebServerRequest *req) {
@@ -548,7 +558,7 @@ void IR_Station::attachStationApi() {
     if (signal == NULL) return req->send(400, "text/plain", "No signal assigned");
     String prev_name = signal->name;
     signal->name = req->arg("name");
-    save();
+    safe_save();
     return req->send(200, "text/plain", "Renamed " + prev_name + " to " + signal->name);
   });
   server.on("/signals/move", [this](AsyncWebServerRequest *req) {
@@ -558,7 +568,7 @@ void IR_Station::attachStationApi() {
     if (signal == NULL) return req->send(400, "text/plain", "No signal assigned");
     signal->row = req->arg("row").toInt();
     signal->column = req->arg("column").toInt();
-    save();
+    safe_save();
     return req->send(200, "text/plain", "Moved position: " + signal->name);
   });
   server.on("/signals/upload", [this](AsyncWebServerRequest *req) {
@@ -577,7 +587,7 @@ void IR_Station::attachStationApi() {
     if (!data.success()) return req->send(400, "text/plain", "Invalid Singnal Format");
     if (!writeStringToFile(signal.path, irJson)) return req->send(500, "text/plain", "Failed to write File");
     signals.push_back(signal);
-    save();
+    safe_save();
     return req->send(200, "text/plain", "Uploading Successful: " + signal.name);
   });
   server.on("/signals/clear", [this](AsyncWebServerRequest *req) {
@@ -587,7 +597,7 @@ void IR_Station::attachStationApi() {
       if (signals[i].id == id) {
         if (!removeFile(signals[i].path)) return req->send(500, "text/plain", "Failed to Delete File");
         signals.erase(signals.begin() + i);
-        save();
+        safe_save();
         return req->send(200, "text/plain", "Deleted");
       }
     }
@@ -599,7 +609,7 @@ void IR_Station::attachStationApi() {
       removeFile(signals[i].path);
     }
     signals.resize(0);
-    save();
+    safe_save();
     return req->send(200, "text/plain", "Cleared All Signals");
   });
   server.on("/schedule/new", [this](AsyncWebServerRequest *req) {
@@ -610,7 +620,7 @@ void IR_Station::attachStationApi() {
     schedule.id = id;
     schedule.time = req->arg("time").toInt();
     schedules.push_back(schedule);
-    save();
+    safe_save();
     return req->send(200, "text/plain", "Added a Schedule");
   });
   server.on("/schedule/delete", [this](AsyncWebServerRequest *req) {
@@ -618,7 +628,7 @@ void IR_Station::attachStationApi() {
     for (int i = 0; i < signals.size(); i++) {
       if (schedules[i].schedule_id == schedule_id) {
         schedules.erase(schedules.begin() + i);
-        save();
+        safe_save();
         return req->send(200, "text/plain", "Deleted a Schedule");
       }
     }
@@ -644,7 +654,7 @@ void IR_Station::attachStationApi() {
     local_ip = _local_ip;
     subnetmask = _subnetmask;
     gateway = _gateway;
-    save();
+    safe_save();
     return req->send(200, "text/palin", "Changed IP Address to " + WiFi.localIP().toString());
   });
 #if USE_ALEXA == true
@@ -665,7 +675,7 @@ void IR_Station::attachStationApi() {
     alexa.darker   = req->arg("Drk").toInt();
 
     alexaDevs[devname] = alexa;
-    save();
+    safe_save();
     return req->send(200, "text/plain", "Alexa new device Successful: " + devname);
   });
   server.on("/alexa/del", [this](AsyncWebServerRequest *req) {
@@ -678,13 +688,24 @@ void IR_Station::attachStationApi() {
     if (!fauxmo.removeDevice(devname.c_str())) return req->send(500, "text/palin", "Couldn't delete "+devname);
 
     alexaDevs.erase(devname);
-    save();
+    safe_save();
     return req->send(200, "text/plain", "Alexa delete device Successful: " + devname);
+  });
+
+  server.onRequestBody([this](AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total) {
+    displayRequest(req);
+    if (fauxmo.process(req->client(), req->method() == HTTP_GET, req->url(), String((char *)data))) return;
   });
 
 #endif
   server.onNotFound([this](AsyncWebServerRequest *req) {
     displayRequest(req);
+
+#if USE_ALEXA == true
+    String body = (req->hasParam("body", true)) ? req->getParam("body", true)->value() : String();
+    if (fauxmo.process(req->client(), req->method() == HTTP_GET, req->url(), body)) return;
+#endif
+
     String res = "<script>location.href = \"http://" + WiFi.localIP().toString() + "/\";</script>";
     req->send(200, "text/html", res);
     println_dbg("End");

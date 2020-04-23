@@ -104,6 +104,7 @@ class IR_Station {
     Indicator indicator;
     AsyncWebServer server;
     DNSServer dnsServer;
+    bool run_save = false;
 
 #if USE_ALEXA == true
     fauxmoESP fauxmo;
@@ -116,6 +117,7 @@ class IR_Station {
     int getNewScheduleId();
     Signal *getSignalById(int id);
     bool restore();
+    void safe_save();
     bool save();
 
     void displayRequest(AsyncWebServerRequest *req);
