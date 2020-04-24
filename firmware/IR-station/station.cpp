@@ -61,17 +61,20 @@ void IR_Station::begin(void) {
   dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
 #endif
 
-  /*server.on("/description.xml", HTTP_GET, [this](AsyncWebServerRequest *req) {
+  server.on("/description.xml", HTTP_GET, [this](AsyncWebServerRequest *req) {
     displayRequest(req);
-    //SSDP.schema(server.client());
-    //request->send(200, "text/xml", response);
-  });*/
+    IPAddress ip = WiFi.localIP();
+    uint16_t size = strlen_P(_ssdp_schema_template)+ SSDP.strlen(ip);
+		char response[size];
+    SSDP.schema(ip, response, size);
+		req->send(200, "text/xml", response);
+  });
 
 
   println_dbg("Starting HTTP Server...");
   server.begin();
 
-  /*println_dbg("Starting SSDP...");
+  println_dbg("Starting SSDP...");
   SSDP.setSchemaURL("description.xml");
   SSDP.setHTTPPort(80);
   SSDP.setName(hostname);
@@ -82,7 +85,7 @@ void IR_Station::begin(void) {
   SSDP.setModelURL("https://github.com/kerikun11/IR-station");
   SSDP.setManufacturer("KERI's Lab");
   SSDP.setManufacturerURL("http://kerikeri.top");
-  SSDP.begin();*/
+  SSDP.begin();
 
 #if USE_ALEXA == true
   fauxmo.createServer(false);

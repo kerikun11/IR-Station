@@ -12,7 +12,6 @@
 
 #include <ESP8266WiFi.h>
 #include <ESPAsyncWebServer.h>
-#include <ESP8266SSDP.h>
 #include <ESP8266mDNS.h>
 #include <DNSServer.h>
 #undef max(a,b)
@@ -20,6 +19,7 @@
 #include "config.h"
 #include "ir.h"
 #include "led.h"
+#include "myssdp.h"
 
 #if USE_ALEXA == true
 #include <fauxmoESP.h>
@@ -35,6 +35,8 @@
 
 const int DNS_PORT = 53;
 const int HTTP_PORT = 80;
+
+extern const char* _ssdp_schema_template;
 
 struct Signal {
   int id;
