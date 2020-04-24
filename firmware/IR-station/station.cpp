@@ -129,20 +129,6 @@ void IR_Station::stopWebUI() {
   SSDP.end();
 }
 
-/*void IR_Station::startAlexa() {
-#if USE_ALEXA == true
-  alexa_mode = true;
-  fauxmo.enable(true);
-#endif
-}
-
-void IR_Station::stopAlexa() {
-#if USE_ALEXA == true
-  alexa_mode = false;
-  fauxmo.enable(false);
-#endif
-}*/
-
 void IR_Station::reset(bool clean) {
   version = IR_STATION_VERSION;
   mode = IR_STATION_MODE_SETUP;

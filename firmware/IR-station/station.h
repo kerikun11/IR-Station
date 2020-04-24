@@ -75,8 +75,6 @@ class IR_Station {
     void begin();
     //void startWebUI();
     void stopWebUI();
-    void startAlexa();
-    void stopAlexa();
     void reset(bool clean = true);
     void handle();
 
