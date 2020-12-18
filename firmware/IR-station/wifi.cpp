@@ -11,7 +11,7 @@
 
 #include "config.h" // for print_dbg()
 
-void setupAP(String ssid, String password) {
+void setupAP(const String& ssid, const String& password) {
   wdt_reset();
   println_dbg("Configuring Access Point...");
   WiFi.softAP(ssid.c_str(), password.c_str());
@@ -25,7 +25,7 @@ void setupAP(String ssid, String password) {
   println_dbg(WiFi.softAPIP());
 }
 
-bool connectWifi(String ssid, String password, bool stealth) {
+bool connectWifi(const String& ssid, const String& password, bool stealth) {
   wdt_reset();
   if (WiFi.status() == WL_CONNECTED) {
     if ((ssid == (String)WiFi.SSID()) && (password == (String)WiFi.psk())) {

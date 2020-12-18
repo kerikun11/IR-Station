@@ -10,7 +10,7 @@
 #include "station.h"
 
 #include <ArduinoJson.h>
-#include <FS.h>
+#include <LittleFS.h>
 #include "file.h"
 #include "wifi.h"
 #include "ntp.h"
@@ -105,7 +105,7 @@ void IR_Station::reset(bool clean) {
 
   if (clean) {
     next_id = 1;
-    for (int i = 0; i < signals.size(); i++) {
+    for (std::size_t i = 0; i < signals.size(); i++) {
       removeFile(signals[i].path);
     }
     signals.resize(0);
@@ -158,9 +158,9 @@ void IR_Station::handle() {
 }
 
 void IR_Station::handleSchedule() {
-  static uint32_t prev_time;
+  static time_t prev_time;
   if (now() != prev_time) {
-    for (int i = 0; i < schedules.size(); i++) {
+    for (std::size_t i = 0; i < schedules.size(); i++) {
       yield();
       wdt_reset();
       if (now() > schedules[i].time) {
@@ -187,7 +187,7 @@ int IR_Station::getNewScheduleId() {
 }
 
 Signal *IR_Station::getSignalById(int id) {
-  for (int i = 0; i < signals.size(); i++) {
+  for (std::size_t i = 0; i < signals.size(); i++) {
     if (signals[i].id == id) {
       return &(signals[i]);
     }
@@ -217,7 +217,7 @@ bool IR_Station::restore() {
   gateway = (const uint32_t)root["gateway"];
 
   next_id = (int)root["next_id"];
-  for (int i = 0; i < root["signals"].size(); i++) {
+  for (std::size_t i = 0; i < root["signals"].size(); i++) {
     Signal signal;
     signal.id = (int)root["signals"][i]["id"];
     signal.name = (const char *)root["signals"][i]["name"];
@@ -228,12 +228,14 @@ bool IR_Station::restore() {
     signals.push_back(signal);
   }
 
+  schedules.clear();
   next_schedule_id = (int)root["next_schedule_id"];
-  for (int i = 0; i < root["schedules"].size(); i++) {
+  for (std::size_t i = 0; i < root["schedules"].size(); i++) {
     Schedule schedule;
     schedule.schedule_id = (int)root["schedules"][i]["schedule_id"];
     schedule.id = (int)root["schedules"][i]["id"];
     schedule.time = (uint32_t)root["schedules"][i]["time"];
+    schedules.push_back(schedule);
   }
 
   if (version != IR_STATION_VERSION) {
@@ -263,7 +265,7 @@ bool IR_Station::save() {
 
   root["next_id"] = next_id;
   JsonArray& _signals = root.createNestedArray("signals");
-  for (int i = 0; i < signals.size(); i++) {
+  for (std::size_t i = 0; i < signals.size(); i++) {
     JsonObject& _signal = jsonBuffer.createObject();
     _signal["id"] = signals[i].id;
     _signal["name"] = signals[i].name;
@@ -276,7 +278,7 @@ bool IR_Station::save() {
 
   root["next_schedule_id"] = next_schedule_id;
   JsonArray& _schedules = root.createNestedArray("schedules");
-  for (int i = 0; i < schedules.size(); i++) {
+  for (std::size_t i = 0; i < schedules.size(); i++) {
     JsonObject& _schedule = jsonBuffer.createObject();
     _schedule["schedule_id"] = schedules[i].schedule_id;
     _schedule["id"] = schedules[i].id;
@@ -285,8 +287,8 @@ bool IR_Station::save() {
   }
 
   String path = STATION_JSON_PATH;
-  SPIFFS.remove(path);
-  File file = SPIFFS.open(path, "w");
+  LittleFS.remove(path);
+  File file = LittleFS.open(path, "w");
   if (!file) {
     print_dbg("File open Error: ");
     println_dbg(path);
@@ -314,7 +316,7 @@ void IR_Station::displayRequest() {
   print_dbg("Arguments count: ");
   println_dbg(server.args(), DEC);
   for (uint8_t i = 0; i < server.args(); i++) {
-    printf_dbg("\t%d = %d\n", server.argName(i).c_str(), server.arg(i).c_str());
+    printf_dbg("\t%s = %s\n", server.argName(i).c_str(), server.arg(i).c_str());
   }
 }
 
@@ -338,7 +340,7 @@ void IR_Station::attachSetupApi() {
     displayRequest();
     if (WiFi.status() == WL_CONNECTED) {
       String res = (String)WiFi.localIP()[0] + "." + WiFi.localIP()[1] + "." + WiFi.localIP()[2] + "." + WiFi.localIP()[3];
-      server.send(200, "text/palin", res);
+      server.send(200, "text/plain", res);
       mode = IR_STATION_MODE_STATION;
       local_ip = WiFi.localIP();
       subnetmask = WiFi.subnetMask();
@@ -404,7 +406,7 @@ void IR_Station::attachSetupApi() {
     server.send(200, "text/html", res);
     println_dbg("End");
   });
-  server.serveStatic("/", SPIFFS, "/setup/");
+  server.serveStatic("/", LittleFS, "/setup/");
 }
 
 void IR_Station::attachStationApi() {
@@ -442,7 +444,7 @@ void IR_Station::attachStationApi() {
         ir.handle();
         if (millis() - timeStamp > timeout_ms) {
           indicator.set(1023, 0, 0);
-          return server.send(500, "text/plain", "No Signal Recieved");
+          return server.send(500, "text/plain", "No Signal Received");
         }
       }
       indicator.set(0, 0, 1023);
@@ -495,7 +497,7 @@ void IR_Station::attachStationApi() {
     String irJson = server.arg("irJson");
     DynamicJsonBuffer jsonBuffer;
     JsonArray& data = jsonBuffer.parseArray(irJson);
-    if (!data.success()) return server.send(400, "text/plain", "Invalid Singnal Format");
+    if (!data.success()) return server.send(400, "text/plain", "Invalid Signal Format");
     if (!writeStringToFile(signal.path, irJson)) return server.send(500, "text/plain", "Failed to write File");
     signals.push_back(signal);
     save();
@@ -504,7 +506,7 @@ void IR_Station::attachStationApi() {
   server.on("/signals/clear", [this]() {
     displayRequest();
     int id = server.arg("id").toInt();
-    for (int i = 0; i < signals.size(); i++) {
+    for (std::size_t i = 0; i < signals.size(); i++) {
       if (signals[i].id == id) {
         if (!removeFile(signals[i].path)) return server.send(500, "text/plain", "Failed to Delete File");
         signals.erase(signals.begin() + i);
@@ -516,7 +518,7 @@ void IR_Station::attachStationApi() {
   });
   server.on("/signals/clear-all", [this]() {
     displayRequest();
-    for (int i = 0; i < signals.size(); i++) {
+    for (std::size_t i = 0; i < signals.size(); i++) {
       removeFile(signals[i].path);
     }
     signals.resize(0);
@@ -536,7 +538,7 @@ void IR_Station::attachStationApi() {
   });
   server.on("/schedule/delete", [this]() {
     int schedule_id = server.arg("schedule_id").toInt();
-    for (int i = 0; i < signals.size(); i++) {
+    for (std::size_t i = 0; i < signals.size(); i++) {
       if (schedules[i].schedule_id == schedule_id) {
         schedules.erase(schedules.begin() + i);
         save();
@@ -555,18 +557,20 @@ void IR_Station::attachStationApi() {
     displayRequest();
     IPAddress _local_ip, _subnetmask, _gateway;
     if (!_local_ip.fromString(server.arg("local_ip")) || !_subnetmask.fromString(server.arg("subnetmask")) || !_gateway.fromString(server.arg("gateway"))) {
-      return server.send(400, "text/palin", "Bad Request!");
+      println_dbg("400");
+      return server.send(400, "text/plain", "Bad Request!");
     }
     WiFi.config(_local_ip, _gateway, _subnetmask);
     if (WiFi.localIP() != _local_ip) {
-      return server.send(500, "text/palin", "Couldn't change IP Address :(");
+      println_dbg("500");
+      return server.send(500, "text/plain", "Couldn't change IP Address :(");
     }
     is_static_ip = true;
     local_ip = _local_ip;
     subnetmask = _subnetmask;
     gateway = _gateway;
     save();
-    return server.send(200, "text/palin", "Changed IP Address to " + WiFi.localIP().toString());
+    return server.send(200, "text/plain", "Changed IP Address to " + WiFi.localIP().toString());
   });
   server.onNotFound([this]() {
     displayRequest();
@@ -574,5 +578,5 @@ void IR_Station::attachStationApi() {
     server.send(200, "text/html", res);
     println_dbg("End");
   });
-  server.serveStatic("/", SPIFFS, "/main/", "public");
+  server.serveStatic("/", LittleFS, "/main/", "public");
 }

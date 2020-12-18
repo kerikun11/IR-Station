@@ -16,16 +16,17 @@
 #include <ESP8266SSDP.h>
 #include <ESP8266mDNS.h>
 #include <DNSServer.h>
-#undef max(a,b)
 #include <vector>
 #include "config.h"
 #include "ir.h"
 #include "led.h"
 #include "ota.h"
 
-#define IR_STATION_MODE_SETUP   0
-#define IR_STATION_MODE_STATION 1
-#define IR_STATION_MODE_AP      2
+enum IR_STATION_MODE {
+  IR_STATION_MODE_SETUP,
+  IR_STATION_MODE_STATION,
+  IR_STATION_MODE_AP,
+};
 
 #define STATION_JSON_PATH       ("/station.json")
 #define IR_DATA_PATH(id)        ("/main/signals/"+String(id,DEC)+".json")
