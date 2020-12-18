@@ -13,7 +13,7 @@
 #include <ArduinoOTA.h>
 #include "config.h" // for print_dbg()
 
-void OTA::begin(String hostname, String password, int port) {
+void OTA::begin(const String& hostname, const String& password, int port) {
   yield();
 
   // Port defaults to 8266

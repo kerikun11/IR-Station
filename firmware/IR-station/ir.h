@@ -32,7 +32,7 @@ class IR {
     static String read();
     static void resume();
 
-    static void send(String dataJson);
+    static void send(const String& dataJson);
 
   private:
     static int txPin, rxPin;

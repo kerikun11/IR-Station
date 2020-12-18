@@ -9,12 +9,12 @@
 
 #include "file.h"
 
-#include <FS.h>
+#include <LittleFS.h>
 #include "config.h"
 
-bool writeStringToFile(String path, String& dataString) {
-  SPIFFS.remove(path);
-  File file = SPIFFS.open(path, "w");
+bool writeStringToFile(const String& path, const String& dataString) {
+  LittleFS.remove(path);
+  File file = LittleFS.open(path, "w");
   if (!file) {
     print_dbg("File open Error: ");
     println_dbg(path);
@@ -31,8 +31,8 @@ bool writeStringToFile(String path, String& dataString) {
   return true;
 }
 
-bool getStringFromFile(String path, String& dataString) {
-  File file = SPIFFS.open(path, "r");
+bool getStringFromFile(const String& path, String& dataString) {
+  File file = LittleFS.open(path, "r");
   if (!file) {
     print_dbg("File open Error: ");
     println_dbg(path);
@@ -53,8 +53,8 @@ bool getStringFromFile(String path, String& dataString) {
   return true;
 }
 
-bool removeFile(String path) {
+bool removeFile(const String& path) {
   println_dbg("Removed: " + path);
-  return SPIFFS.remove(path);
+  return LittleFS.remove(path);
 }
 

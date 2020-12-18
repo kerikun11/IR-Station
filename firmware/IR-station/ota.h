@@ -14,7 +14,7 @@
 
 class OTA {
   public:
-    void begin(String hostname, String password = "", int port = 8266);
+    void begin(const String& hostname, const String& password = "", int port = 8266);
     void handle();
 };
 

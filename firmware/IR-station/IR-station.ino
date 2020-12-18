@@ -14,7 +14,7 @@
 */
 
 #include <ESP8266WiFi.h>
-#include <FS.h>
+#include <LittleFS.h>
 #include "config.h"
 #include "station.h"
 
@@ -32,8 +32,8 @@ void setup() {
   println_dbg("");
   println_dbg("Hello, I'm ESP-WROOM-02");
 
-  // prepare SPIFFS
-  SPIFFS.begin();
+  // prepare internal filesystem
+  LittleFS.begin();
 
   // IR-station setup
   station = new IR_Station(PIN_IR_OUT, PIN_IR_IN, PIN_LED_R, PIN_LED_G, PIN_LED_B);
@@ -41,7 +41,7 @@ void setup() {
 
   // hardware button reset setup
   pinMode(PIN_BUTTON, INPUT_PULLUP);
-  attachInterrupt(PIN_BUTTON, rst_isr,  RISING);
+  attachInterrupt(PIN_BUTTON, rst_isr, RISING);
 
   // Setup Completed
   println_dbg("Setup Completed");

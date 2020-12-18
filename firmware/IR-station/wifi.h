@@ -12,7 +12,7 @@
 
 #include <ESP8266WiFi.h>
 
-void setupAP(String ssid, String password);
-bool connectWifi(String ssid, String pass, bool stealth = false);
+void setupAP(const String& ssid, const String& password);
+bool connectWifi(const String& ssid, const String& pass, bool stealth = false);
 
 #endif

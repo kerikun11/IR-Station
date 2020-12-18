@@ -46,7 +46,7 @@ void IR::resume() {
   state = IR_RECEIVER_READY;
 }
 
-void IR::send(String dataJson) {
+void IR::send(const String& dataJson) {
   enum IR_RECEIVER_STATE state_cache = state;
   state = IR_RECEIVER_OFF;
   {
