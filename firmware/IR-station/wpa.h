@@ -1,10 +1,4 @@
-/*
-  IR-station
-  Infrared Remote Controller with ESP8266 WiFi Module
-
-  Author:  kerikun11 (Github: kerikun11)
-  Date:    2016.07.23
-
+/**
   The MIT License (MIT)
   Copyright (c)  2016  Ryotaro Onuki
 
@@ -13,37 +7,11 @@
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <ESP8266WiFi.h>
-#include "config.h"
-#include "station.h"
+#ifndef __WPA_H__
+#define __WPA_H__
 
-IR_Station *station;
-volatile bool reset_flag = false;
+#include <Arduino.h>
 
-void ICACHE_RAM_ATTR rst_isr() {
-  reset_flag = true;
-}
+String calcWPAPassPhrase(const String &ssid, const String &password);
 
-void setup() {
-  // prepare serial debug
-  Serial.begin(74880);
-  delay(10);
-  println_dbg("");
-  println_dbg("Hello, I'm ESP-WROOM-02");
-
-  // IR-station setup
-  station = new IR_Station(PIN_IR_OUT, PIN_IR_IN, PIN_LED_R, PIN_LED_G, PIN_LED_B);
-  station->begin();
-
-  // hardware button reset setup
-  pinMode(PIN_BUTTON, INPUT_PULLUP);
-  attachInterrupt(PIN_BUTTON, rst_isr, RISING);
-
-  // Setup Completed
-  println_dbg("Setup Completed");
-}
-
-void loop() {
-  station->handle();
-  if (reset_flag) station->reset();
-}
+#endif
