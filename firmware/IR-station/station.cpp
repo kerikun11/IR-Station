@@ -14,17 +14,18 @@
 #include "file.h"
 #include "wifi.h"
 #include "ntp.h"
+#include "wpa.h"
 
-void IR_Station::begin(void) {
+void IR_Station::begin() {
   yield();
   wdt_reset();
   indicator.green(1023);
 
-  if (restore() == false) reset();
+  // prepare internal filesystem
+  LittleFS.begin();
 
-#if USE_OTA_UPDATE == true
-  ota.begin(hostname);
-#endif
+  // restore settings
+  if (restore() == false) reset();
 
   switch (mode) {
     case IR_STATION_MODE_SETUP:
@@ -65,6 +66,10 @@ void IR_Station::begin(void) {
   dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
 #endif
 
+#if USE_OTA_UPDATE == true
+  ota.begin(hostname);
+#endif
+
   println_dbg("Starting HTTP Updater...");
   httpUpdater.setup(&server, "/firmware");
   server.on("/description.xml", HTTP_GET, [this]() {
@@ -83,9 +88,9 @@ void IR_Station::begin(void) {
   SSDP.setURL("index.htm");
   SSDP.setModelName("IR-Station");
   SSDP.setModelNumber("20160821");
-  SSDP.setModelURL("https://github.com/kerikun11/IR-station");
+  SSDP.setModelURL("https://github.com/kerikun11/IR-Station");
   SSDP.setManufacturer("KERI's Lab");
-  SSDP.setManufacturerURL("http://kerikeri.top");
+  SSDP.setManufacturerURL("https://www.kerislab.jp");
   SSDP.begin();
 }
 
@@ -196,6 +201,7 @@ Signal *IR_Station::getSignalById(int id) {
 }
 
 bool IR_Station::restore() {
+  wdt_reset();
   yield();
   String s;
   if (getStringFromFile(STATION_JSON_PATH, s) == false) return false;
@@ -246,6 +252,7 @@ bool IR_Station::restore() {
 }
 
 bool IR_Station::save() {
+  wdt_reset();
   yield();
   DynamicJsonBuffer jsonBuffer;
   JsonObject& root = jsonBuffer.createObject();
@@ -307,6 +314,7 @@ bool IR_Station::save() {
 
 void IR_Station::displayRequest() {
   yield();
+  wdt_reset();
   println_dbg("");
   println_dbg("New Request");
   print_dbg("URI: ");
@@ -373,7 +381,9 @@ void IR_Station::attachSetupApi() {
     indicator.set(0, 1023, 0);
     server.send(200);
     WiFi.disconnect();
-    //    delay(1000);
+    password = calcWPAPassPhrase(ssid, password);
+    print_dbg("WPA Passphrase: ");
+    println_dbg(password);
     WiFi.begin(ssid.c_str(), password.c_str());
   });
   server.on("/mode/accesspoint", [this]() {
