@@ -84,7 +84,7 @@ void IR_Station::begin() {
   SSDP.setSchemaURL("description.xml");
   SSDP.setHTTPPort(80);
   SSDP.setName(hostname);
-  SSDP.setSerialNumber(String(ESP.getChipId() , HEX));
+  SSDP.setSerialNumber(String(ESP.getChipId(), HEX));
   SSDP.setURL("index.htm");
   SSDP.setModelName("IR-Station");
   SSDP.setModelNumber("20160821");
@@ -108,16 +108,8 @@ void IR_Station::reset(bool clean) {
   subnetmask = 0U;
   gateway = 0U;
 
-  if (clean) {
-    next_id = 1;
-    for (std::size_t i = 0; i < signals.size(); i++) {
-      removeFile(signals[i].path);
-    }
-    signals.resize(0);
+  if (clean) clearAllSignals();
 
-    next_schedule_id = 1;
-    schedules.resize(0);
-  }
   save();
   ESP.reset();
 }
@@ -169,12 +161,14 @@ void IR_Station::handleSchedule() {
       yield();
       wdt_reset();
       if (now() > schedules[i].time) {
-        Signal *signal = getSignalById(schedules[i].id);
-        String json;
-        if (!getStringFromFile(signal->path, json)) break;
-        indicator.set(0, 1023, 0);
-        ir.send(json);
-        indicator.set(0, 0, 1023);
+        Signal* signal = getSignalById(schedules[i].id);
+        if (signal) {
+          String json;
+          if (!getStringFromFile(signal->path, json)) break;
+          indicator.set(0, 1023, 0);
+          ir.send(json);
+          indicator.set(0, 0, 1023);
+        }
         schedules.erase(schedules.begin() + i);
         save();
       }
@@ -191,13 +185,25 @@ int IR_Station::getNewScheduleId() {
   return next_schedule_id++;
 }
 
-Signal *IR_Station::getSignalById(int id) {
+Signal* IR_Station::getSignalById(int id) {
   for (std::size_t i = 0; i < signals.size(); i++) {
     if (signals[i].id == id) {
       return &(signals[i]);
     }
   }
   return NULL;
+}
+
+bool IR_Station::clearAllSignals() {
+  next_id = 1;
+  for (std::size_t i = 0; i < signals.size(); i++) {
+    removeFile(signals[i].path);
+  }
+  signals.resize(0);
+
+  next_schedule_id = 1;
+  schedules.resize(0);
+  return true;
 }
 
 bool IR_Station::restore() {
@@ -207,9 +213,9 @@ bool IR_Station::restore() {
   if (getStringFromFile(STATION_JSON_PATH, s) == false) return false;
   DynamicJsonBuffer jsonBuffer;
   JsonObject& root = jsonBuffer.parseObject(s);
-  if (!root.success())return false;
+  if (!root.success()) return false;
 
-  version = (const char *)root["version"];
+  version = (const char*)root["version"];
   mode = (int)root["mode"];
   hostname = (const char*)root["hostname"];
 
@@ -226,8 +232,8 @@ bool IR_Station::restore() {
   for (std::size_t i = 0; i < root["signals"].size(); i++) {
     Signal signal;
     signal.id = (int)root["signals"][i]["id"];
-    signal.name = (const char *)root["signals"][i]["name"];
-    signal.path = (const char *)root["signals"][i]["path"];
+    signal.name = (const char*)root["signals"][i]["name"];
+    signal.path = (const char*)root["signals"][i]["path"];
     signal.display = (bool)root["signals"][i]["display"];
     signal.row = (int)root["signals"][i]["row"];
     signal.column = (int)root["signals"][i]["column"];
@@ -336,7 +342,7 @@ void IR_Station::attachSetupApi() {
     int n = WiFi.scanNetworks();
     for (int i = 0; i < n; ++i) {
       String s = WiFi.SSID(i);
-      if (s.length() < 28)root.add(s);
+      if (s.length() < 28) root.add(s);
     }
     String res;
     root.printTo(res);
@@ -378,12 +384,12 @@ void IR_Station::attachSetupApi() {
     println_dbg(password);
     print_dbg("Stealth: ");
     println_dbg(is_stealth_ssid ? "true" : "false");
-    indicator.set(0, 1023, 0);
-    server.send(200);
-    WiFi.disconnect();
     password = calcWPAPassPhrase(ssid, password);
     print_dbg("WPA Passphrase: ");
     println_dbg(password);
+    indicator.set(0, 1023, 0);
+    server.send(200);
+    WiFi.disconnect();
     WiFi.begin(ssid.c_str(), password.c_str());
   });
   server.on("/mode/accesspoint", [this]() {
@@ -432,7 +438,7 @@ void IR_Station::attachStationApi() {
   server.on("/signals/send", [this]() {
     displayRequest();
     int id = server.arg("id").toInt();
-    Signal *signal = getSignalById(id);
+    Signal* signal = getSignalById(id);
     if (signal == NULL) return server.send(400, "text/plain", "No signal assigned");
     String json;
     if (!getStringFromFile(signal->path, json)) return server.send(500, "text/plain", "Failed to open File");
@@ -477,7 +483,7 @@ void IR_Station::attachStationApi() {
   server.on("/signals/rename", [this]() {
     displayRequest();
     int id = server.arg("id").toInt();
-    Signal *signal = getSignalById(id);
+    Signal* signal = getSignalById(id);
     if (signal == NULL) return server.send(400, "text/plain", "No signal assigned");
     String prev_name = signal->name;
     signal->name = server.arg("name");
@@ -487,7 +493,7 @@ void IR_Station::attachStationApi() {
   server.on("/signals/move", [this]() {
     displayRequest();
     int id = server.arg("id").toInt();
-    Signal *signal = getSignalById(id);
+    Signal* signal = getSignalById(id);
     if (signal == NULL) return server.send(400, "text/plain", "No signal assigned");
     signal->row = server.arg("row").toInt();
     signal->column = server.arg("column").toInt();
@@ -528,10 +534,7 @@ void IR_Station::attachStationApi() {
   });
   server.on("/signals/clear-all", [this]() {
     displayRequest();
-    for (std::size_t i = 0; i < signals.size(); i++) {
-      removeFile(signals[i].path);
-    }
-    signals.resize(0);
+    clearAllSignals();
     save();
     return server.send(200, "text/plain", "Cleared All Signals");
   });

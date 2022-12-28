@@ -12,7 +12,6 @@
 #include <TimeLib.h>
 #include <WiFiUdp.h>
 #include "config.h"
-#include <Time.h>
 
 // NTP Servers:
 IPAddress timeServer(210, 173, 160, 57); // ntp.jst.mfeed.ad.jp
@@ -93,4 +92,3 @@ void sendNTPpacket(IPAddress &address)
   Udp.write(packetBuffer, NTP_PACKET_SIZE);
   Udp.endPacket();
 }
-
