@@ -13,9 +13,9 @@
 #include <ESP8266WiFi.h>
 
 class OTA {
-  public:
-    void begin(const String& hostname, const String& password = "", int port = 8266);
-    void handle();
+public:
+  void begin(const String& hostname, const String& password = "", int port = 8266);
+  void handle();
 };
 
 #endif

@@ -57,4 +57,3 @@ bool removeFile(const String& path) {
   println_dbg("Removed: " + path);
   return LittleFS.remove(path);
 }
-

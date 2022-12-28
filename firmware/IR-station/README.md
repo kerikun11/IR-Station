@@ -22,4 +22,6 @@ monitor_port = /dev/ttyUSB0
 platformio run
 # firmware を書き込む (VSCode: Ctrl+Alt+U)
 platformio run -t upload
+# filesystem image を書き込む (VSCode: PlatformIO Tab → Upload FileSystem Image)
+platformio run -t uploadfs
 ```

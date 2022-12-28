@@ -11,7 +11,7 @@
 #define __CONFIG_H__
 
 /* Version */
-#define IR_STATION_VERSION      "v1.6.3"
+#define IR_STATION_VERSION      "v1.6.4"
 
 /* Hardware Mapping */
 #define PIN_BUTTON              (0)
@@ -23,7 +23,7 @@
 #define PIN_LED_B               (13)
 
 /* Software */
-// for Remocon
+// IR Signal
 #define SIGNAL_COUNT_DEFAULT    (25)
 #define SIGNAL_COUNT_MAX        (100)
 

@@ -9,7 +9,7 @@
 
 #include "wifi.h"
 
-#include "config.h" // for print_dbg()
+#include "config.h"  // for print_dbg()
 
 void setupAP(const String& ssid, const String& password) {
   wdt_reset();
@@ -59,7 +59,7 @@ bool connectWifi(const String& ssid, const String& password, bool stealth) {
   // Wait for connection
   int timeout = 0;
   while (WiFi.status() != WL_CONNECTED) {
-    ESP.wdtFeed();
+    wdt_reset();
     delay(500);
     print_dbg(".");
     timeout++;
@@ -78,4 +78,3 @@ bool connectWifi(const String& ssid, const String& password, bool stealth) {
 
   return true;
 }
-
