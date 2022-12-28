@@ -32,6 +32,7 @@ void IR_Station::begin() {
     case IR_STATION_MODE_SETUP:
       println_dbg("Boot Mode: Setup");
       WiFi.mode(WIFI_AP_STA);
+      WiFi.begin();
       setupAP(SOFTAP_SSID, SOFTAP_PASS);
       attachSetupApi();
       break;
@@ -42,6 +43,9 @@ void IR_Station::begin() {
       connectWifi(ssid, password, is_stealth_ssid);
       if (WiFi.localIP() != local_ip) {
         is_static_ip = false;
+        local_ip = WiFi.localIP();
+        subnetmask = WiFi.subnetMask();
+        gateway = WiFi.gatewayIP();
         save();
       }
       attachStationApi();
