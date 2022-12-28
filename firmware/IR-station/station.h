@@ -29,7 +29,7 @@ enum IR_STATION_MODE {
 };
 
 #define STATION_JSON_PATH       ("/station.json")
-#define IR_DATA_PATH(id)        ("/main/signals/"+String(id,DEC)+".json")
+#define IR_DATA_PATH(id)        ("/main/signals/" + String(id, DEC) + ".json")
 
 const int DNS_PORT = 53;
 const int HTTP_PORT = 80;
@@ -51,8 +51,8 @@ struct Schedule {
 
 class IR_Station {
   public:
-    IR_Station(int pin_ir_tx, int pin_ir_rx, int pin_red, int pin_green, int pin_blue):
-      indicator(pin_red, pin_green, pin_blue), server(HTTP_PORT), httpUpdater(true) {
+    IR_Station(int pin_ir_tx, int pin_ir_rx, int pin_red, int pin_green, int pin_blue)
+      : indicator(pin_red, pin_green, pin_blue), server(HTTP_PORT), httpUpdater(true) {
       ir.begin(pin_ir_tx, pin_ir_rx);
     }
     void begin();
@@ -90,6 +90,7 @@ class IR_Station {
     int getNewId();
     int getNewScheduleId();
     Signal *getSignalById(int id);
+    bool clearAllSignals();
     bool restore();
     bool save();
 
@@ -99,4 +100,3 @@ class IR_Station {
 };
 
 #endif
-

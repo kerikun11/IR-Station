@@ -20,7 +20,7 @@
 IR_Station *station;
 volatile bool reset_flag = false;
 
-void ICACHE_RAM_ATTR rst_isr() {
+void IRAM_ATTR rst_isr() {
   reset_flag = true;
 }
 
