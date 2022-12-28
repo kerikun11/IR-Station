@@ -11,20 +11,19 @@
 
 /* defined in wpa_supplicant library */
 extern "C" int pbkdf2_sha1(
-  const char * passphrase,
-  const char * ssid,
+  const char *passphrase,
+  const char *ssid,
   size_t ssid_len,
   int iterations,
-  u8 * buf,
-  size_t buflen
-);
+  uint8_t *buf,
+  size_t buflen);
 
 String calcWPAPassPhrase(const String &ssid, const String &password) {
-  const int s = 32; // 256 bit
-  u8 buf[s];
+  const int s = 32;  // 256 bit
+  uint8_t buf[s];
   pbkdf2_sha1(password.c_str(), ssid.c_str(), ssid.length(), 4096, buf, s);
   String hash;
-  for(int i=0; i<s; ++i)
+  for (int i = 0; i < s; ++i)
     hash += String(buf[i] >> 4, HEX) + String(buf[i] & 0x0f, HEX);
   hash.toLowerCase();
   return hash;

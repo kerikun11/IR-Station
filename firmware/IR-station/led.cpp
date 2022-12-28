@@ -9,7 +9,7 @@
 
 #include "led.h"
 
-#include "config.h" // for print_dbg()
+#include "config.h"  // for print_dbg()
 
 void Indicator::set(int val_red, int val_green, int val_blue) {
   analogWrite(_pin_red, val_red);

@@ -10,12 +10,12 @@
 #include "ir.h"
 
 #include <ArduinoJson.h>
-#include "config.h" // for print_dbg()
+#include "config.h"  // for print_dbg()
 
 int IR::txPin, IR::rxPin;
 volatile enum IR_RECEIVER_STATE IR::state;
 volatile uint16_t IR::rawIndex;
-volatile uint16_t IR::rawData[RAWDATA_BUFFER_SIZE];
+volatile uint16_t IR::rawData[RAW_DATA_BUFFER_SIZE];
 volatile uint32_t IR::prev_us;
 
 void IR::begin(int tx, int rx) {
@@ -85,7 +85,7 @@ void IR::isr() {
       break;
     case IR_RECEIVER_RECEIVING:
       while (diff > 0xFFFF) {
-        if (rawIndex > RAWDATA_BUFFER_SIZE - 2) {
+        if (rawIndex > RAW_DATA_BUFFER_SIZE - 2) {
           println_dbg("IR buffer overflow");
           break;
         }
@@ -93,7 +93,7 @@ void IR::isr() {
         rawData[rawIndex++] = 0;
         diff -= 0xFFFF;
       }
-      if (rawIndex > RAWDATA_BUFFER_SIZE - 1) {
+      if (rawIndex > RAW_DATA_BUFFER_SIZE - 1) {
         println_dbg("IR buffer overflow");
         break;
       }
@@ -144,4 +144,3 @@ void IR::handle() {
       break;
   }
 }
-

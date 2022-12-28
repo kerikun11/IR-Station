@@ -12,8 +12,8 @@
 
 #include <ESP8266WiFi.h>
 
-bool writeStringToFile(const String &path, const String& dataString);
-bool getStringFromFile(const String &path, String& dataString);
+bool writeStringToFile(const String &path, const String &dataString);
+bool getStringFromFile(const String &path, String &dataString);
 bool removeFile(const String &path);
 
 #endif

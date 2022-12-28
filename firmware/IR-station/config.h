@@ -23,7 +23,7 @@
 #define PIN_LED_B               (13)
 
 /* Software */
-// for Remocon
+// IR Signal
 #define SIGNAL_COUNT_DEFAULT    (25)
 #define SIGNAL_COUNT_MAX        (100)
 

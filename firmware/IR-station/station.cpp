@@ -17,8 +17,9 @@
 #include "wpa.h"
 
 void IR_Station::begin() {
-  yield();
   wdt_reset();
+
+  // begin setup
   indicator.green(1023);
 
   // prepare internal filesystem
@@ -158,17 +159,9 @@ void IR_Station::handleSchedule() {
   static time_t prev_time;
   if (now() != prev_time) {
     for (std::size_t i = 0; i < schedules.size(); i++) {
-      yield();
       wdt_reset();
       if (now() > schedules[i].time) {
-        Signal* signal = getSignalById(schedules[i].id);
-        if (signal) {
-          String json;
-          if (!getStringFromFile(signal->path, json)) break;
-          indicator.set(0, 1023, 0);
-          ir.send(json);
-          indicator.set(0, 0, 1023);
-        }
+        sendSignal(schedules[i].id);
         schedules.erase(schedules.begin() + i);
         save();
       }
@@ -194,6 +187,17 @@ Signal* IR_Station::getSignalById(int id) {
   return NULL;
 }
 
+bool IR_Station::sendSignal(int id) {
+  Signal* signal = getSignalById(id);
+  if (signal == NULL) return false;
+  String json;
+  if (!getStringFromFile(signal->path, json)) return false;
+  indicator.set(0, 1023, 0);
+  ir.send(json);
+  indicator.set(0, 0, 1023);
+  return true;
+}
+
 bool IR_Station::clearAllSignals() {
   next_id = 1;
   for (std::size_t i = 0; i < signals.size(); i++) {
@@ -208,7 +212,6 @@ bool IR_Station::clearAllSignals() {
 
 bool IR_Station::restore() {
   wdt_reset();
-  yield();
   String s;
   if (getStringFromFile(STATION_JSON_PATH, s) == false) return false;
   DynamicJsonBuffer jsonBuffer;
@@ -259,7 +262,6 @@ bool IR_Station::restore() {
 
 bool IR_Station::save() {
   wdt_reset();
-  yield();
   DynamicJsonBuffer jsonBuffer;
   JsonObject& root = jsonBuffer.createObject();
 
@@ -319,7 +321,6 @@ bool IR_Station::save() {
 }
 
 void IR_Station::displayRequest() {
-  yield();
   wdt_reset();
   println_dbg("");
   println_dbg("New Request");
@@ -440,11 +441,7 @@ void IR_Station::attachStationApi() {
     int id = server.arg("id").toInt();
     Signal* signal = getSignalById(id);
     if (signal == NULL) return server.send(400, "text/plain", "No signal assigned");
-    String json;
-    if (!getStringFromFile(signal->path, json)) return server.send(500, "text/plain", "Failed to open File");
-    indicator.set(0, 1023, 0);
-    ir.send(json);
-    indicator.set(0, 0, 1023);
+    if (!sendSignal(id)) return server.send(500, "text/plain", "Failed to send IR signal");
     return server.send(200, "text/plain", "Sending Successful: " + signal->name);
   });
   server.on("/signals/record", [this]() {

@@ -12,9 +12,9 @@
 
 #include <ESP8266WiFi.h>
 
-#define IR_RECEIVE_TIMEOUT_US   200000
-#define RAWDATA_BUFFER_SIZE     800
-#define REGARD_AS_NOISE_COUNT   8
+#define IR_RECEIVE_TIMEOUT_US 200000
+#define RAW_DATA_BUFFER_SIZE 800
+#define REGARD_AS_NOISE_COUNT 8
 
 enum IR_RECEIVER_STATE {
   IR_RECEIVER_OFF,
@@ -25,24 +25,23 @@ enum IR_RECEIVER_STATE {
 };
 
 class IR {
-  public:
-    static void begin(int tx, int rx);
-    static void handle();
-    static bool available();
-    static String read();
-    static void resume();
+public:
+  static void begin(int tx, int rx);
+  static void handle();
+  static bool available();
+  static String read();
+  static void resume();
 
-    static void send(const String& dataJson);
+  static void send(const String& dataJson);
 
-  private:
-    static int txPin, rxPin;
-    static volatile enum IR_RECEIVER_STATE state;
-    static volatile uint16_t rawIndex;
-    static volatile uint16_t rawData[RAWDATA_BUFFER_SIZE];
-    static volatile uint32_t prev_us;
+private:
+  static int txPin, rxPin;
+  static volatile enum IR_RECEIVER_STATE state;
+  static volatile uint16_t rawIndex;
+  static volatile uint16_t rawData[RAW_DATA_BUFFER_SIZE];
+  static volatile uint32_t prev_us;
 
-    static void ICACHE_RAM_ATTR isr();
+  static void IRAM_ATTR isr();
 };
 
 #endif
-

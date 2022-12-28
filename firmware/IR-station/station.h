@@ -28,8 +28,8 @@ enum IR_STATION_MODE {
   IR_STATION_MODE_AP,
 };
 
-#define STATION_JSON_PATH       ("/station.json")
-#define IR_DATA_PATH(id)        ("/main/signals/" + String(id, DEC) + ".json")
+#define STATION_JSON_PATH ("/station.json")
+#define IR_DATA_PATH(id) ("/main/signals/" + String(id, DEC) + ".json")
 
 const int DNS_PORT = 53;
 const int HTTP_PORT = 80;
@@ -50,53 +50,54 @@ struct Schedule {
 };
 
 class IR_Station {
-  public:
-    IR_Station(int pin_ir_tx, int pin_ir_rx, int pin_red, int pin_green, int pin_blue)
-      : indicator(pin_red, pin_green, pin_blue), server(HTTP_PORT), httpUpdater(true) {
-      ir.begin(pin_ir_tx, pin_ir_rx);
-    }
-    void begin();
-    void reset(bool clean = true);
-    void handle();
+public:
+  IR_Station(int pin_ir_tx, int pin_ir_rx, int pin_red, int pin_green, int pin_blue)
+    : indicator(pin_red, pin_green, pin_blue), server(HTTP_PORT), httpUpdater(true) {
+    ir.begin(pin_ir_tx, pin_ir_rx);
+  }
+  void begin();
+  void reset(bool clean = true);
+  void handle();
 
-  private:
-    String version;
-    uint8_t mode;
-    String hostname;
+private:
+  String version;
+  uint8_t mode;
+  String hostname;
 
-    bool is_stealth_ssid;
-    String ssid;
-    String password;
+  bool is_stealth_ssid;
+  String ssid;
+  String password;
 
-    bool is_static_ip;
-    IPAddress local_ip;
-    IPAddress gateway;
-    IPAddress subnetmask;
+  bool is_static_ip;
+  IPAddress local_ip;
+  IPAddress gateway;
+  IPAddress subnetmask;
 
-    int next_id;
-    std::vector<Signal> signals;
+  int next_id;
+  std::vector<Signal> signals;
 
-    int next_schedule_id;
-    std::vector<Schedule> schedules;
+  int next_schedule_id;
+  std::vector<Schedule> schedules;
 
-    IR ir;
-    Indicator indicator;
-    ESP8266WebServer server;
-    ESP8266HTTPUpdateServer httpUpdater;
-    DNSServer dnsServer;
-    OTA ota;
+  IR ir;
+  Indicator indicator;
+  ESP8266WebServer server;
+  ESP8266HTTPUpdateServer httpUpdater;
+  DNSServer dnsServer;
+  OTA ota;
 
-    void handleSchedule();
-    int getNewId();
-    int getNewScheduleId();
-    Signal *getSignalById(int id);
-    bool clearAllSignals();
-    bool restore();
-    bool save();
+  void handleSchedule();
+  int getNewId();
+  int getNewScheduleId();
+  Signal *getSignalById(int id);
+  bool sendSignal(int id);
+  bool clearAllSignals();
+  bool restore();
+  bool save();
 
-    void displayRequest();
-    void attachSetupApi();
-    void attachStationApi();
+  void displayRequest();
+  void attachSetupApi();
+  void attachStationApi();
 };
 
 #endif

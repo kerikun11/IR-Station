@@ -11,11 +11,9 @@
 
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
-#include "config.h" // for print_dbg()
+#include "config.h"  // for print_dbg()
 
 void OTA::begin(const String& hostname, const String& password, int port) {
-  yield();
-
   // Port defaults to 8266
   ArduinoOTA.setPort(port);
 
@@ -26,16 +24,16 @@ void OTA::begin(const String& hostname, const String& password, int port) {
   //  ArduinoOTA.setPassword(password.c_str());
 
   ArduinoOTA.onStart([]() {
-    println_dbg("Start");
+    println_dbg("OTA Start");
   });
   ArduinoOTA.onEnd([]() {
-    println_dbg("End");
+    println_dbg("OTA End");
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    printf_dbg("Progress: %u%%\r\n", (progress / (total / 100)));
+    printf_dbg("OTA Progress: %u%%\r\n", (progress / (total / 100)));
   });
   ArduinoOTA.onError([](ota_error_t error) {
-    printf_dbg("Error[%u]: ", error);
+    printf_dbg("OTA Error[%u]: ", error);
     if (error == OTA_AUTH_ERROR) println_dbg("Auth Failed");
     else if (error == OTA_BEGIN_ERROR) println_dbg("Begin Failed");
     else if (error == OTA_CONNECT_ERROR) println_dbg("Connect Failed");
