@@ -21,6 +21,7 @@ void IR_Station::begin() {
 
   // begin setup
   indicator.green(1023);
+  pinMode(PIN_PERSON_SENSOR, INPUT_PULLDOWN_16);
 
   // prepare internal filesystem
   LittleFS.begin();
@@ -126,8 +127,8 @@ void IR_Station::handle() {
   /* person sensor */
   static long last_detected_ms = millis();
   static long light_state = 0;
-  const long light_off_threshold_ms = 10'000;
-  if (digitalRead(16) == HIGH) {
+  const long light_off_threshold_ms = 60'000;
+  if (digitalRead(PIN_PERSON_SENSOR) == HIGH) {
     last_detected_ms = millis();
     if (light_state == 0) {
       light_state = 1;

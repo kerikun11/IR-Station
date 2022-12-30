@@ -11,7 +11,7 @@
 #define __CONFIG_H__
 
 /* Version */
-#define IR_STATION_VERSION      "v1.6.4"
+#define IR_STATION_VERSION      "v1.6.4-sensor"
 
 /* Hardware Mapping */
 #define PIN_BUTTON              (0)
@@ -21,6 +21,8 @@
 #define PIN_LED_R               (12)
 #define PIN_LED_G               (15)
 #define PIN_LED_B               (13)
+
+#define PIN_PERSON_SENSOR       (16) // pin with pull-down
 
 /* Software */
 // IR Signal
