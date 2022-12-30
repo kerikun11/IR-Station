@@ -12,19 +12,17 @@
 #include <ArduinoJson.h>
 #include "config.h"  // for print_dbg()
 
-int IR::txPin, IR::rxPin;
-volatile enum IR_RECEIVER_STATE IR::state;
-volatile uint16_t IR::rawIndex;
-volatile uint16_t IR::rawData[RAW_DATA_BUFFER_SIZE];
-volatile uint32_t IR::prev_us;
-
 void IR::begin(int tx, int rx) {
   txPin = tx;
   rxPin = rx;
   pinMode(tx, OUTPUT);
   pinMode(rx, INPUT);
-  attachInterrupt(rx, &IR::isr, CHANGE);
+  attachInterruptArg(rx, isrEntryPoint, this, CHANGE);
   state = IR_RECEIVER_READY;
+}
+
+void IR::isrEntryPoint(void* this_ptr) {
+  reinterpret_cast<IR*>(this_ptr)->isr();
 }
 
 bool IR::available() {
@@ -44,6 +42,7 @@ String IR::read() {
 
 void IR::resume() {
   state = IR_RECEIVER_READY;
+  println_dbg("IR resume");
 }
 
 void IR::send(const String& dataJson) {
@@ -69,7 +68,7 @@ void IR::send(const String& dataJson) {
     interrupts();
   }
   state = state_cache;
-  println_dbg("Send OK");
+  println_dbg("IR Send OK");
 }
 
 void IR::isr() {
@@ -121,23 +120,21 @@ void IR::handle() {
     case IR_RECEIVER_RECEIVING:
       if (diff > IR_RECEIVE_TIMEOUT_US) {
         state = IR_RECEIVER_READING;
-        println_dbg("End Receiving");
+        println_dbg("IR End Receiving");
       }
       break;
     case IR_RECEIVER_READING:
       if (rawIndex < REGARD_AS_NOISE_COUNT) {
-        println_dbg("noise");
+        println_dbg("IR Regarded as noise");
         state = IR_RECEIVER_READY;
         break;
       }
-
-      println_dbg("Raw Data: ");
+      print_dbg("IR Raw Data: [");
       for (int i = 0; i < rawIndex; i++) {
         print_dbg(rawData[i], DEC);
         if (i != rawIndex - 1) print_dbg(",");
       }
-      println_dbg("");
-
+      println_dbg("]");
       state = IR_RECEIVER_AVAILABLE;
       break;
     case IR_RECEIVER_AVAILABLE:

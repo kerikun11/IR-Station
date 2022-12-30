@@ -218,6 +218,8 @@ bool IR_Station::restore() {
   wdt_reset();
   String s;
   if (getStringFromFile(STATION_JSON_PATH, s) == false) return false;
+  print_dbg("data: ");
+  println_dbg(s);
   DynamicJsonBuffer jsonBuffer;
   JsonObject& root = jsonBuffer.parseObject(s);
   if (!root.success()) return false;
@@ -258,7 +260,10 @@ bool IR_Station::restore() {
   }
 
   if (version != IR_STATION_VERSION) {
-    println_dbg("version does not match!");
+    print_dbg("version does not match! version:");
+    println_dbg(version);
+    version = IR_STATION_VERSION;
+    save();
   }
   println_dbg("Restored IR-Station Settings");
   return true;

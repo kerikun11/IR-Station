@@ -48,8 +48,6 @@ bool getStringFromFile(const String& path, String& dataString) {
   file.close();
   print_dbg("Restore successful: ");
   println_dbg(path);
-  print_dbg("data: ");
-  println_dbg(dataString);
   return true;
 }
 

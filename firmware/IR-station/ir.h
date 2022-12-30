@@ -26,22 +26,22 @@ enum IR_RECEIVER_STATE {
 
 class IR {
 public:
-  static void begin(int tx, int rx);
-  static void handle();
-  static bool available();
-  static String read();
-  static void resume();
-
-  static void send(const String& dataJson);
+  void begin(int tx, int rx);
+  void handle();
+  bool available();
+  String read();
+  void resume();
+  void send(const String& dataJson);
 
 private:
-  static int txPin, rxPin;
-  static volatile enum IR_RECEIVER_STATE state;
-  static volatile uint16_t rawIndex;
-  static volatile uint16_t rawData[RAW_DATA_BUFFER_SIZE];
-  static volatile uint32_t prev_us;
+  int txPin, rxPin;
+  volatile enum IR_RECEIVER_STATE state;
+  volatile uint16_t rawIndex;
+  volatile uint16_t rawData[RAW_DATA_BUFFER_SIZE];
+  volatile uint32_t prev_us;
 
-  static void IRAM_ATTR isr();
+  void isr();
+  static void IRAM_ATTR isrEntryPoint(void* this_ptr);
 };
 
 #endif
