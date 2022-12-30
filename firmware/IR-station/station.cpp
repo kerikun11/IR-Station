@@ -124,21 +124,40 @@ void IR_Station::handle() {
   server.handleClient();
   ir.handle();
   ota.handle();
+  /* light state */
+  static bool light_state = 0;
   /* person sensor */
-  static long last_detected_ms = millis();
-  static long light_state = 0;
-  const long light_off_threshold_ms = 60'000;
+  const unsigned long light_off_threshold_ms = 10 * 60 * 1000;
+  static unsigned long last_detected_ms = millis();
   if (digitalRead(PIN_PERSON_SENSOR) == HIGH) {
     last_detected_ms = millis();
-    if (light_state == 0) {
-      light_state = 1;
+    if (!light_state) {
       sendSignal(1);
+      light_state = true;
+      println_dbg("Light ON (motion)");
     }
   }
-  if (light_state == 1 && (long)millis() > last_detected_ms + light_off_threshold_ms) {
-    light_state = 0;
+  if (light_state && millis() > last_detected_ms + light_off_threshold_ms) {
     sendSignal(2);
+    light_state = false;
+    println_dbg("Light OFF (motion)");
   }
+  /* range sensor */
+  bool range_detected = sensorRange > 0;
+  sensorRange = -1;
+  if (range_detected && !light_state) {
+    range_detected = false;
+    sendSignal(1);
+    light_state = true;
+    println_dbg("Light ON (ToF)");
+  }
+  if (range_detected && light_state) {
+    range_detected = false;
+    sendSignal(2);
+    light_state = false;
+    println_dbg("Light OFF (ToF)");
+  }
+
   switch (mode) {
     case IR_STATION_MODE_SETUP:
       if ((WiFi.status() == WL_CONNECTED)) indicator.set(0, 1023, 1023);
@@ -606,6 +625,12 @@ void IR_Station::attachStationApi() {
     gateway = _gateway;
     save();
     return server.send(200, "text/plain", "Changed IP Address to " + WiFi.localIP().toString());
+  });
+  server.on("/sensor", [this]() {
+    displayRequest();
+    server.send(200);
+    int range = server.arg("range").toInt();
+    sensorRange = range;
   });
   server.onNotFound([this]() {
     displayRequest();

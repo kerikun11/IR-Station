@@ -86,6 +86,8 @@ private:
   DNSServer dnsServer;
   OTA ota;
 
+  int sensorRange = -1;
+
   void handleSchedule();
   int getNewId();
   int getNewScheduleId();
