@@ -123,6 +123,21 @@ void IR_Station::handle() {
   server.handleClient();
   ir.handle();
   ota.handle();
+  /* person sensor */
+  static long last_detected_ms = millis();
+  static long light_state = 0;
+  const long light_off_threshold_ms = 10'000;
+  if (digitalRead(16) == HIGH) {
+    last_detected_ms = millis();
+    if (light_state == 0) {
+      light_state = 1;
+      sendSignal(1);
+    }
+  }
+  if (light_state == 1 && (long)millis() > last_detected_ms + light_off_threshold_ms) {
+    light_state = 0;
+    sendSignal(2);
+  }
   switch (mode) {
     case IR_STATION_MODE_SETUP:
       if ((WiFi.status() == WL_CONNECTED)) indicator.set(0, 1023, 1023);
