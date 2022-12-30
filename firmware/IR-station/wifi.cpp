@@ -12,7 +12,7 @@
 #include "config.h"  // for print_dbg()
 
 void setupAP(const String& ssid, const String& password) {
-  wdt_reset();
+  yield();
   println_dbg("Configuring Access Point...");
   WiFi.softAP(ssid.c_str(), password.c_str());
 
@@ -26,7 +26,7 @@ void setupAP(const String& ssid, const String& password) {
 }
 
 bool connectWifi(const String& ssid, const String& password, bool stealth) {
-  wdt_reset();
+  yield();
   if (WiFi.status() == WL_CONNECTED) {
     if ((ssid == (String)WiFi.SSID()) && (password == (String)WiFi.psk())) {
       println_dbg("Already connected:" + ssid);
@@ -59,7 +59,7 @@ bool connectWifi(const String& ssid, const String& password, bool stealth) {
   // Wait for connection
   int timeout = 0;
   while (WiFi.status() != WL_CONNECTED) {
-    wdt_reset();
+    yield();
     delay(500);
     print_dbg(".");
     timeout++;

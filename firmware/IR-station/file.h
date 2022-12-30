@@ -10,7 +10,7 @@
 #ifndef __FILE_H__
 #define __FILE_H__
 
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
 
 bool writeStringToFile(const String &path, const String &dataString);
 bool getStringFromFile(const String &path, String &dataString);

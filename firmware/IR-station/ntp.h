@@ -10,7 +10,7 @@
 #ifndef __NTP_H_
 #define __NTP_H_
 
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
 #include <TimeLib.h>
 
 void ntp_begin();

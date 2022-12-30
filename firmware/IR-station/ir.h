@@ -10,7 +10,7 @@
 #ifndef __IR_SIGNAL_H__
 #define __IR_SIGNAL_H__
 
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
 
 #define IR_RECEIVE_TIMEOUT_US 200000
 #define RAW_DATA_BUFFER_SIZE 800

@@ -15,12 +15,12 @@
 
 /* Hardware Mapping */
 #define PIN_BUTTON              (0)
-#define PIN_IR_IN               (5)
-#define PIN_IR_OUT              (14)
+#define PIN_IR_IN               (19)
+#define PIN_IR_OUT              (2)
 
-#define PIN_LED_R               (12)
-#define PIN_LED_G               (15)
-#define PIN_LED_B               (13)
+#define PIN_LED_R               (21)
+#define PIN_LED_G               (12)
+#define PIN_LED_B               (22)
 
 /* Software */
 // IR Signal

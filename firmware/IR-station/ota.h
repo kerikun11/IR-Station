@@ -10,7 +10,7 @@
 #ifndef __OTA_H__
 #define __OTA_H__
 
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
 
 class OTA {
 public:

@@ -10,7 +10,7 @@
 #ifndef __WIFI_H__
 #define __WIFI_H__
 
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
 
 void setupAP(const String& ssid, const String& password);
 bool connectWifi(const String& ssid, const String& pass, bool stealth = false);

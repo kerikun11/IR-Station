@@ -54,7 +54,7 @@ void IR::send(const String& dataJson) {
     noInterrupts();
     {
       for (uint16_t count = 0; count < root.size(); count++) {
-        wdt_reset();
+        yield();
         uint32_t us = micros();
         uint16_t time = (uint16_t)root[count];
         do {

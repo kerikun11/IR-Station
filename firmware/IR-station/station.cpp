@@ -10,20 +10,18 @@
 #include "station.h"
 
 #include <ArduinoJson.h>
-#include <LittleFS.h>
+#include <SPIFFS.h>
 #include "file.h"
 #include "wifi.h"
 #include "ntp.h"
 #include "wpa.h"
 
 void IR_Station::begin() {
-  wdt_reset();
-
-  // begin setup
+  yield();
   indicator.green(1023);
 
   // prepare internal filesystem
-  LittleFS.begin();
+  SPIFFS.begin();
 
   // restore settings
   if (restore() == false) reset();
@@ -77,26 +75,9 @@ void IR_Station::begin() {
 
   println_dbg("Starting HTTP Updater...");
   httpUpdater.setup(&server, "/firmware");
-  server.on("/description.xml", HTTP_GET, [this]() {
-    displayRequest();
-    SSDP.schema(server.client());
-  });
 
   println_dbg("Starting HTTP Server...");
   server.begin();
-
-  println_dbg("Starting SSDP...");
-  SSDP.setSchemaURL("description.xml");
-  SSDP.setHTTPPort(80);
-  SSDP.setName(hostname);
-  SSDP.setSerialNumber(String(ESP.getChipId(), HEX));
-  SSDP.setURL("index.htm");
-  SSDP.setModelName("IR-Station");
-  SSDP.setModelNumber("20160821");
-  SSDP.setModelURL("https://github.com/kerikun11/IR-Station");
-  SSDP.setManufacturer("KERI's Lab");
-  SSDP.setManufacturerURL("https://www.kerislab.jp");
-  SSDP.begin();
 }
 
 void IR_Station::reset(bool clean) {
@@ -116,7 +97,7 @@ void IR_Station::reset(bool clean) {
   if (clean) clearAllSignals();
 
   save();
-  ESP.reset();
+  ESP.restart();
 }
 
 void IR_Station::handle() {
@@ -163,7 +144,7 @@ void IR_Station::handleSchedule() {
   static time_t prev_time;
   if (now() != prev_time) {
     for (std::size_t i = 0; i < schedules.size(); i++) {
-      wdt_reset();
+      yield();
       if (now() > schedules[i].time) {
         sendSignal(schedules[i].id);
         schedules.erase(schedules.begin() + i);
@@ -215,7 +196,7 @@ bool IR_Station::clearAllSignals() {
 }
 
 bool IR_Station::restore() {
-  wdt_reset();
+  yield();
   String s;
   if (getStringFromFile(STATION_JSON_PATH, s) == false) return false;
   print_dbg("data: ");
@@ -270,7 +251,7 @@ bool IR_Station::restore() {
 }
 
 bool IR_Station::save() {
-  wdt_reset();
+  yield();
   DynamicJsonBuffer jsonBuffer;
   JsonObject& root = jsonBuffer.createObject();
 
@@ -311,8 +292,8 @@ bool IR_Station::save() {
   }
 
   String path = STATION_JSON_PATH;
-  LittleFS.remove(path);
-  File file = LittleFS.open(path, "w");
+  SPIFFS.remove(path);
+  File file = SPIFFS.open(path, "w");
   if (!file) {
     print_dbg("File open Error: ");
     println_dbg(path);
@@ -330,7 +311,7 @@ bool IR_Station::save() {
 }
 
 void IR_Station::displayRequest() {
-  wdt_reset();
+  yield();
   println_dbg("");
   println_dbg("New Request");
   print_dbg("URI: ");
@@ -372,7 +353,7 @@ void IR_Station::attachSetupApi() {
       save();
       indicator.set(0, 0, 1023);
       delay(1000);
-      ESP.reset();
+      ESP.restart();
     } else {
       println_dbg("Not connected yet.");
       server.send(200, "text/plain", "false");
@@ -409,7 +390,7 @@ void IR_Station::attachSetupApi() {
     if (hostname == "") hostname = HOSTNAME_DEFAULT;
     mode = IR_STATION_MODE_AP;
     save();
-    ESP.reset();
+    ESP.restart();
   });
   server.on("/dbg", [this]() {
     displayRequest();
@@ -432,7 +413,7 @@ void IR_Station::attachSetupApi() {
     server.send(200, "text/html", res);
     println_dbg("End");
   });
-  server.serveStatic("/", LittleFS, "/setup/");
+  server.serveStatic("/", SPIFFS, "/setup/");
 }
 
 void IR_Station::attachStationApi() {
@@ -462,7 +443,7 @@ void IR_Station::attachStationApi() {
       ir.resume();
       int timeStamp = millis();
       while (!ir.available()) {
-        wdt_reset();
+        yield();
         ir.handle();
         if (millis() - timeStamp > timeout_ms) {
           indicator.set(1023, 0, 0);
@@ -597,5 +578,5 @@ void IR_Station::attachStationApi() {
     server.send(200, "text/html", res);
     println_dbg("End");
   });
-  server.serveStatic("/", LittleFS, "/main/", "public");
+  server.serveStatic("/", SPIFFS, "/main/", "public");
 }

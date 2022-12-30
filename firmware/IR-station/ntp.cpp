@@ -23,7 +23,8 @@ void ntp_begin() {
   println_dbg("Starting NTP UDP");
   Udp.begin(localPort);
   print_dbg("Local port: ");
-  println_dbg(Udp.localPort());
+  // println_dbg(Udp.localPort());
+  println_dbg(Udp.remotePort());
   println_dbg("waiting for sync");
   setSyncProvider(getNtpTime);
 
