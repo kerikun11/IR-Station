@@ -127,7 +127,7 @@ void IR_Station::handle() {
   /* light state */
   static bool light_state = 0;
   /* person sensor */
-  const unsigned long light_off_threshold_ms = 10 * 60 * 1000;
+  const unsigned long light_off_threshold_ms = 3 * 60 * 1000;
   static unsigned long last_detected_ms = millis();
   if (digitalRead(PIN_PERSON_SENSOR) == HIGH) {
     last_detected_ms = millis();
@@ -143,19 +143,32 @@ void IR_Station::handle() {
     println_dbg("Light OFF (motion)");
   }
   /* range sensor */
-  bool range_detected = sensorRange > 0;
-  sensorRange = -1;
-  if (range_detected && !light_state) {
-    range_detected = false;
-    sendSignal(1);
-    light_state = true;
-    println_dbg("Light ON (ToF)");
+  static bool range_passed = false;
+  static const unsigned long ignore_after_passed_ms = 15 * 1000;
+  static const unsigned long undetected_light_off_threshold_ms = 1000;
+  static unsigned long last_passed_ms = millis();
+  if (sensorRange > 0) {
+    sensorRange = -1;
+    range_passed = true;
+    last_passed_ms = millis();
+    println_dbg("Range Passed");
   }
-  if (range_detected && light_state) {
-    range_detected = false;
+  // if (range_passed && !light_state) {
+  //   range_passed = false;
+  //   sendSignal(1);
+  //   light_state = true;
+  //   println_dbg("Light ON (ToF)");
+  // }
+  if (range_passed && light_state
+      && millis() > last_detected_ms + undetected_light_off_threshold_ms) {
+    range_passed = false;
     sendSignal(2);
     light_state = false;
     println_dbg("Light OFF (ToF)");
+  }
+  if (range_passed && millis() > last_passed_ms + ignore_after_passed_ms) {
+    range_passed = false;
+    println_dbg("Range Passed Ignored");
   }
 
   switch (mode) {
