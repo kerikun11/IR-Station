@@ -145,7 +145,7 @@ void IR_Station::handle() {
   /* range sensor */
   static bool range_passed = false;
   static const unsigned long ignore_after_passed_ms = 15 * 1000;
-  static const unsigned long undetected_light_off_threshold_ms = 1000;
+  static const unsigned long undetected_light_off_threshold_ms = 3000;
   static unsigned long last_passed_ms = millis();
   if (sensorRange > 0) {
     sensorRange = -1;
