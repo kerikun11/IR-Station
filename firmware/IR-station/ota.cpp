@@ -9,7 +9,6 @@
 
 #include "ota.h"
 
-#include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 #include "config.h"  // for print_dbg()
 

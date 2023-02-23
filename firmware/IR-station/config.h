@@ -11,7 +11,11 @@
 #define __CONFIG_H__
 
 /* Version */
+#ifdef GIT_DESCRIBE
+#define IR_STATION_VERSION      GIT_DESCRIBE
+#else
 #define IR_STATION_VERSION      "v1.6.4-sensor"
+#endif
 
 /* Hardware Mapping */
 #define PIN_BUTTON              (0)
