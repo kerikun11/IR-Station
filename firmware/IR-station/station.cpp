@@ -12,7 +12,7 @@
 #include <ArduinoJson.h>
 #include <SPIFFS.h>
 #include "file.h"
-#include "wifi.h"
+#include "wifi_connection.h"
 #include "ntp.h"
 #include "wpa.h"
 
